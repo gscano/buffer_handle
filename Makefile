@@ -2,7 +2,7 @@
 
 CATCH ?= .
 
-all: test
+all: test test-run
 
 -include test.d
 
@@ -11,7 +11,9 @@ test.o: test.cpp Makefile
 
 test: test.o Makefile
 	g++ $< -o $@
-	./$@
+
+test-run: test
+	./test
 
 clean:
 	rm -f test.d test.o test
