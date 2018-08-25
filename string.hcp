@@ -1,0 +1,87 @@
+#include <cassert> // assert()
+#include <cstring> // memcpy() memset()
+
+namespace buffer_handle
+{
+  template<config Config, action Action> inline
+  char * string(char * buffer, const char * value, std::size_t length)
+  {
+    if((Config == config::static_ && Action == action::prepare)
+       || (Config == config::dynamic && Action != action::size))
+      {
+	std::memcpy(buffer, value, length);
+      }
+
+    return buffer + length;
+  }
+
+  template<config Config, align Align, char Pad, action Action> inline
+  char * string(char * buffer, const char * value, std::size_t length, std::size_t & max_length)
+  {
+    if(Config == config::static_)
+      {
+	if(Action == action::prepare)
+	  {
+	    assert(value != nullptr && "A static string requires a non null value initializer.");
+
+	    max_length = length;
+	    std::memcpy(buffer, value, length);
+	  }
+
+	buffer += length;
+      }
+    else if(Config == config::dynamic)
+      {
+	switch(Action)
+	  {
+	  case action::size:
+	    {
+	      return buffer + length;
+	    }
+	  case action::prepare:
+	    {
+	      max_length = length;
+	    }
+	  case action::reset:
+	    {
+	      std::memset(buffer, Pad, max_length);
+
+	      break;
+	    }
+	  case action::write:
+	    {
+	      if(Align == align::left)
+		{
+		  std::memcpy(buffer, value, length);
+		}
+	      else if(Align == align::right)
+		{
+		  std::memcpy(buffer + max_length - length, value, length);
+		}
+
+	      break;
+	    }
+	  }
+
+	buffer += max_length;
+      }
+
+    return buffer;
+  }
+
+  template<config Config, align Align, char Pad> inline
+  string_t<Config, Align, Pad>::string_t(const char * value /* = nullptr */, std::size_t length /* = 0 */) :
+    value(value),
+    length(length),
+    max_length(0)
+  {
+
+  }
+
+  template<config Config, align Align, char Pad>
+  template<action Action> inline
+  char * string_t<Config, Align, Pad>::handle(char * buffer)
+  {
+    return string<Config, Action, Align, Pad>(buffer, this->value, this->length, this->max_length);
+  }
+};
