@@ -1,0 +1,7 @@
+config.mk
+
+test.d
+test.o
+test
+
+*~
