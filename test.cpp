@@ -3,14 +3,14 @@
 #include <catch2/catch.hpp>
 
 #include <buffer_handle/character.hpp>
-#include <buffer_handle/token.hpp>
 #include <buffer_handle/string.hpp>
+#include <buffer_handle/token.hpp>
 
 using namespace buffer_handle;
 
 SCENARIO("Character", "[character]")
 {
-  char buffer[1024] = {0};
+  char buffer[1] = {0};
   char * begin = buffer;
   char * end = nullptr;
 
