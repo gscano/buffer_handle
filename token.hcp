@@ -1,0 +1,52 @@
+#include <buffer_handle/character.hpp>
+
+namespace buffer_handle
+{
+  template<config Config, action Action> inline
+  char * new_line(char * buffer)
+  {
+    return character<Config, Action>(buffer, '\n');
+  }
+
+  template<config Config, action Action> inline
+  char * carriage_return(char * buffer)
+  {
+    return character<Config, Action>(buffer, '\r');
+  }
+
+  template<config Config, action Action> inline
+  char * space(char * buffer)
+  {
+    return character<Config, Action>(buffer, ' ');
+  }
+
+  template<config Config, action Action> inline
+  char * comma(char * buffer)
+  {
+    return character<Config, Action>(buffer, ',');
+  }
+
+  template<config Config, action Action> inline
+  char * dot(char * buffer)
+  {
+    return character<Config, Action>(buffer, '.');
+  }
+
+  template<config Config, action Action> inline
+  char * colon(char * buffer)
+  {
+    return character<Config, Action>(buffer, ':');
+  }
+
+  template<config Config, action Action> inline
+  char * semicolon(char * buffer)
+  {
+    return character<Config, Action>(buffer, ';');
+  }
+
+  template<config Config, action Action> inline
+  char * equal(char * buffer)
+  {
+    return character<Config, Action>(buffer, '=');
+  }
+};

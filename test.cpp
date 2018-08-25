@@ -3,6 +3,7 @@
 #include <catch2/catch.hpp>
 
 #include <buffer_handle/character.hpp>
+#include <buffer_handle/token.hpp>
 
 using namespace buffer_handle;
 
