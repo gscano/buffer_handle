@@ -6,12 +6,12 @@ all: test
 
 -include test.d
 
-test.o: test.cpp
+test.o: test.cpp Makefile
 	g++ -c -MD $< -I $(CATCH) -I ../ -o $@
 
-test: test.o
+test: test.o Makefile
 	g++ $< -o $@
 	./$@
 
 clean:
-	rm -f test.o test
+	rm -f test.d test.o test
