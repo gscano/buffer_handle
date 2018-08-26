@@ -1,0 +1,91 @@
+#include <cstring> // memset()
+
+#include <type_traits> // is_integral
+
+namespace buffer_handle
+{
+  template<class T>
+  constexpr uint8_t digits(T number, bool no_digits = true);
+
+  template<config Config, align Align, char Pad, class Itoa, action Action, typename I> inline
+  char * integral_number(char * buffer, I i, uint8_t & max_digits, const Itoa & itoa /* = Itoa() */)
+  {
+    if(Config == config::static_)
+      {
+	if(Action == action::prepare)
+	  {
+	    max_digits = digits(i);
+	    itoa.template fwd<I>(buffer, i);
+	  }
+
+	buffer += digits(i);
+      }
+    else if(Config == config::dynamic)
+      {
+	switch(Action)
+	  {
+	  case action::size:
+	    {
+	      return buffer + digits(i);
+	    }
+	  case action::prepare:
+	    {
+	      max_digits = digits(i);
+	    }
+	  case action::reset:
+	    {
+	      std::memset(buffer, Pad, max_digits);
+
+	      break;
+	    }
+	  case action::write:
+	    {
+	      if(Align == align::left)
+		{
+		  itoa.template fwd<I>(buffer, i);
+		}
+	      else
+		{
+		  itoa.template bwd<I>(buffer + max_digits, i);
+		}
+
+	      break;
+	    }
+	  }
+
+	buffer += max_digits;
+      }
+
+    return buffer;
+  }
+
+  template<config Config, align Align, char Pad, class Itoa, typename I> inline
+  integral_number_t<Config, Align, Pad, Itoa, I>::integral_number_t(I i /* = I() */) :
+    value(i),
+    max_digits(0)
+  {
+
+  }
+
+  template<config Config, align Align, char Pad, class Itoa, typename I>
+  template<action Action> inline
+  char * integral_number_t<Config, Align, Pad, Itoa, I>::handle(char * buffer, const Itoa & itoa /* = Itoa() */)
+  {
+    return integral_number<Config, Align, Pad, Itoa, Action, I>(buffer, this->value, this->max_digits, itoa);
+  }
+
+  template<class T> inline
+  constexpr uint8_t digits(T number, bool no_digits)
+  {
+    static_assert(std::is_integral<T>::value, "Template parameter T must be an integral type.");
+
+    return
+      (number == 0
+       ?
+       no_digits
+       :
+       (number < 0 && no_digits) + 1 + digits<T>(number / 10, false)
+       );
+      ;
+  }
+};
