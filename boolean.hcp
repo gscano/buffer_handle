@@ -1,0 +1,121 @@
+#include <cstring> // memcpy()
+
+#include <buffer_handle/token.hpp> // space()
+
+namespace buffer_handle
+{
+  template<case_ Case>
+  char * boolean_true(char * buffer);
+
+  template<case_ Case>
+  char * boolean_false(char * buffer);
+
+  template<config Config, case_ Case, align Align, char Pad, action Action> inline
+  char * boolean(char * buffer, bool value)
+  {
+    if(Config == config::static_)
+      {
+	if(value)
+	  {
+	    if(Action == action::prepare)
+	      {
+		boolean_true<Case>(buffer);
+	      }
+
+	    buffer += 4;
+	  }
+	else
+	  {
+	    if(Action == action::prepare)
+	      {
+		boolean_false<Case>(buffer);
+	      }
+
+	    buffer += 5;
+	  }
+      }
+    else if(Config == config::dynamic)
+      {
+	if(Action != action::size)
+	  {
+	    if(value)
+	      {
+		if(Align == align::right)
+		  {
+		    char * local = space<config::static_, Action>(buffer);
+		    boolean_true<Case>(local);
+		  }
+		else if(Align == align::left)
+		  {
+		    char * local = boolean_true<Case>(buffer);
+		    space<config::static_, Action>(local);
+		  }
+	      }
+	    else
+	      {
+		boolean_false<Case>(buffer);
+	      }
+	  }
+
+	buffer += 5;
+      }
+
+    return buffer;
+  }
+
+  template<case_ Case> inline
+  char * boolean_true(char * buffer)
+  {
+    switch(Case)
+      {
+      case case_::lower:
+	{
+	  std::memcpy(buffer, "true", 4);
+
+	  break;
+	}
+      case case_::first_upper:
+	{
+	  std::memcpy(buffer, "True", 4);
+
+	  break;
+	}
+      case case_::upper:
+	{
+	  std::memcpy(buffer, "TRUE", 4);
+
+	  break;
+	}
+      }
+
+    return buffer + 4;
+  }
+
+  template<case_ Case> inline
+  char * boolean_false(char * buffer)
+  {
+    switch(Case)
+      {
+      case case_::lower:
+	{
+	  std::memcpy(buffer, "false", 5);
+
+	  break;
+	}
+      case case_::first_upper:
+	{
+	  std::memcpy(buffer, "False", 5);
+
+	  break;
+	}
+      case case_::upper:
+	{
+	  std::memcpy(buffer, "FALSE", 5);
+
+	  break;
+	}
+      }
+
+    return buffer + 5;
+  }
+};
