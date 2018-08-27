@@ -1,0 +1,49 @@
+#include <cassert> // assert()
+
+#include <buffer_handle/token.hpp> // comma()
+#include <buffer_handle/number.hpp> // two_digits_number() integral_number()
+
+namespace buffer_handle
+{
+  template<config Config, align Align, char Pad, class Itoa, action Action> inline
+  char * time_(char * buffer, time_t time, uint8_t & max_digits, const Itoa & itoa /* = Itoa() */)
+  {
+    return integral_number<Config, Align, Pad, Itoa, Action, time_t>(nullptr, time, max_digits, itoa);
+  }
+
+  template<config Config, action Action>
+  char * time_(char * buffer, uint8_t hours, uint8_t minutes, uint8_t seconds)
+  {
+    if((Config == config::static_ && Action == action::prepare)
+       || (Config == config::dynamic && Action != action::size))
+      {
+	switch(Action)
+	  {
+	  case action::prepare:
+	    {
+	      colon<config::static_, action::prepare>(buffer + 2);
+	      colon<config::static_, action::prepare>(buffer + 5);
+	    }
+	  case action::write:
+	  case action::reset:
+	    {
+	      assert(0 <= hours && hours < 24);
+	      assert(0 <= minutes && minutes < 60);
+	      assert(0 <= seconds && seconds < 60);
+
+	      two_digits_number<Config, Action, uint8_t>(buffer, hours);
+	      two_digits_number<Config, Action, uint8_t>(buffer + 3, minutes);
+	      two_digits_number<Config, Action, uint8_t>(buffer + 6, seconds);
+	    }
+	  }
+      }
+
+    return buffer + 2 + 1 + 2 + 1 + 2;
+  }
+
+  template<config Config, action Action> inline
+  char * time_(char * buffer, struct tm time)
+  {
+    return time_<Config, Action>(buffer, time.tm_hour, time.tm_min, time.tm_sec);
+  }
+};

@@ -6,6 +6,7 @@
 #include <buffer_handle/character.hpp>
 #include <buffer_handle/number.hpp>
 #include <buffer_handle/string.hpp>
+#include <buffer_handle/time.hpp>
 #include <buffer_handle/token.hpp>
 
 using namespace buffer_handle;
@@ -216,6 +217,19 @@ SCENARIO("Number", "[Number]")
 
   GIVEN("A buffer")
     {
+      WHEN("Two digits number")
+	{
+	  end = two_digits_number<config::static_, action::prepare, uint8_t>(begin, 43);
+
+	  REQUIRE(end - begin == 2);
+	  REQUIRE(std::string(begin, end) == "43");
+
+	  end = two_digits_number<config::static_, action::prepare, uint8_t>(begin, 7);
+
+	  REQUIRE(end - begin == 2);
+	  REQUIRE(std::string(begin, end) == "07");
+	}
+
       uint8_t max_digits = 0;
 
       WHEN("Static")
@@ -292,6 +306,69 @@ SCENARIO("Number", "[Number]")
 			    }
 			}
 		    }
+		}
+	    }
+	}
+    }
+}
+
+SCENARIO("Time", "[time]")
+{
+  const char pad = ' ';
+
+  const std::size_t size = 8;
+  char buffer[8] = {0};
+  char * begin = buffer;
+  char * end = buffer;
+
+  GIVEN("A buffer")
+    {
+      WHEN("Using 'time_t'")
+	{
+	  time_t time = 193749;
+
+	  uint8_t max_digits = 0;
+
+	  REQUIRE(((std::size_t)time_<config::dynamic, align::right, pad, adapter::itoa, action::size>(nullptr, time, max_digits) == 6));
+	}
+
+      WHEN("Specfic")
+	{
+	  uint8_t hours = 5;
+	  uint8_t minutes = 23;
+	  uint8_t seconds = 59;
+
+	  REQUIRE(((std::size_t)time_<config::static_, action::size>(nullptr, hours, minutes, seconds) == size));
+
+	  GIVEN("Size")
+	    {
+	      THEN("Prepare")
+		{
+		  end = time_<config::static_, action::prepare>(buffer, hours, minutes, seconds);
+
+		  REQUIRE(end - begin == size);
+		  REQUIRE(std::string(begin, end) == "05:23:59");
+		}
+	    }
+	}
+
+      WHEN("Using 'struct tm'")
+	{
+	  struct tm time;
+	  time.tm_hour = 4;
+	  time.tm_min = 34;
+	  time.tm_sec = 0;
+
+	  REQUIRE(((std::size_t)time_<config::static_, action::size>(nullptr, time) == size));
+
+	  GIVEN("Size")
+	    {
+	      THEN("Prepare")
+		{
+		  end = time_<config::static_, action::prepare>(buffer, time);
+
+		  REQUIRE(end - begin == size);
+		  REQUIRE(std::string(begin, end) == "04:34:00");
 		}
 	    }
 	}
