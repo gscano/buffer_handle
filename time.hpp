@@ -12,8 +12,8 @@ namespace buffer_handle
   template<config Config, align Align, char Pad, class Itoa, action Action>
   char * time_(char * buffer, time_t time, uint8_t & max_digits, const Itoa & itoa = Itoa());
 
-  template<config Config, action Action>
-  char * time_(char * buffer, uint8_t hours, uint8_t minutes, uint8_t seconds);
+  template<config Config, action Action, typename Hours, typename Minutes, typename Seconds>
+  char * time_(char * buffer, Hours hours, Minutes minutes, Seconds seconds);
 
   template<config Config, action Action>
   char * time_(char * buffer, struct tm time);

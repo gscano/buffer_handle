@@ -11,8 +11,8 @@ namespace buffer_handle
     return integral_number<Config, Align, Pad, Itoa, Action, time_t>(nullptr, time, max_digits, itoa);
   }
 
-  template<config Config, action Action>
-  char * time_(char * buffer, uint8_t hours, uint8_t minutes, uint8_t seconds)
+  template<config Config, action Action, typename Hours, typename Minutes, typename Seconds> inline
+  char * time_(char * buffer, Hours hours, Minutes minutes, Seconds seconds)
   {
     if((Config == config::static_ && Action == action::prepare)
        || (Config == config::dynamic && Action != action::size))
@@ -31,9 +31,9 @@ namespace buffer_handle
 	      assert(0 <= minutes && minutes < 60);
 	      assert(0 <= seconds && seconds < 60);
 
-	      two_digits_number<Config, Action, uint8_t>(buffer, hours);
-	      two_digits_number<Config, Action, uint8_t>(buffer + 3, minutes);
-	      two_digits_number<Config, Action, uint8_t>(buffer + 6, seconds);
+	      two_digits_number<Config, Action, Hours>(buffer, hours);
+	      two_digits_number<Config, Action, Minutes>(buffer + 3, minutes);
+	      two_digits_number<Config, Action, Seconds>(buffer + 6, seconds);
 	    }
 	  }
       }
