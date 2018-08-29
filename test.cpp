@@ -4,6 +4,7 @@
 
 #include <buffer_handle/boolean.hpp>
 #include <buffer_handle/character.hpp>
+#include <buffer_handle/nothing.hpp>
 #include <buffer_handle/number.hpp>
 #include <buffer_handle/string.hpp>
 #include <buffer_handle/time.hpp>
@@ -22,6 +23,16 @@ SCENARIO("Character", "[character]")
   end = character<config::static_, action::prepare>(begin, 'c');
 
   REQUIRE(std::string(begin, end) == "c");
+}
+
+SCENARIO("nothing", "[nothing]")
+{
+  char c;
+
+  REQUIRE(((std::size_t)nothing_t().handle<action::size>(nullptr) == 0));
+  REQUIRE(nothing_t().handle<action::prepare>(&c) == &c);
+  REQUIRE(nothing_t().handle<action::write>(&c) == &c);
+  REQUIRE(nothing_t().handle<action::reset>(&c) == &c);
 }
 
 SCENARIO("String", "[string]")

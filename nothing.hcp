@@ -1,0 +1,8 @@
+namespace buffer_handle
+{
+  template<action Action> inline
+  char * nothing_t::handle(char * buffer) const
+  {
+    return buffer;
+  }
+};
