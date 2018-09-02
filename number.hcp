@@ -4,7 +4,7 @@
 
 namespace buffer_handle
 {
-  template<config Config, action Action, typename I> inline
+  template<config Config, char InsteadOfALeadingZero, action Action, typename I> inline
   char * two_digits_number(char * buffer, I i)
   {
     if((Config == config::static_ && Action == action::prepare)
@@ -12,9 +12,32 @@ namespace buffer_handle
       {
 	buffer[0] = '0' + i / 10;
 	buffer[1] = '0' + i - 10 * (buffer[0] - '0');
+
+	if(InsteadOfALeadingZero != 0 && buffer[0] == '0')
+	  {
+	    buffer[0] = InsteadOfALeadingZero;
+	  }
       }
 
     return buffer + 2;
+  }
+
+  template<config Config, action Action, typename I> inline
+  char * four_digits_number(char * buffer, I i)
+  {
+    if((Config == config::static_ && Action == action::prepare)
+       || (Config == config::dynamic && Action != action::size))
+      {
+	buffer[0] = '0' + i / 1000;
+	i = i - 1000 * (buffer[0] - '0');
+	buffer[1] = '0' + i / 100;
+	i = i - 100 * (buffer[1] - '0');
+	buffer[2] = '0' + i / 10;
+	i = i - 10 * (buffer[2] - '0');
+	buffer[3] = '0' + i;
+      }
+
+    return buffer + 4;
   }
 
   template<class T>

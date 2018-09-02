@@ -4,10 +4,12 @@
 
 #include <buffer_handle/boolean.hpp>
 #include <buffer_handle/character.hpp>
+#include <buffer_handle/date.hpp>
 #include <buffer_handle/nothing.hpp>
 #include <buffer_handle/number.hpp>
 #include <buffer_handle/string.hpp>
 #include <buffer_handle/time.hpp>
+#include <buffer_handle/timezone.hpp>
 #include <buffer_handle/token.hpp>
 
 using namespace buffer_handle;
@@ -72,7 +74,7 @@ SCENARIO("String", "[string]")
 
 	      GIVEN("Size")
 		{
-		  THEN("Prepare")
+		  THEN("Prepare with no content")
 		    {
 		      end = string<config::dynamic, align::right, ' ', action::prepare>(begin, nullptr, length, max_length);
 
@@ -99,6 +101,26 @@ SCENARIO("String", "[string]")
 			    }
 			}
 		    }
+
+		  THEN("Prepare")
+		    {
+		      max_length = std::strlen(data);
+		      end = string<config::dynamic, align::right, ' ', action::prepare>(begin, "world!", 6, max_length);
+
+		      REQUIRE(end - begin == ::strlen(data));
+		      REQUIRE(max_length == ::strlen(data));
+		      REQUIRE(std::string(begin, end) == std::string(max_length - 6, pad) + "world!");
+
+		      THEN("Write")
+			{
+			  end = string<config::dynamic, align::right, ' ', action::write>(begin, data, std::strlen(data), max_length);
+
+			  REQUIRE(max_length == std::strlen(data));
+			  REQUIRE(end - begin == max_length);
+			  REQUIRE(std::string(begin, end - std::strlen(data)) == std::string(max_length - std::strlen(data), pad));
+			  REQUIRE(std::string(end - std::strlen(data), end) == data);
+			}
+		    }
 		}
 	    }
 
@@ -111,7 +133,7 @@ SCENARIO("String", "[string]")
 
 	      GIVEN("Size")
 		{
-		  THEN("Prepare")
+		  THEN("Prepare with no content")
 		    {
 		      end = string<config::dynamic, align::left, ' ', action::prepare>(begin, nullptr, length, max_length);
 
@@ -136,6 +158,26 @@ SCENARIO("String", "[string]")
 			      REQUIRE(end - begin == max_length);
 			      REQUIRE(std::string(begin, end) == std::string(max_length, pad));
 			    }
+			}
+		    }
+
+		  THEN("Prepare")
+		    {
+		      max_length = std::strlen(data);
+		      end = string<config::dynamic, align::left, ' ', action::prepare>(begin, "world!", 6, max_length);
+
+		      REQUIRE(end - begin == ::strlen(data));
+		      REQUIRE(max_length == ::strlen(data));
+		      REQUIRE(std::string(begin, end) == std::string("world!") + std::string(max_length - 6, pad));
+
+		      THEN("Write")
+			{
+			  end = string<config::dynamic, align::left, ' ', action::write>(begin, data, std::strlen(data), max_length);
+
+			  REQUIRE(max_length == std::strlen(data));
+			  REQUIRE(end - begin == max_length);
+			  REQUIRE(std::string(begin, end - std::strlen(data)) == std::string(max_length - std::strlen(data), pad));
+			  REQUIRE(std::string(end - std::strlen(data), end) == data);
 			}
 		    }
 		}
@@ -230,15 +272,43 @@ SCENARIO("Number", "[Number]")
     {
       WHEN("Two digits number")
 	{
-	  end = two_digits_number<config::static_, action::prepare, uint8_t>(begin, 43);
+	  end = two_digits_number<config::static_, false, action::prepare, uint8_t>(begin, 43);
 
 	  REQUIRE(end - begin == 2);
 	  REQUIRE(std::string(begin, end) == "43");
 
-	  end = two_digits_number<config::static_, action::prepare, uint8_t>(begin, 7);
+	  end = two_digits_number<config::static_, false, action::prepare, uint8_t>(begin, 7);
 
 	  REQUIRE(end - begin == 2);
 	  REQUIRE(std::string(begin, end) == "07");
+
+	  end = two_digits_number<config::static_, ' ', action::prepare, uint8_t>(begin, 7);
+
+	  REQUIRE(end - begin == 2);
+	  REQUIRE(std::string(begin, end) == " 7");
+	}
+
+      WHEN("Four digits number")
+	{
+	  end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 2);
+
+	  REQUIRE(end - begin == 4);
+	  REQUIRE(std::string(begin, end) == "0002");
+
+	  end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 56);
+
+	  REQUIRE(end - begin == 4);
+	  REQUIRE(std::string(begin, end) == "0056");
+
+	  end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 723);
+
+	  REQUIRE(end - begin == 4);
+	  REQUIRE(std::string(begin, end) == "0723");
+
+	  end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 2968);
+
+	  REQUIRE(end - begin == 4);
+	  REQUIRE(std::string(begin, end) == "2968");
 	}
 
       uint8_t max_digits = 0;
@@ -384,4 +454,464 @@ SCENARIO("Time", "[time]")
 	    }
 	}
     }
+}
+
+SCENARIO("Timezone", "[timezone]")
+{
+#define TST(C, I)							\
+  REQUIRE(military_timezone_offset_2_letter<int8_t>((int8_t)(I)) == (C)); \
+  REQUIRE(military_timezone_letter_2_offset(C) == (I))
+
+  TST('Z', 0);
+
+  TST('A', 1); TST('N', -1);
+  TST('B', 2); TST('O', -2);
+  TST('C', 3); TST('P', -3);
+  TST('D', 4); TST('Q', -4);
+  TST('E', 5); TST('R', -5);
+  TST('F', 6); TST('S', -6);
+  TST('G', 7); TST('T', -7);
+  TST('H', 8); TST('U', -8);
+  TST('I', 9); TST('V', -9);
+  TST('K', 10); TST('W', -10);
+  TST('L', 11); TST('X', -11);
+  TST('M', 12); TST('Y', -12);
+
+#undef TST
+
+  const std::size_t size = 32;
+  char buffer[size] = {0};
+  char * begin = buffer;
+  char * end = buffer;
+
+  GIVEN("A buffer")
+    {
+      WHEN("universal")
+	{
+	  WHEN("Static")
+	    {
+	      REQUIRE(((std::size_t)universal_timezone<config::static_, align::right, ' ', action::size>(nullptr, universal_timezone::GMT) == 3));
+	    }
+	}
+
+      WHEN("north american")
+	{
+	  WHEN("Static")
+	    {
+	      REQUIRE(((std::size_t)north_american_timezone<config::static_, action::size>(nullptr, north_american_timezone::CST) == 3));
+	    }
+	}
+
+      WHEN("military")
+	{
+	  WHEN("Static")
+	    {
+	      REQUIRE(((std::size_t)military_timezone<config::static_, action::size>(nullptr, 4) == 1));
+
+	      GIVEN("Size")
+		{
+		  THEN("Prepare")
+		    {
+		      end = military_timezone<config::static_, action::prepare>(begin, 10);
+
+		      REQUIRE(end - begin == 1);
+		      REQUIRE(std::string(begin, end) == "K");
+		    }
+		}
+	    }
+	}
+
+      WHEN("differential")
+	{
+	  WHEN("Static")
+	    {
+	      REQUIRE(((std::size_t)differential_timezone<config::static_, action::size>(nullptr, true, 12, 54) == 5));
+
+	      GIVEN("Size")
+		{
+		  THEN("Prepare")
+		    {
+		      end = differential_timezone<config::static_, action::prepare>(begin, true, 14, 45);
+
+		      REQUIRE(end - begin == 5);
+		      REQUIRE(std::string(begin, end) == "+1445");
+		    }
+		}
+	    }
+	}
+    }
+}
+
+SCENARIO("Date", "[date]")
+{
+  {
+    const std::size_t size = 32;
+    char buffer[size] = {0};
+    char * begin = buffer;
+    char * end = buffer;
+
+    GIVEN("A buffer")
+      {
+	WHEN("day month year")
+	  {
+	    WHEN("Leading space and 4 digits year")
+	      {
+		REQUIRE(((std::size_t)day_month_year<config::dynamic, false, ' ', true, action::size>(nullptr, 0, 0, 0) == 11));
+
+		GIVEN("Size")
+		  {
+		    THEN("Prepare")
+		      {
+			end = day_month_year<config::dynamic, false, ' ', true, action::prepare>(begin, 5, 4, 0);
+
+			REQUIRE(end - begin == 11);
+			REQUIRE(std::string(begin, end) == "05 Apr 0000");
+
+			THEN("Write or reset")
+			  {
+			    end = day_month_year<config::dynamic, false, ' ', true, action::write>(begin, 24, 12, 1901);
+
+			    REQUIRE(end - begin == 11);
+			    REQUIRE(std::string(begin, end) == "24 Dec 1901");
+			  }
+		      }
+		  }
+	      }
+
+	    WHEN("Leading space and 2 digits year")
+	      {
+		REQUIRE(((std::size_t)day_month_year<config::dynamic, false, ' ', false, action::size>(nullptr, 0, 0, 0) == 9));
+
+		GIVEN("Size")
+		  {
+		    THEN("Prepare")
+		      {
+			end = day_month_year<config::dynamic, false, ' ', false, action::prepare>(begin, 5, 4, 0);
+
+			REQUIRE(end - begin == 9);
+			REQUIRE(std::string(begin, end) == "05 Apr 00");
+
+			THEN("Write or reset")
+			  {
+			    end = day_month_year<config::dynamic, false, ' ', false, action::write>(begin, 24, 12, 1901);
+
+			    REQUIRE(end - begin == 9);
+			    REQUIRE(std::string(begin, end) == "24 Dec 01");
+			  }
+		      }
+		  }
+	      }
+	  }
+
+	WHEN("month day")
+	  {
+	    REQUIRE(((std::size_t)month_day<config::dynamic, action::size>(nullptr, 0, 0) == 6));
+
+	    GIVEN("Size")
+	      {
+		THEN("Prepare")
+		  {
+		    end = month_day<config::dynamic, action::prepare>(begin, 1, 3);
+
+		    REQUIRE(end - begin == 6);
+		    REQUIRE(std::string(begin, end) == "Jan 03");
+
+		    THEN("Write or reset")
+		      {
+			end = month_day<config::dynamic, action::prepare>(begin, 12, 31);
+
+			REQUIRE(end - begin == 6);
+			REQUIRE(std::string(begin, end) == "Dec 31");
+		      }
+		  }
+	      }
+	  }
+      }
+
+    struct tm date_time;
+
+    date_time.tm_wday = 4;
+    date_time.tm_mday = 3;
+    date_time.tm_mon = 1 - 1;
+    date_time.tm_year = 2001 - 1900;
+    date_time.tm_hour = 23;
+    date_time.tm_min = 32;
+    date_time.tm_sec = 57;
+
+    WHEN("asc")
+      {
+	REQUIRE(((std::size_t)asc::date<config::static_, action::size>(nullptr, 0, 0, 0, 0, 0, 0, 0) == 24));
+
+	GIVEN("Size")
+	  {
+	    char buffer[size] = {0};
+	    char * begin = buffer;
+	    char * end = buffer;
+
+	    GIVEN("A buffer")
+	      {
+		THEN("Prepare")
+		  {
+		    end = asc::date<config::static_, action::prepare>(begin, date_time);
+
+		    REQUIRE(end - begin == 24);
+		    REQUIRE(std::string(begin, end) == "Thu Jan 03 23:32:57 2001");
+		  }
+	      }
+	  }
+      }
+
+    WHEN("rfc822")
+      {
+	typedef universal_timezone_t<config::static_, align::left, ' '> timezone_t;
+
+	WHEN("Static")
+	  {
+	    WHEN("Handle weekday and seconds")
+	      {
+		std::size_t size = (std::size_t)rfc822::date<config::static_, true, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
+
+		GIVEN("Size")
+		  {
+		    char buffer[size] = {0};
+		    char * begin = buffer;
+		    char * end = buffer;
+
+		    GIVEN("A buffer")
+		      {
+			THEN("Prepare, write or reset")
+			  {
+			    end = rfc822::date<config::static_, true, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			    REQUIRE(end - begin == size);
+			    REQUIRE(std::string(begin, end) == "Thu, 03 Jan 01 23:32:57 GMT");
+
+			    date_time.tm_mday = 12;
+
+			    end = rfc822::date<config::static_, true, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			    REQUIRE(end - begin == size);
+			    REQUIRE(std::string(begin, end) == "Thu, 12 Jan 01 23:32:57 GMT");
+			  }
+		      }
+		  }
+	      }
+
+	    WHEN("Handle weekday but not seconds")
+	      {
+		std::size_t size = (std::size_t)rfc822::date<config::static_, true, false, timezone_t, action::size>(nullptr, date_time, timezone_t());
+
+		GIVEN("Size")
+		  {
+		    char buffer[size] = {0};
+		    char * begin = buffer;
+		    char * end = buffer;
+
+		    GIVEN("A buffer")
+		      {
+			THEN("Prepare, write or reset")
+			  {
+			    end = rfc822::date<config::static_, true, false, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			    REQUIRE(end - begin == size);
+			    REQUIRE(std::string(begin, end) == "Thu, 03 Jan 01 23:32 GMT");
+
+			    date_time.tm_mday = 12;
+
+			    end = rfc822::date<config::static_, true, false, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			    REQUIRE(end - begin == size);
+			    REQUIRE(std::string(begin, end) == "Thu, 12 Jan 01 23:32 GMT");
+			  }
+		      }
+		  }
+	      }
+
+	    WHEN("Handle seconds but not weekday")
+	      {
+		std::size_t size = (std::size_t)rfc822::date<config::static_, false, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
+
+		GIVEN("Size")
+		  {
+		    char buffer[size] = {0};
+		    char * begin = buffer;
+		    char * end = buffer;
+
+		    GIVEN("A buffer")
+		      {
+			THEN("Prepare, write or reset")
+			  {
+			    end = rfc822::date<config::static_, false, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			    REQUIRE(end - begin == size);
+			    REQUIRE(std::string(begin, end) == "03 Jan 01 23:32:57 GMT");
+
+			    date_time.tm_mday = 12;
+
+			    end = rfc822::date<config::static_, false, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			    REQUIRE(end - begin == size);
+			    REQUIRE(std::string(begin, end) == "12 Jan 01 23:32:57 GMT");
+			  }
+		      }
+		  }
+	      }
+
+	    WHEN("Do not handle weekday nor seconds")
+	      {
+		std::size_t size = (std::size_t)rfc822::date<config::static_, false, false, timezone_t, action::size>(nullptr, date_time, timezone_t());
+
+		GIVEN("Size")
+		  {
+		    char buffer[size] = {0};
+		    char * begin = buffer;
+		    char * end = buffer;
+
+		    GIVEN("A buffer")
+		      {
+			THEN("Prepare, write or reset")
+			  {
+			    end = rfc822::date<config::static_, false, false, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			    REQUIRE(end - begin == size);
+			    REQUIRE(std::string(begin, end) == "03 Jan 01 23:32 GMT");
+
+			    date_time.tm_mday = 12;
+
+			    end = rfc822::date<config::static_, false, false, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			    REQUIRE(end - begin == size);
+			    REQUIRE(std::string(begin, end) == "12 Jan 01 23:32 GMT");
+			  }
+		      }
+		  }
+	      }
+	  }
+
+	WHEN("Dynamic")
+	  {
+	    WHEN("Handle weekday and seconds")
+	      {
+		std::size_t size = (std::size_t)rfc822::date<config::dynamic, true, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
+
+		GIVEN("Size")
+		  {
+		    GIVEN("A buffer")
+		      {
+			char buffer[size] = {0};
+			char * begin = buffer;
+			char * end = buffer;
+
+			THEN("Prepare")
+			  {
+			    end = rfc822::date<config::dynamic, true, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			    REQUIRE(end - begin == size);
+			    REQUIRE(std::string(begin, end) == "Thu, 03 Jan 01 23:32:57 GMT");
+
+			    THEN("Reset")
+			      {
+				date_time.tm_mday = 11;
+
+				end = rfc822::date<config::dynamic, true, true, timezone_t, action::reset>(begin, date_time, timezone_t());
+
+				REQUIRE(end - begin == size);
+				REQUIRE(std::string(begin, end) == "Thu, 11 Jan 01 23:32:57 GMT");
+			      }
+			  }
+		      }
+		  }
+	      }
+	  }
+      }
+
+    WHEN("rfc850")
+      {
+	typedef universal_timezone_t<config::static_, align::left, ' '> timezone_t;
+
+	WHEN("Static")
+	  {
+	    std::size_t size = (std::size_t)rfc850::date<config::static_, timezone_t, action::size>(nullptr, date_time, timezone_t());
+
+	    GIVEN("Size")
+	      {
+		char buffer[size] = {0};
+		char * begin = buffer;
+		char * end = buffer;
+
+		GIVEN("A buffer")
+		  {
+		    THEN("Prepare")
+		      {
+			end = rfc850::date<config::static_, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			REQUIRE(end - begin == size);
+			REQUIRE(std::string(begin, end) == "Thursday, 03-Jan-01 23:32:57 GMT");
+		      }
+		  }
+	      }
+	  }
+
+	WHEN("Dynamic")
+	  {
+	    std::size_t size = (std::size_t)rfc850::date<config::dynamic, timezone_t, action::size>(nullptr, date_time, timezone_t());
+
+	    GIVEN("Size")
+	      {
+		char buffer[size] = {0};
+		char * begin = buffer;
+		char * end = buffer;
+
+		GIVEN("A buffer")
+		  {
+		    THEN("Prepare")
+		      {
+			end = rfc850::date<config::dynamic, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			REQUIRE(end - begin == size);
+			REQUIRE(std::string(begin, end) == " Thursday, 03-Jan-01 23:32:57 GMT");
+
+			THEN("Reset")
+			  {
+			    date_time.tm_wday = 0;
+
+			    end = rfc850::date<config::dynamic, timezone_t, action::reset>(begin, date_time, timezone_t());
+
+			    REQUIRE(end - begin == size);
+			    REQUIRE(std::string(begin, end) == "   Sunday, 03-Jan-01 23:32:57 GMT");
+			  }
+		      }
+		  }
+	      }
+	  }
+      }
+
+    WHEN("rfc1123")
+      {
+	typedef universal_timezone_t<config::static_, align::left, ' '> timezone_t;
+
+	WHEN("Static")
+	  {
+	    std::size_t size = (std::size_t)rfc1123::date<config::static_, true, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
+
+	    GIVEN("Size")
+	      {
+		char buffer[size] = {0};
+		char * begin = buffer;
+		char * end = buffer;
+
+		GIVEN("A buffer")
+		  {
+		    THEN("Prepare")
+		      {
+			end = rfc1123::date<config::static_, true, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
+
+			REQUIRE(end - begin == size);
+			REQUIRE(std::string(begin, end) == "Thu, 03 Jan 2001 23:32:57 GMT");
+		      }
+		  }
+	      }
+	  }
+      }
+  }
 }

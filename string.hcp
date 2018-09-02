@@ -39,12 +39,32 @@ namespace buffer_handle
 	      return buffer + length;
 	    }
 	  case action::prepare:
-	    {
-	      max_length = length;
-	    }
 	  case action::reset:
 	    {
-	      std::memset(buffer, Pad, max_length);
+	      if(value == nullptr)
+		{
+		  if(Action == action::prepare)
+		    {
+		      max_length = length;
+		    }
+
+		  std::memset(buffer, Pad, max_length);
+		}
+	      else
+		{
+		  assert(length <= max_length);
+
+		  if(Align == align::left)
+		    {
+		      std::memset(buffer + length, Pad, max_length - length);
+		      std::memcpy(buffer, value, length);
+		    }
+		  else if(Align == align::right)
+		    {
+		      std::memset(buffer, Pad, max_length - length);
+		      std::memcpy(buffer + max_length - length, value, length);
+		    }
+		}
 
 	      break;
 	    }

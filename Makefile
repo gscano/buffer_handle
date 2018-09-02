@@ -8,7 +8,7 @@ test: test.o Makefile
 -include test.d
 
 test.o: test.cpp Makefile
-	g++ -c -MD $< -I $(CATCH) -I $(ITOA) -I ../ -o $@
+	g++ -c -MD -g -O0 $< -I $(CATCH) -I $(ITOA) -I ../ -o $@
 
 clean:
 	rm -f test.d test.o test

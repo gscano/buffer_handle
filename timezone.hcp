@@ -1,0 +1,244 @@
+#include <cstring> // memcpy()
+
+namespace buffer_handle
+{
+  template<config Config, align Align, char Pad, action Action> inline
+  char * universal_timezone(char * buffer, enum universal_timezone value)
+  {
+    if(Config == config::static_)
+      {
+	switch(value)
+	  {
+	  case universal_timezone::UT:
+	    {
+	      if(Action == action::prepare)
+		{
+		  std::memcpy(buffer, "UT", 2);
+		}
+
+	      buffer += 2;
+
+	      break;
+	    }
+	  case universal_timezone::GMT:
+	    {
+	      if(Action == action::prepare)
+		{
+		  std::memcpy(buffer, "GMT", 3);
+		}
+
+	      buffer += 3;
+	      break;
+	    }
+	  }
+      }
+    else if(Config == config::dynamic)
+      {
+	switch(Action)
+	  {
+	  case action::prepare:
+	  case action::write:
+	  case action::reset:
+	    {
+	      switch(value)
+		{
+		case universal_timezone::UT:
+		  {
+		    if(Align == align::right)
+		      {
+			std::memcpy(buffer, " UT", 3);
+		      }
+		    else if(Align == align::left)
+		      {
+			std::memcpy(buffer, "UT ", 3);
+		      }
+
+		    break;
+		  }
+		case universal_timezone::GMT:
+		  {
+		    std::memcpy(buffer, "GMT", 3);
+
+		    break;
+		  }
+		}
+	    }
+	  }
+
+	buffer += 3;
+      }
+
+    return buffer;
+  }
+
+  template<config Config, align Align, char Pad> inline
+  universal_timezone_t<Config, Align, Pad>::universal_timezone_t(enum universal_timezone value /* = universal_timezone::GMT */) :
+    value(value)
+  {
+
+  }
+
+  template<config Config, align Align, char Pad>
+  template<action Action> inline
+  char * universal_timezone_t<Config, Align, Pad>::handle(char * buffer) const
+  {
+    return universal_timezone<Config, Align, Pad, Action>(buffer, this->value);
+  }
+
+  const char * north_american_timezone(enum north_american_timezone value)
+  {
+    switch(value)
+      {
+      case north_american_timezone::EST: return "EST";
+      case north_american_timezone::EDT: return "EDT";
+      case north_american_timezone::CST: return "CST";
+      case north_american_timezone::CDT: return "CDT";
+      case north_american_timezone::MST: return "MST";
+      case north_american_timezone::MDT: return "MDT";
+      case north_american_timezone::PST: return "PST";
+      case north_american_timezone::PDT: return "PDT";
+      default: return "   ";
+      }
+  }
+
+  template<config Config, action Action>
+  char * north_american_timezone(char * buffer, enum north_american_timezone value)
+  {
+    if((Config == config::static_ && Action == action::prepare)
+       || (Config == config::dynamic && Action != action::size))
+      {
+	std::memcpy(buffer, north_american_timezone(value), 3);
+      }
+
+    return buffer + 3;
+  }
+
+  template<config Config> inline
+  north_american_timezone_t<Config>::north_american_timezone_t(enum north_american_timezone value /* = north_american_timezone::EST */) :
+    value(value)
+  {
+
+  }
+
+  template<config Config>
+  template<action Action> inline
+  char * north_american_timezone_t<Config>::handle(char * buffer)
+  {
+    return north_american_timezone(buffer, this->value);
+  }
+
+  template<typename T> inline
+  char military_timezone_offset_2_letter(T offset)
+  {
+    static_assert(std::is_signed<T>::value, "T must be signed.");
+
+    assert(-12 <= offset <= 12);
+
+    if(offset < 0)
+      {
+	return 'M' - offset;
+      }
+    else if(offset == 0)
+      {
+	return 'Z';
+      }
+    else
+      {
+	return '@' + offset + (9 < offset);
+      }
+  }
+
+  inline
+  int8_t military_timezone_letter_2_offset(char letter)
+  {
+    assert('A' <= letter && letter <= 'Z' && letter != 'J');
+
+    if(letter < 'N')
+      {
+	return letter - '@' - ('J' < letter);
+      }
+    else if(letter < 'Z')
+      {
+	return 'M' - letter;
+      }
+    else
+      {
+	return 0;
+      }
+  }
+
+  template<config Config, action Action> inline
+  char * military_timezone(char * buffer, char letter)
+  {
+    return character<Config, Action>(buffer, letter);
+  }
+
+  template<config Config, action Action, typename T> inline
+  char * military_timezone(char * buffer, T offset)
+  {
+    return military_timezone<Config, Action>(buffer, military_timezone_offset_2_letter<T>(offset));
+  }
+
+  template<config Config> inline
+  military_timezone_t<Config>::military_timezone_t(char letter /* = 'Z' */) :
+    letter(letter)
+  {
+
+  }
+
+  template<config Config>
+  template<typename T> inline
+  military_timezone_t<Config>::military_timezone_t(T offset) :
+    letter(military_timezone_offset_2_letter<T>(offset))
+  {
+
+  }
+
+  template<config Config>
+  template<typename T> inline
+  void military_timezone_t<Config>::set(T offset)
+  {
+    this->letter = military_timezone_offset_2_letter<T>(offset);
+  }
+
+  template<config Config>
+  template<action Action> inline
+  char * military_timezone_t<Config>::handle(char * buffer) const
+  {
+    return military_timezone<Config, Action>(buffer, this->letter);
+  }
+
+  template<config Config, action Action, typename Hours, typename Minutes> inline
+  char * differential_timezone(char * buffer, bool sign, Hours hours, Minutes minutes)
+  {
+    if(sign)
+      {
+	plus<Config, Action>(buffer);
+      }
+    else
+      {
+	minus<Config, Action>(buffer);
+      }
+
+    two_digits_number<Config, false, Action, Hours>(buffer + 1, hours);
+    two_digits_number<Config, false, Action, Minutes>(buffer + 3, minutes);
+
+    return buffer + 5;
+  }
+
+  template<config Config> inline
+  differential_timezone_t<Config>::differential_timezone_t(bool positive /* = true */, uint8_t hours /* = 0 */, uint8_t minutes /* = 0 */) :
+    positive(positive),
+    hours(hours),
+    minutes(minutes)
+  {
+
+  }
+
+  template<config Config>
+  template<action Action> inline
+  char * differential_timezone_t<Config>::handle(char * buffer) const
+  {
+    return differential_timezone<Config, Action>(buffer, this->positive, this->hours, this->minutes);
+  }
+};

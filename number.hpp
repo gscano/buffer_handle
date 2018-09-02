@@ -7,8 +7,11 @@
 
 namespace buffer_handle
 {
-  template<config Config, action Action, typename I>
+  template<config Config, char InsteadOfALeadingZero, action Action, typename I>
   char * two_digits_number(char * buffer, I i);
+
+  template<config Config, action Action, typename I>
+  char * four_digits_number(char * buffer, I i);
 
   template<config Config, align Align, char Pad, class Itoa, action Action, typename I>
   char * integral_number(char * buffer, I i, uint8_t & max_digits, const Itoa & itoa = Itoa());
