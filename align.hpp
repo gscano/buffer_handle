@@ -3,7 +3,7 @@
 
 namespace buffer_handle
 {
-  enum class align
+  enum class align : uint8_t
   {
     left,
       right

@@ -36,6 +36,47 @@ Since *alignment* may leave some space untouched from the previous **prepare** o
 
 When localization does not apply constant strings could be written with either a **lower**, **upper** or **lower with a first upper letter** case.
 
+## Reference
+
+All code is scoped in `namespace buffer_handle`.
+
+### Types
+
+```cpp
+#include <buffer_handle/action.hpp>
+enum class action { size, prepare, write, reset };
+
+#include <buffer_handle/align.hpp>
+enum class align { left, right };
+
+#include <buffer_handle/case.hpp>
+enum class case_ { lower, first_upper, upper };
+
+#include <buffer_handle/config.hpp>
+enum class config { static_, dynamic };
+```
+
+### Functions
+
+```cpp
+#include <buffer_handle/character.hpp>
+
+template<config Config, action Action>
+char * character(char * buffer, char c);
+```
+
+### Functors
+
+```cpp
+#include <buffer_handle/nothing.hpp>
+
+struct nothing_t
+{
+  template<action Action>
+  char * handle(char * buffer) const;
+};
+```
+
 ## Tests
 
 Run ```make test``` to compile and ```make run-test``` to execute, or simply ```make```.

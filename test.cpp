@@ -17,18 +17,35 @@ using namespace buffer_handle;
 
 SCENARIO("Character", "[character]")
 {
-  char buffer[1] = {0};
-  char * begin = buffer;
-  char * end = nullptr;
+  char c = '\0';
+  char * begin = &c;
+  char * end = &c;
 
-  REQUIRE((std::size_t)character<config::static_, action::size>(nullptr, 0) == 1);
+  WHEN("Static")
+    {
+      REQUIRE((std::size_t)character<config::static_, action::size>(nullptr, 0) == 1);
 
-  end = character<config::static_, action::prepare>(begin, 'c');
+      end = character<config::static_, action::prepare>(begin, 'c');
 
-  REQUIRE(std::string(begin, end) == "c");
+      REQUIRE(end - begin == 1);
+      REQUIRE(c == 'c');
+    }
+
+  WHEN("Dynamic")
+    {
+      REQUIRE((std::size_t)character<config::static_, action::size>(nullptr, 0) == 1);
+
+      WHEN("Prepare, write or reset")
+	{
+	  end = character<config::static_, action::prepare>(begin, 'c');
+
+	  REQUIRE(end - begin == 1);
+	  REQUIRE(c == 'c');
+	}
+    }
 }
 
-SCENARIO("nothing", "[nothing]")
+SCENARIO("Nothing", "[nothing]")
 {
   char c;
 
