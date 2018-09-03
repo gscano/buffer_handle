@@ -16,7 +16,7 @@ namespace buffer_handle
   }
 
   template<config Config, align Align, char Pad, action Action> inline
-  char * string(char * buffer, const char * value, std::size_t length, std::size_t & max_length)
+  char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length)
   {
     if(Config == config::static_)
       {
@@ -24,11 +24,19 @@ namespace buffer_handle
 	  {
 	    assert(value != nullptr && "A static string requires a non null value initializer.");
 
-	    max_length = length;
-	    std::memcpy(buffer, value, length);
+	    if(Align == align::left)
+	      {
+		std::memcpy(buffer, value, length);
+		std::memset(buffer + length, Pad, max_length - length);
+	      }
+	    else if(Align == align::right)
+	      {
+		std::memset(buffer, Pad, max_length - length);
+		std::memcpy(buffer + max_length - length, value, length);
+	      }
 	  }
 
-	buffer += length;
+	buffer += max_length;
       }
     else if(Config == config::dynamic)
       {
@@ -36,18 +44,13 @@ namespace buffer_handle
 	  {
 	  case action::size:
 	    {
-	      return buffer + length;
+	      return buffer + max_length;
 	    }
 	  case action::prepare:
 	  case action::reset:
 	    {
 	      if(value == nullptr)
 		{
-		  if(Action == action::prepare)
-		    {
-		      max_length = length;
-		    }
-
 		  std::memset(buffer, Pad, max_length);
 		}
 	      else
@@ -56,8 +59,8 @@ namespace buffer_handle
 
 		  if(Align == align::left)
 		    {
-		      std::memset(buffer + length, Pad, max_length - length);
 		      std::memcpy(buffer, value, length);
+		      std::memset(buffer + length, Pad, max_length - length);
 		    }
 		  else if(Align == align::right)
 		    {
@@ -90,10 +93,10 @@ namespace buffer_handle
   }
 
   template<config Config, align Align, char Pad> inline
-  string_t<Config, Align, Pad>::string_t(const char * value /* = nullptr */, std::size_t length /* = 0 */) :
+  string_t<Config, Align, Pad>::string_t(std::size_t max_length, const char * value /* = nullptr */, std::size_t length /* = 0 */) :
     value(value),
     length(length),
-    max_length(0)
+    max_length(max_length)
   {
 
   }

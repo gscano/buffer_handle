@@ -80,6 +80,16 @@ template<config Config, case_ Case, align Align, char Pad, action Action>
 char * boolean(char * buffer, bool value);
 ```
 
+```cpp
+#include <buffer_handle/string.hpp>
+
+template<config Config, action Action>
+char * string(char * buffer, const char * value, std::size_t length);
+
+template<config Config, align Align, char Pad, action Action>
+char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length);
+```
+
 ### Functors
 
 ```cpp
@@ -89,6 +99,22 @@ struct nothing_t
 {
   template<action Action>
   char * handle(char * buffer) const;
+};
+```
+
+```cpp
+#include <buffer_handle/string.hpp>
+
+template<config Config, align Align, char Pad>
+struct string_t
+{
+  string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
+
+  const char * value;
+  std::size_t length;
+
+  template<action Action>
+  char * handle(char * buffer);
 };
 ```
 

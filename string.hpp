@@ -11,13 +11,13 @@ namespace buffer_handle
   char * string(char * buffer, const char * value, std::size_t length);
 
   template<config Config, align Align, char Pad, action Action>
-  char * string(char * buffer, const char * value, std::size_t length, std::size_t & max_length);
+  char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length);
 
   template<config Config, align Align, char Pad>
   struct string_t
   {
   public:
-    string_t(const char * value = nullptr, std::size_t length = 0);
+    string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
 
   public:
     const char * value;

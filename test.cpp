@@ -15,10 +15,11 @@
 
 using namespace buffer_handle;
 
-#define BUFFER(size)				\
+#define GIVEN_A_BUFFER(size)			\
   char buffer[size] = {0};			\
   char * begin = buffer;			\
-  char * end = buffer
+  char * end = buffer;				\
+  GIVEN("A buffer")
 
 SCENARIO("Boolean", "[boolean]")
 {
@@ -28,9 +29,7 @@ SCENARIO("Boolean", "[boolean]")
 
       GIVEN("Size")
 	{
-	  BUFFER(4);
-
-	  GIVEN("A buffer")
+	  GIVEN_A_BUFFER(4)
 	    {
 	      THEN("Prepare")
 		{
@@ -51,9 +50,7 @@ SCENARIO("Boolean", "[boolean]")
 
 	  GIVEN("Size")
 	    {
-	      BUFFER(5);
-
-	      GIVEN("A buffer")
+	      GIVEN_A_BUFFER(5)
 		{
 		  THEN("Prepare, write or reset")
 		    {
@@ -83,9 +80,7 @@ SCENARIO("Boolean", "[boolean]")
 
 	  GIVEN("Size")
 	    {
-	      BUFFER(5);
-
-	      GIVEN("A buffer")
+	      GIVEN_A_BUFFER(5)
 		{
 		  THEN("Prepare, write or reset")
 		    {
@@ -149,155 +144,6 @@ SCENARIO("Nothing", "[nothing]")
   REQUIRE(nothing_t().handle<action::prepare>(&c) == &c);
   REQUIRE(nothing_t().handle<action::write>(&c) == &c);
   REQUIRE(nothing_t().handle<action::reset>(&c) == &c);
-}
-
-SCENARIO("String", "[string]")
-{
-  const std::size_t length = 32;
-  char buffer[length] = {0};
-  char * begin = buffer;
-  char * end = buffer;
-
-  const char pad = ' ';
-
-  const char * data = "Hello world!";
-
-  std::size_t max_length = 0;
-
-  GIVEN("A buffer")
-    {
-      WHEN("Static")
-	{
-	  REQUIRE(((std::size_t)string<config::static_, align::left, ' ', action::size>(nullptr, data, std::strlen(data), max_length) == std::strlen(data)));
-
-	  end = string<config::static_, align::left, ' ', action::prepare>(begin, data, std::strlen(data), max_length);
-
-	  REQUIRE(end - begin == std::strlen(data));
-	  REQUIRE(max_length == std::strlen(data));
-	  REQUIRE(std::string(begin, end) == data);
-	}
-
-      WHEN("Dynamic")
-	{
-	  WHEN("Right-aligned")
-	    {
-	      std::size_t size = (std::size_t)string<config::dynamic, align::right, ' ', action::size>(nullptr, nullptr, length, max_length);
-
-	      REQUIRE(size == length);
-	      REQUIRE(max_length == 0);
-
-	      GIVEN("Size")
-		{
-		  THEN("Prepare with no content")
-		    {
-		      end = string<config::dynamic, align::right, ' ', action::prepare>(begin, nullptr, length, max_length);
-
-		      REQUIRE(end - begin == length);
-		      REQUIRE(max_length == length);
-		      REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-
-		      THEN("Write")
-			{
-			  end = string<config::dynamic, align::right, ' ', action::write>(begin, data, std::strlen(data), max_length);
-
-			  REQUIRE(max_length == length);
-			  REQUIRE(end - begin == max_length);
-			  REQUIRE(std::string(begin, end - std::strlen(data)) == std::string(max_length - std::strlen(data), pad));
-			  REQUIRE(std::string(end - std::strlen(data), end) == data);
-
-			  THEN("Reset")
-			    {
-			      end = string<config::dynamic, align::right, ' ', action::reset>(begin, nullptr, 0, max_length);
-
-			      REQUIRE(max_length == length);
-			      REQUIRE(end - begin == max_length);
-			      REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-			    }
-			}
-		    }
-
-		  THEN("Prepare")
-		    {
-		      max_length = std::strlen(data);
-		      end = string<config::dynamic, align::right, ' ', action::prepare>(begin, "world!", 6, max_length);
-
-		      REQUIRE(end - begin == std::strlen(data));
-		      REQUIRE(max_length == std::strlen(data));
-		      REQUIRE(std::string(begin, end) == std::string(max_length - 6, pad) + "world!");
-
-		      THEN("Write")
-			{
-			  end = string<config::dynamic, align::right, ' ', action::write>(begin, data, std::strlen(data), max_length);
-
-			  REQUIRE(max_length == std::strlen(data));
-			  REQUIRE(end - begin == max_length);
-			  REQUIRE(std::string(begin, end - std::strlen(data)) == std::string(max_length - std::strlen(data), pad));
-			  REQUIRE(std::string(end - std::strlen(data), end) == data);
-			}
-		    }
-		}
-	    }
-
-	  WHEN("Left-aligned")
-	    {
-	      std::size_t size = (std::size_t)string<config::dynamic, align::left, ' ', action::size>(nullptr, nullptr, length, max_length);
-
-	      REQUIRE(size == length);
-	      REQUIRE(max_length == 0);
-
-	      GIVEN("Size")
-		{
-		  THEN("Prepare with no content")
-		    {
-		      end = string<config::dynamic, align::left, ' ', action::prepare>(begin, nullptr, length, max_length);
-
-		      REQUIRE(end - begin == length);
-		      REQUIRE(max_length == length);
-		      REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-
-		      THEN("Write")
-			{
-			  end = string<config::dynamic, align::left, ' ', action::write>(begin, data, std::strlen(data), max_length);
-
-			  REQUIRE(max_length == length);
-			  REQUIRE(end - begin == max_length);
-			  REQUIRE(std::string(begin, begin + std::strlen(data)) == data);
-			  REQUIRE(std::string(begin + std::strlen(data), end) == std::string(max_length - std::strlen(data), pad));
-
-			  THEN("Reset")
-			    {
-			      end = string<config::dynamic, align::left, ' ', action::reset>(begin, nullptr, 0, max_length);
-
-			      REQUIRE(max_length == length);
-			      REQUIRE(end - begin == max_length);
-			      REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-			    }
-			}
-		    }
-
-		  THEN("Prepare")
-		    {
-		      max_length = std::strlen(data);
-		      end = string<config::dynamic, align::left, ' ', action::prepare>(begin, "world!", 6, max_length);
-
-		      REQUIRE(end - begin == std::strlen(data));
-		      REQUIRE(max_length == std::strlen(data));
-		      REQUIRE(std::string(begin, end) == std::string("world!") + std::string(max_length - 6, pad));
-
-		      THEN("Write")
-			{
-			  end = string<config::dynamic, align::left, ' ', action::write>(begin, data, std::strlen(data), max_length);
-
-			  REQUIRE(max_length == std::strlen(data));
-			  REQUIRE(end - begin == max_length);
-			  REQUIRE(std::string(begin, end - std::strlen(data)) == std::string(max_length - std::strlen(data), pad));
-			  REQUIRE(std::string(end - std::strlen(data), end) == data);
-			}
-		    }
-		}
-	    }
-	}
-    }
 }
 
 #include <buffer_handle/adapter/itoa.hpp>
@@ -876,7 +722,7 @@ SCENARIO("Date", "[date]")
 	      }
 	  }
       }
-
+#if 0
     WHEN("rfc850")
       {
 	typedef universal_timezone_t<config::static_, align::left, ' '> timezone_t;
@@ -937,7 +783,7 @@ SCENARIO("Date", "[date]")
 	      }
 	  }
       }
-
+#endif
     WHEN("rfc1123")
       {
 	typedef universal_timezone_t<config::static_, align::left, ' '> timezone_t;
@@ -1197,6 +1043,206 @@ SCENARIO("Container", "[container]")
 			    }
 			}
 		    }
+		}
+	    }
+	}
+    }
+}
+
+SCENARIO("String", "[string]")
+{
+  const char * data = "Hello world!";
+  const std::size_t length = std::strlen(data);
+  const char pad = ' ';
+
+  GIVEN("A string and a padding character")
+    {
+      const std::size_t max_length_ = 32;
+      std::size_t max_length = max_length_;
+
+      WHEN("Static")
+	{
+	  WHEN("Left-aligned")
+	    {
+	      std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, data, length, max_length);
+
+	      REQUIRE(size == max_length);
+	      REQUIRE(max_length == max_length_);
+
+	      GIVEN("Size")
+		{
+		  GIVEN_A_BUFFER(size)
+		  {
+		    THEN("Prepare")
+		      {
+			end = string<config::static_, align::left, pad, action::prepare>(begin, data, std::strlen(data), max_length);
+
+			REQUIRE(end - begin == max_length);
+			REQUIRE(std::string(begin, end) == data + std::string(max_length - length, pad));
+		      }
+		  }
+		}
+	    }
+
+	  WHEN("Right-aligned")
+	    {
+	      std::size_t size = (std::size_t)string<config::static_, align::right, pad, action::size>(nullptr, data, length, max_length);
+
+	      REQUIRE(size == max_length);
+	      REQUIRE(max_length == max_length_);
+
+	      GIVEN("Size")
+		{
+		  GIVEN_A_BUFFER(size)
+		  {
+		    THEN("Prepare")
+		      {
+			end = string<config::static_, align::right, pad, action::prepare>(begin, data, std::strlen(data), max_length);
+
+			REQUIRE(end - begin == max_length);
+			REQUIRE(std::string(begin, end) == std::string(max_length - length, pad) + data);
+		      }
+		  }
+		}
+	    }
+	}
+
+      WHEN("Dynamic")
+	{
+	  WHEN("Left-aligned")
+	    {
+	      std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, length, max_length);
+
+	      REQUIRE(size == max_length);
+	      REQUIRE(max_length == max_length_);
+
+	      GIVEN("Size")
+		{
+		  GIVEN_A_BUFFER(size)
+		  {
+		    THEN("Prepare with no content")
+		      {
+			end = string<config::dynamic, align::left, pad, action::prepare>(begin, nullptr, 0, max_length);
+
+			REQUIRE(end - begin == max_length);
+			REQUIRE(max_length == max_length_);
+			REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+
+			THEN("Write")
+			  {
+			    end = string<config::dynamic, align::left, pad, action::write>(begin, data, std::strlen(data), max_length);
+
+			    REQUIRE(end - begin == max_length);
+			    REQUIRE(max_length == max_length_);
+			    REQUIRE(std::string(begin, begin + std::strlen(data)) == data);
+			    REQUIRE(std::string(begin + std::strlen(data), end) == std::string(max_length - std::strlen(data), pad));
+
+			    THEN("Reset")
+			      {
+				end = string<config::dynamic, align::left, pad, action::reset>(begin, nullptr, 0, max_length);
+
+				REQUIRE(end - begin == max_length);
+				REQUIRE(max_length == max_length_);
+				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+			      }
+			  }
+		      }
+
+		    THEN("Prepare")
+		      {
+			end = string<config::dynamic, align::left, pad, action::prepare>(begin, "world!", 6, max_length);
+
+			REQUIRE(end - begin == max_length);
+			REQUIRE(max_length == max_length_);
+			REQUIRE(std::string(begin, end) == std::string("world!") + std::string(max_length - 6, pad));
+
+			THEN("Write")
+			  {
+			    end = string<config::dynamic, align::left, pad, action::write>(begin, data, length, max_length);
+
+			    REQUIRE(end - begin == max_length);
+			    REQUIRE(max_length == max_length_);
+			    REQUIRE(std::string(begin, end) == data + std::string(max_length - length, pad));
+
+			    THEN("Reset")
+			      {
+				end = string<config::dynamic, align::left, pad, action::reset>(begin, nullptr, 0, max_length);
+
+				REQUIRE(end - begin == max_length);
+				REQUIRE(max_length == max_length_);
+				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+			      }
+			  }
+		      }
+		  }
+		}
+	    }
+
+	  WHEN("Right-aligned")
+	    {
+	      std::size_t size = (std::size_t)string<config::dynamic, align::right, pad, action::size>(nullptr, nullptr, 0, max_length);
+
+	      REQUIRE(size == max_length);
+	      REQUIRE(max_length == max_length_);
+
+	      GIVEN("Size")
+		{
+		  GIVEN_A_BUFFER(size)
+		  {
+		    THEN("Prepare with no content")
+		      {
+			end = string<config::dynamic, align::right, pad, action::prepare>(begin, nullptr, length, max_length);
+
+			REQUIRE(end - begin == max_length);
+			REQUIRE(max_length == max_length_);
+			REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+
+			THEN("Write")
+			  {
+			    end = string<config::dynamic, align::right, pad, action::write>(begin, data, length, max_length);
+
+			    REQUIRE(end - begin == max_length);
+			    REQUIRE(max_length == max_length_);
+			    REQUIRE(std::string(begin, end) == std::string(max_length - length, pad) + data);
+
+			    THEN("Reset")
+			      {
+				end = string<config::dynamic, align::right, pad, action::reset>(begin, nullptr, 0, max_length);
+
+				REQUIRE(end - begin == max_length);
+				REQUIRE(max_length == max_length_);
+				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+			      }
+			  }
+		      }
+
+		    THEN("Prepare")
+		      {
+			end = string<config::dynamic, align::right, pad, action::prepare>(begin, "world!", 6, max_length);
+
+			REQUIRE(end - begin == max_length);
+			REQUIRE(max_length == max_length_);
+			REQUIRE(std::string(begin, end) == std::string(max_length - 6, pad) + "world!");
+
+			THEN("Write")
+			  {
+			    end = string<config::dynamic, align::right, pad, action::write>(begin, data, length, max_length);
+
+			    REQUIRE(end - begin == max_length);
+			    REQUIRE(max_length == max_length_);
+			    REQUIRE(std::string(begin, end) == std::string(max_length - length, pad) + data);
+
+			    THEN("Reset")
+			      {
+				end = string<config::dynamic, align::right, pad, action::reset>(begin, nullptr, 0, max_length);
+
+				REQUIRE(end - begin == max_length);
+				REQUIRE(max_length == max_length_);
+				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+			      }
+			  }
+		      }
+		  }
 		}
 	    }
 	}
