@@ -4,6 +4,7 @@
 
 #include <buffer_handle/boolean.hpp>
 #include <buffer_handle/character.hpp>
+#include <buffer_handle/container.hpp>
 #include <buffer_handle/date.hpp>
 #include <buffer_handle/nothing.hpp>
 #include <buffer_handle/number.hpp>
@@ -107,8 +108,8 @@ SCENARIO("String", "[string]")
 		      max_length = std::strlen(data);
 		      end = string<config::dynamic, align::right, ' ', action::prepare>(begin, "world!", 6, max_length);
 
-		      REQUIRE(end - begin == ::strlen(data));
-		      REQUIRE(max_length == ::strlen(data));
+		      REQUIRE(end - begin == std::strlen(data));
+		      REQUIRE(max_length == std::strlen(data));
 		      REQUIRE(std::string(begin, end) == std::string(max_length - 6, pad) + "world!");
 
 		      THEN("Write")
@@ -166,8 +167,8 @@ SCENARIO("String", "[string]")
 		      max_length = std::strlen(data);
 		      end = string<config::dynamic, align::left, ' ', action::prepare>(begin, "world!", 6, max_length);
 
-		      REQUIRE(end - begin == ::strlen(data));
-		      REQUIRE(max_length == ::strlen(data));
+		      REQUIRE(end - begin == std::strlen(data));
+		      REQUIRE(max_length == std::strlen(data));
 		      REQUIRE(std::string(begin, end) == std::string("world!") + std::string(max_length - 6, pad));
 
 		      THEN("Write")
@@ -914,4 +915,239 @@ SCENARIO("Date", "[date]")
 	  }
       }
   }
+}
+
+template<class Iterator>
+struct handler_t
+{
+  template<config Config, action Action>
+  char * operator () (char * buffer, const Iterator & it) const
+  {
+    if(Action != action::size)
+      {
+	std::memcpy(buffer, it->first, it->second);
+      }
+
+    return buffer + it->second;
+  }
+};
+
+struct separator_t
+{
+  template<config Config, action Action>
+  char * operator () (char * buffer) const
+  {
+    buffer = space<Config, Action>(buffer);
+
+    return buffer;
+  }
+};
+
+SCENARIO("Container", "[container]")
+{
+  typedef std::vector<std::pair<const char *, std::size_t> > list_type;
+
+  list_type list;
+  list.push_back(std::make_pair("Hello", 5));
+  list.push_back(std::make_pair("world", 5));
+  list.push_back(std::make_pair("!", 1));
+
+  const char * data = "Hello world !";
+
+  typename list_type::const_iterator cbegin = list.cbegin();
+  typename list_type::const_iterator cend = list.cend();
+
+  typename list_type::const_reverse_iterator crbegin = list.crbegin();
+  typename list_type::const_reverse_iterator crend = list.crend();
+
+  GIVEN("A container and its iterators")
+    {
+      handler_t<typename list_type::const_iterator > handler;
+      handler_t<typename list_type::const_reverse_iterator > reverse_handler;
+
+      separator_t separator;
+
+      GIVEN("Handlers and separator functors")
+	{
+	  WHEN("Container process")
+	    {
+	      char buffer[1024] = {0};
+	      char * begin = buffer;
+	      char * end = buffer + 1024;
+
+	      GIVEN("A buffer and a handler with a separator")
+		{
+		  WHEN("Static")
+		    {
+		      WHEN("Left-aligned")
+			{
+			  std::size_t size = (std::size_t)container_process<config::static_, align::left, action::size>(nullptr, cbegin, cend, handler, separator);
+
+			  REQUIRE(size == std::strlen(data));
+
+			  GIVEN("Size")
+			    {
+			      THEN("Prepare, write or reset")
+				{
+				  end = container_process<config::static_, align::left, action::prepare>(begin, cbegin, cend, handler, separator);
+
+				  REQUIRE(end - begin == std::strlen(data));
+				  REQUIRE(std::string(begin, end) == data);
+				}
+			    }
+			}
+
+		      WHEN("Right-aligned")
+			{
+			  std::size_t size = -(std::size_t)container_process<config::static_, align::right, action::size>(nullptr, crbegin, crend, reverse_handler, separator);
+
+			  REQUIRE(size == std::strlen(data));
+
+			  GIVEN("Size")
+			    {
+			      THEN("Prepare, write or reset")
+				{
+				  begin = container_process<config::static_, align::right, action::prepare>(begin + size, crbegin, crend, reverse_handler, separator);
+
+				  REQUIRE(std::string(begin, begin + size) == data);
+				}
+			    }
+			}
+		    }
+
+		  WHEN("Dynamic")
+		    {
+		      WHEN("Left-aligned")
+			{
+			  REQUIRE(((std::size_t)container_process<config::dynamic, align::left, action::size>(nullptr, cbegin, cend, handler, separator) == std::strlen(data)));
+
+			  WHEN("Prepare, write or reset")
+			    {
+			      end = container_process<config::dynamic, align::left, action::write>(begin, cbegin, cend, handler, separator);
+
+			      REQUIRE(end - begin == std::strlen(data));
+			      REQUIRE(std::string(begin, end) == data);
+			    }
+			}
+
+		      WHEN("Right-aligned")
+			{
+			  REQUIRE(((std::size_t)container_process<config::dynamic, align::right, action::size>(nullptr, crbegin, crend, reverse_handler, separator) == -std::strlen(data)));
+
+			  GIVEN("Size")
+			    {
+			      THEN("Prepare, write or reset")
+				{
+				  begin = container_process<config::dynamic, align::right, action::write>(begin + std::strlen(data), crbegin, crend, reverse_handler, separator);
+
+				  REQUIRE(std::string(begin, begin + std::strlen(data)) == data);
+				}
+			    }
+			}
+		    }
+		}
+	    }
+
+	  WHEN("Container")
+	    {
+	      std::size_t max_length = 0;
+
+	      WHEN("Static")
+		{
+		  WHEN("Right-aligned")
+		    {
+		      std::size_t size = (std::size_t)container<config::static_, align::right, ' ', action::size>(nullptr, crbegin, crend, max_length, reverse_handler, separator);
+
+		      char buffer[size] = {0};
+		      char * begin = buffer;
+		      char * end = buffer + size;
+
+		      WHEN("Prepare")
+			{
+			  end = container<config::static_, align::right, ' ', action::prepare>(begin, crbegin, crend, max_length, reverse_handler, separator);
+
+			  REQUIRE(end - begin == size);
+			  REQUIRE(std::string(begin, end) == data);
+
+			  THEN("Write")
+			    {
+			      end = container<config::static_, align::right, ' ', action::write>(begin, crbegin, crend, max_length, reverse_handler, separator);
+
+			      REQUIRE(end - begin == size);
+			      REQUIRE(std::string(begin, end) == data);
+			    }
+			}
+		    }
+
+		  WHEN("Left-aligned")
+		    {
+
+		    }
+		}
+
+	      WHEN("Dynamic")
+		{
+		  WHEN("Right-aligned")
+		    {
+		      std::size_t max_length = 64;
+
+		      std::size_t size = (std::size_t)container<config::dynamic, align::right, ' ', action::size>(nullptr, crbegin, crend, max_length, reverse_handler, separator);
+
+		      REQUIRE(size == max_length);
+
+		      char buffer[size] = {0};
+		      char * begin = buffer;
+		      char * end = buffer + size;
+
+		      WHEN("Prepare")
+			{
+			  end = container<config::dynamic, align::right, ' ', action::prepare>(begin, crbegin, crend, max_length, reverse_handler, separator);
+
+			  REQUIRE(end - begin == size);
+			  REQUIRE(size == max_length);
+			  REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
+
+			  THEN("Write")
+			    {
+			      end = container<config::dynamic, align::right, ' ', action::write>(begin, crbegin, crend, max_length, reverse_handler, separator);
+
+			      REQUIRE(end - begin == size);
+			      REQUIRE(size == max_length);
+			      REQUIRE(std::string(begin + size - std::strlen(data), end) == data);
+
+			      THEN("Reset")
+				{
+				  end = container<config::dynamic, align::right, ' ', action::reset>(begin, crbegin, crend, max_length, reverse_handler, separator);
+
+				  REQUIRE(end - begin == size);
+				  REQUIRE(size == max_length);
+				  REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
+
+				  THEN("Rewrite")
+				    {
+				      list.pop_back();
+				      list.pop_back();
+
+				      list.push_back(std::make_pair("world,", 6));
+				      list.push_back(std::make_pair("once again!", 11));
+
+				      const char * data2 = "Hello world, once again!";
+
+				      crbegin = list.crbegin();
+				      crend = list.crend();
+
+				      end = container<config::dynamic, align::right, ' ', action::write>(begin, crbegin, crend, max_length, reverse_handler, separator);
+
+				      REQUIRE(end -  begin == size);
+				      REQUIRE(size == max_length);
+				      REQUIRE(std::string(begin, end) == std::string(max_length - std::strlen(data2), ' ') + data2);
+				    }
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
 }
