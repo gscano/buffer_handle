@@ -3,6 +3,7 @@
 When buffers are extensively used to send textual output, their management requires a work to be eased by this **C++** library.
 
 * [Concept](#concept)
+* [Reference](#reference)
 * [Tests](#tests)
 
 ## Concept
@@ -63,6 +64,20 @@ enum class config { static_, dynamic };
 
 template<config Config, action Action>
 char * character(char * buffer, char c);
+```
+
+```cpp
+#include <buffer_handle/token.hpp>
+
+template<config Config, action Action>
+char * TOKEN(char * buffer); //TOKEN = new_line, carriage_return, space, comma, dot, colon, semicolon, equal
+```
+
+```cpp
+#include <buffer_handle/boolean.hpp>
+
+template<config Config, case_ Case, align Align, char Pad, action Action>
+char * boolean(char * buffer, bool value);
 ```
 
 ### Functors

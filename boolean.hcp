@@ -40,15 +40,15 @@ namespace buffer_handle
 	  {
 	    if(value)
 	      {
-		if(Align == align::right)
-		  {
-		    char * local = space<config::static_, Action>(buffer);
-		    boolean_true<Case>(local);
-		  }
-		else if(Align == align::left)
+		if(Align == align::left)
 		  {
 		    char * local = boolean_true<Case>(buffer);
-		    space<config::static_, Action>(local);
+		    character<config::static_, Action>(local, Pad);
+		  }
+		else if(Align == align::right)
+		  {
+		    char * local = character<config::static_, Action>(buffer, Pad);
+		    boolean_true<Case>(local);
 		  }
 	      }
 	    else

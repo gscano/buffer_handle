@@ -15,6 +15,102 @@
 
 using namespace buffer_handle;
 
+#define BUFFER(size)				\
+  char buffer[size] = {0};			\
+  char * begin = buffer;			\
+  char * end = buffer
+
+SCENARIO("Boolean", "[boolean]")
+{
+  WHEN("Static, any case, left or right aligned, any pad")
+    {
+      REQUIRE(((std::size_t)boolean<config::static_, case_::lower, align::left, ' ', action::size>(nullptr, true) == 4));
+
+      GIVEN("Size")
+	{
+	  BUFFER(4);
+
+	  GIVEN("A buffer")
+	    {
+	      THEN("Prepare")
+		{
+		  end = boolean<config::static_, case_::lower, align::left, ' ', action::prepare>(begin, true);
+
+		  REQUIRE(end - begin == 4);
+		  REQUIRE(std::string(begin, end) == "true");
+		}
+	    }
+	}
+    }
+
+  WHEN("Dynamic")
+    {
+      WHEN("Left-aligned")
+	{
+	  REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::left, ' ', action::size>(nullptr, true) == 5));
+
+	  GIVEN("Size")
+	    {
+	      BUFFER(5);
+
+	      GIVEN("A buffer")
+		{
+		  THEN("Prepare, write or reset")
+		    {
+		      WHEN("True")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::prepare>(begin, true);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == "true ");
+			}
+
+		      WHEN("False")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::prepare>(begin, false);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == "false");
+			}
+		    }
+		}
+	    }
+	}
+
+      WHEN("Right-aligned")
+	{
+	  REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::right, ' ', action::size>(nullptr, true) == 5));
+
+	  GIVEN("Size")
+	    {
+	      BUFFER(5);
+
+	      GIVEN("A buffer")
+		{
+		  THEN("Prepare, write or reset")
+		    {
+		      WHEN("True")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::prepare>(begin, true);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == " true");
+			}
+
+		      WHEN("False")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::prepare>(begin, false);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == "false");
+			}
+		    }
+		}
+	    }
+	}
+    }
+}
+
 SCENARIO("Character", "[character]")
 {
   char c = '\0';
@@ -197,68 +293,6 @@ SCENARIO("String", "[string]")
 			  REQUIRE(std::string(begin, end - std::strlen(data)) == std::string(max_length - std::strlen(data), pad));
 			  REQUIRE(std::string(end - std::strlen(data), end) == data);
 			}
-		    }
-		}
-	    }
-	}
-    }
-}
-
-SCENARIO("Boolean", "[boolean]")
-{
-  const std::size_t length = 8;
-  char buffer[length] = {0};
-  char * begin = buffer;
-  char * end = buffer;
-
-  GIVEN("A buffer")
-    {
-      WHEN("Static")
-	{
-	  REQUIRE(((std::size_t)boolean<config::static_, case_::lower, align::left, ' ', action::size>(nullptr, true) == 4));
-
-	  end = boolean<config::static_, case_::lower, align::left, ' ', action::prepare>(begin, true);
-
-	  REQUIRE(end - begin == 4);
-	  REQUIRE(std::string(begin, end) == "true");
-	}
-
-      WHEN("Dynamic")
-	{
-	  GIVEN("Size")
-	    {
-	      REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::left, ' ', action::size>(nullptr, true) == 5));
-	      REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::right, ' ', action::size>(nullptr, true) == 5));
-
-	      WHEN("Left-aligned")
-		{
-		  THEN("Prepare or write or reset")
-		    {
-		      end = boolean<config::dynamic, case_::lower, align::left, ' ', action::prepare>(begin, true);
-
-		      REQUIRE(end - begin == 5);
-		      REQUIRE(std::string(begin, end) == "true ");
-
-		      end = boolean<config::dynamic, case_::lower, align::left, ' ', action::prepare>(begin, false);
-
-		      REQUIRE(end - begin == 5);
-		      REQUIRE(std::string(begin, end) == "false");
-		    }
-		}
-
-	      WHEN("Right-aligned")
-		{
-		  THEN("Prepare or write or reset")
-		    {
-		      end = boolean<config::dynamic, case_::lower, align::right, ' ', action::prepare>(begin, true);
-
-		      REQUIRE(end - begin == 5);
-		      REQUIRE(std::string(begin, end) == " true");
-
-		      end = boolean<config::dynamic, case_::lower, align::right, ' ', action::prepare>(begin, false);
-
-		      REQUIRE(end - begin == 5);
-		      REQUIRE(std::string(begin, end) == "false");
 		    }
 		}
 	    }
