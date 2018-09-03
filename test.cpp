@@ -411,61 +411,87 @@ SCENARIO("Time", "[time]")
 {
   const char pad = ' ';
 
-  const std::size_t size = 8;
-  char buffer[8] = {0};
-  char * begin = buffer;
-  char * end = buffer;
-
-  GIVEN("A buffer")
+  WHEN("time_t")
     {
-      WHEN("Using 'time_t'")
+      //see integral_number
+    }
+
+  WHEN("Hours and minutes")
+    {
+      uint8_t hours = 5;
+      uint8_t minutes = 23;
+
+      WHEN("Static or dynamic")
 	{
-	  time_t time = 193749;
+	  std::size_t size = (std::size_t)time_<config::static_, action::size>(nullptr, hours, minutes);
 
-	  uint8_t max_digits = 0;
-
-	  REQUIRE(((std::size_t)time_<config::dynamic, align::right, pad, adapter::itoa, action::size>(nullptr, time, max_digits) == 6));
-	}
-
-      WHEN("Specfic")
-	{
-	  uint8_t hours = 5;
-	  uint8_t minutes = 23;
-	  uint8_t seconds = 59;
-
-	  REQUIRE(((std::size_t)time_<config::static_, action::size>(nullptr, hours, minutes, seconds) == size));
+	  REQUIRE(size == 5);
 
 	  GIVEN("Size")
 	    {
-	      THEN("Prepare")
-		{
-		  end = time_<config::static_, action::prepare>(buffer, hours, minutes, seconds);
+	      GIVEN_A_BUFFER(size)
+	      {
+		THEN("Prepare, write or reset")
+		  {
+		    end = time_<config::static_, action::prepare>(buffer, hours, minutes);
 
-		  REQUIRE(end - begin == size);
-		  REQUIRE(std::string(begin, end) == "05:23:59");
-		}
+		    REQUIRE(end - begin == size);
+		    REQUIRE(std::string(begin, end) == "05:23");
+		  }
+	      }
 	    }
 	}
+    }
 
-      WHEN("Using 'struct tm'")
+  WHEN("Hours, minutes and seconds")
+    {
+      uint8_t hours = 5;
+      uint8_t minutes = 23;
+      uint8_t seconds = 59;
+
+      WHEN("Static or dynamic")
 	{
-	  struct tm time;
-	  time.tm_hour = 4;
-	  time.tm_min = 34;
-	  time.tm_sec = 0;
+	  std::size_t size = (std::size_t)time_<config::static_, action::size>(nullptr, hours, minutes, seconds);
 
-	  REQUIRE(((std::size_t)time_<config::static_, action::size>(nullptr, time) == size));
+	  REQUIRE(size == 8);
 
 	  GIVEN("Size")
 	    {
-	      THEN("Prepare")
-		{
-		  end = time_<config::static_, action::prepare>(buffer, time);
+	      GIVEN_A_BUFFER(size)
+	      {
+		THEN("Prepare, write or reset")
+		  {
+		    end = time_<config::static_, action::prepare>(buffer, hours, minutes, seconds);
 
-		  REQUIRE(end - begin == size);
-		  REQUIRE(std::string(begin, end) == "04:34:00");
-		}
+		    REQUIRE(end - begin == size);
+		    REQUIRE(std::string(begin, end) == "05:23:59");
+		  }
+	      }
 	    }
+	}
+    }
+
+  WHEN("tm")
+    {
+      std::tm time;
+      time.tm_hour = 4;
+      time.tm_min = 34;
+      time.tm_sec = 0;
+
+      std::size_t size = (std::size_t)time_<config::static_, action::size>(nullptr, time);
+
+      GIVEN("Size")
+	{
+	  GIVEN_A_BUFFER(size)
+	  {
+	    THEN("Prepare")
+	      {
+		end = time_<config::static_, action::prepare>(buffer, time);
+
+		REQUIRE(end - begin == size);
+		REQUIRE(std::string(begin, end) == "04:34:00");
+	      }
+	  }
 	}
     }
 }

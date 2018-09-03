@@ -107,6 +107,22 @@ char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & 
 * The ```uint8_t & max_digits``` parameter is a reference because the function will assign the value based on the value passed in ```i``` when **prepare** is called. This value should not be modify for later invocations.
 * ```uint8_t``` to encode the number of digits should be enough for most applications.
 
+```cpp
+#include <buffer_handle/time.hpp>
+
+template<config Config, align Align, char Pad, class Itoa, action Action, typename MaxDigits = uint8_t>
+char * time_(char * buffer, time_t time, MaxDigits & max_digits, const Itoa & itoa = Itoa());
+
+template<config Config, action Action, typename Hours, typename Minutes>
+char * time_(char * buffer, Hours hours, Minutes minutes);
+
+template<config Config, action Action, typename Hours, typename Minutes, typename Seconds>
+char * time_(char * buffer, Hours hours, Minutes minutes, Seconds seconds);
+
+template<config Config, action Action>
+char * time_(char * buffer, std::tm time);
+```
+
 ### Functors
 
 ```cpp

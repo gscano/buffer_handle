@@ -5,8 +5,8 @@
 
 namespace buffer_handle
 {
-  template<config Config, align Align, char Pad, class Itoa, action Action> inline
-  char * time_(char * buffer, time_t time, uint8_t & max_digits, const Itoa & itoa /* = Itoa() */)
+  template<config Config, align Align, char Pad, class Itoa, action Action, typename MaxDigits> inline
+  char * time_(char * buffer, time_t time, MaxDigits & max_digits, const Itoa & itoa /* = Itoa() */)
   {
     return integral_number<Config, Align, Pad, Itoa, Action, time_t>(nullptr, time, max_digits, itoa);
   }
@@ -66,7 +66,7 @@ namespace buffer_handle
   }
 
   template<config Config, action Action> inline
-  char * time_(char * buffer, struct tm time)
+  char * time_(char * buffer, std::tm time)
   {
     return time_<Config, Action>(buffer, time.tm_hour, time.tm_min, time.tm_sec);
   }
