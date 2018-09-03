@@ -28,7 +28,7 @@ namespace buffer_handle
 
   public:
     template<action Action>
-    char * handle(char * buffer);
+    char * handle(char * buffer) const;
   };
 };
 

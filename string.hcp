@@ -103,7 +103,7 @@ namespace buffer_handle
 
   template<config Config, align Align, char Pad>
   template<action Action> inline
-  char * string_t<Config, Align, Pad>::handle(char * buffer)
+  char * string_t<Config, Align, Pad>::handle(char * buffer) const
   {
     return string<Config, Action, Align, Pad>(buffer, this->value, this->length, this->max_length);
   }

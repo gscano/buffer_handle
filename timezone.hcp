@@ -122,49 +122,52 @@ namespace buffer_handle
 
   template<config Config>
   template<action Action> inline
-  char * north_american_timezone_t<Config>::handle(char * buffer)
+  char * north_american_timezone_t<Config>::handle(char * buffer) const
   {
     return north_american_timezone(buffer, this->value);
   }
 
-  template<typename T> inline
-  char military_timezone_offset_2_letter(T offset)
+  namespace details
   {
-    static_assert(std::is_signed<T>::value, "T must be signed.");
+    template<typename T> inline
+    char military_timezone_offset_2_letter(T offset)
+    {
+      static_assert(std::is_signed<T>::value, "T must be signed.");
 
-    assert(-12 <= offset <= 12);
+      assert(-12 <= offset <= 12);
 
-    if(offset < 0)
-      {
-	return 'M' - offset;
-      }
-    else if(offset == 0)
-      {
-	return 'Z';
-      }
-    else
-      {
-	return '@' + offset + (9 < offset);
-      }
-  }
+      if(offset < 0)
+	{
+	  return 'M' - offset;
+	}
+      else if(offset == 0)
+	{
+	  return 'Z';
+	}
+      else
+	{
+	  return '@' + offset + (9 < offset);
+	}
+    }
 
-  inline
-  int8_t military_timezone_letter_2_offset(char letter)
-  {
-    assert('A' <= letter && letter <= 'Z' && letter != 'J');
+    inline
+    int8_t military_timezone_letter_2_offset(char letter)
+    {
+      assert('A' <= letter && letter <= 'Z' && letter != 'J');
 
-    if(letter < 'N')
-      {
-	return letter - '@' - ('J' < letter);
-      }
-    else if(letter < 'Z')
-      {
-	return 'M' - letter;
-      }
-    else
-      {
-	return 0;
-      }
+      if(letter < 'N')
+	{
+	  return letter - '@' - ('J' < letter);
+	}
+      else if(letter < 'Z')
+	{
+	  return 'M' - letter;
+	}
+      else
+	{
+	  return 0;
+	}
+    }
   }
 
   template<config Config, action Action> inline
@@ -176,7 +179,7 @@ namespace buffer_handle
   template<config Config, action Action, typename T> inline
   char * military_timezone(char * buffer, T offset)
   {
-    return military_timezone<Config, Action>(buffer, military_timezone_offset_2_letter<T>(offset));
+    return military_timezone<Config, Action>(buffer, details::military_timezone_offset_2_letter<T>(offset));
   }
 
   template<config Config> inline
@@ -189,7 +192,7 @@ namespace buffer_handle
   template<config Config>
   template<typename T> inline
   military_timezone_t<Config>::military_timezone_t(T offset) :
-    letter(military_timezone_offset_2_letter<T>(offset))
+    letter(details::military_timezone_offset_2_letter<T>(offset))
   {
 
   }
@@ -198,7 +201,7 @@ namespace buffer_handle
   template<typename T> inline
   void military_timezone_t<Config>::set(T offset)
   {
-    this->letter = military_timezone_offset_2_letter<T>(offset);
+    this->letter = details::military_timezone_offset_2_letter<T>(offset);
   }
 
   template<config Config>
@@ -220,14 +223,14 @@ namespace buffer_handle
 	minus<Config, Action>(buffer);
       }
 
-    two_digits_number<Config, false, Action, Hours>(buffer + 1, hours);
-    two_digits_number<Config, false, Action, Minutes>(buffer + 3, minutes);
+    two_digits_number<Config, '\0', Action, Hours>(buffer + 1, hours);
+    two_digits_number<Config, '\0', Action, Minutes>(buffer + 3, minutes);
 
     return buffer + 5;
   }
 
-  template<config Config> inline
-  differential_timezone_t<Config>::differential_timezone_t(bool positive /* = true */, uint8_t hours /* = 0 */, uint8_t minutes /* = 0 */) :
+  template<config Config, typename Hours, typename Minutes> inline
+  differential_timezone_t<Config, Hours, Minutes>::differential_timezone_t(bool positive /* = true */, Hours hours /* = 0 */, Minutes minutes /* = 0 */) :
     positive(positive),
     hours(hours),
     minutes(minutes)
@@ -235,10 +238,10 @@ namespace buffer_handle
 
   }
 
-  template<config Config>
+  template<config Config, typename Hours, typename Minutes>
   template<action Action> inline
-  char * differential_timezone_t<Config>::handle(char * buffer) const
+  char * differential_timezone_t<Config, Hours, Minutes>::handle(char * buffer) const
   {
-    return differential_timezone<Config, Action>(buffer, this->positive, this->hours, this->minutes);
+    return differential_timezone<Config, Action, Hours, Minutes>(buffer, this->positive, this->hours, this->minutes);
   }
 };

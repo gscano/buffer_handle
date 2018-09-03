@@ -70,7 +70,7 @@ char * character(char * buffer, char c);
 #include <buffer_handle/token.hpp>
 
 template<config Config, action Action>
-char * TOKEN(char * buffer); //TOKEN = new_line, carriage_return, space, comma, dot, colon, semicolon, equal
+char * TOKEN(char * buffer);//TOKEN = new_line, carriage_return, space, comma, dot, colon, semicolon, equal
 ```
 
 ```cpp
@@ -123,6 +123,29 @@ template<config Config, action Action>
 char * time_(char * buffer, std::tm time);
 ```
 
+```cpp
+#include <buffer_handle/timezone.hpp>
+
+enum class universal_timezone : uint8_t { UT, GMT };
+
+template<config Config, align Align, char Pad, action Action>
+char * universal_timezone(char * buffer, enum universal_timezone value);
+
+enum class north_american_timezone : uint8_t { EST, EDT, CST, CDT, MST, MDT, PST, PDT };
+
+template<config Config, action Action>
+char * north_american_timezone(char * buffer, enum north_american_timezone value);
+
+template<config Config, action Action>
+char * military_timezone(char * buffer, char letter);
+
+template<config Config, action Action, typename T>
+char * military_timezone(char * buffer, T offset);
+
+template<config Config, action Action, typename Hours, typename Minutes>
+char * differential_timezone(char * buffer, bool sign, Hours hours, Minutes minutes);
+```
+
 ### Functors
 
 ```cpp
@@ -147,7 +170,7 @@ struct string_t
   std::size_t length;
 
   template<action Action>
-  char * handle(char * buffer);
+  char * handle(char * buffer) const;
 };
 ```
 
@@ -163,6 +186,62 @@ struct integral_number_t
 
   template<action Action>
   char * handle(char * buffer, const Itoa & itoa = Itoa());
+};
+```
+
+```cpp
+#include <buffer_handle/timezone.hpp>
+
+template<config Config, align Align, char Pad>
+struct universal_timezone_t
+{
+  universal_timezone_t(enum universal_timezone value = universal_timezone::GMT);
+
+  enum universal_timezone value;
+
+  template<action Action>
+  char * handle(char * buffer) const;
+};
+
+template<config Config>
+struct north_american_timezone_t
+{
+  north_american_timezone_t(enum north_american_timezone value = north_american_timezone::EST);
+
+  enum north_american_timezone value;
+
+  template<action Action>
+  char * handle(char * buffer) const;
+};
+
+template<config Config>
+struct military_timezone_t
+{
+  military_timezone_t(char letter = 'Z');
+
+  template<typename T>
+  military_timezone_t(T offset);
+
+  template<typename T>
+  void set(T offset);
+
+  char letter;
+
+  template<action Action>
+  char * handle(char * buffer) const;
+};
+
+template<config Config>
+struct differential_timezone_t
+{
+  differential_timezone_t(bool positive = true, uint8_t hours = 0, uint8_t minutes = 0);
+
+  bool positive;
+  uint8_t hours;
+  uint8_t minutes;
+
+  template<action Action>
+  char * handle(char * buffer) const;
 };
 ```
 

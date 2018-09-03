@@ -52,7 +52,7 @@ namespace buffer_handle
 
   public:
     template<action Action>
-    char * handle(char * buffer);
+    char * handle(char * buffer) const;
   };
 
   template<config Config, action Action>
@@ -85,11 +85,11 @@ namespace buffer_handle
   template<config Config, action Action, typename Hours, typename Minutes>
   char * differential_timezone(char * buffer, bool sign, Hours hours, Minutes minutes);
 
-  template<config Config>
+  template<config Config, typename Hours, typename Minutes>
   struct differential_timezone_t
   {
   public:
-    differential_timezone_t(bool positive = true, uint8_t hours = 0, uint8_t minutes = 0);
+    differential_timezone_t(bool positive = true, Hours hours = 0, Minutes minutes = 0);
 
   public:
     bool positive;

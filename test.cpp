@@ -498,88 +498,158 @@ SCENARIO("Time", "[time]")
 
 SCENARIO("Timezone", "[timezone]")
 {
-#define TST(C, I)							\
-  REQUIRE(military_timezone_offset_2_letter<int8_t>((int8_t)(I)) == (C)); \
-  REQUIRE(military_timezone_letter_2_offset(C) == (I))
-
-  TST('Z', 0);
-
-  TST('A', 1); TST('N', -1);
-  TST('B', 2); TST('O', -2);
-  TST('C', 3); TST('P', -3);
-  TST('D', 4); TST('Q', -4);
-  TST('E', 5); TST('R', -5);
-  TST('F', 6); TST('S', -6);
-  TST('G', 7); TST('T', -7);
-  TST('H', 8); TST('U', -8);
-  TST('I', 9); TST('V', -9);
-  TST('K', 10); TST('W', -10);
-  TST('L', 11); TST('X', -11);
-  TST('M', 12); TST('Y', -12);
-
-#undef TST
-
-  const std::size_t size = 32;
-  char buffer[size] = {0};
-  char * begin = buffer;
-  char * end = buffer;
-
-  GIVEN("A buffer")
+  WHEN("universal")
     {
-      WHEN("universal")
-	{
-	  WHEN("Static")
-	    {
-	      REQUIRE(((std::size_t)universal_timezone<config::static_, align::right, ' ', action::size>(nullptr, universal_timezone::GMT) == 3));
-	    }
-	}
+      const char pad = ' ';
 
-      WHEN("north american")
+      WHEN("Static")
 	{
-	  WHEN("Static")
+	  WHEN("Left or right aligned")
 	    {
-	      REQUIRE(((std::size_t)north_american_timezone<config::static_, action::size>(nullptr, north_american_timezone::CST) == 3));
-	    }
-	}
+	      std::size_t size = (std::size_t)universal_timezone<config::static_, align::left, pad, action::size>(nullptr, universal_timezone::GMT);
 
-      WHEN("military")
-	{
-	  WHEN("Static")
-	    {
-	      REQUIRE(((std::size_t)military_timezone<config::static_, action::size>(nullptr, 4) == 1));
+	      REQUIRE(size == 3);
 
 	      GIVEN("Size")
 		{
-		  THEN("Prepare")
-		    {
-		      end = military_timezone<config::static_, action::prepare>(begin, 10);
+		  GIVEN_A_BUFFER(size)
+		  {
+		    THEN("Prepare")
+		      {
+			end = universal_timezone<config::static_, align::left, pad, action::prepare>(begin, universal_timezone::GMT);
 
-		      REQUIRE(end - begin == 1);
-		      REQUIRE(std::string(begin, end) == "K");
-		    }
+			REQUIRE(end - begin == 3);
+			REQUIRE(std::string(begin, end) == "GMT");
+		      }
+		  }
 		}
 	    }
 	}
 
-      WHEN("differential")
+      WHEN("Dynamic")
 	{
-	  WHEN("Static")
+	  WHEN("Left-aligned")
 	    {
-	      REQUIRE(((std::size_t)differential_timezone<config::static_, action::size>(nullptr, true, 12, 54) == 5));
+	      std::size_t size = (std::size_t)universal_timezone<config::dynamic, align::left, pad, action::size>(nullptr, universal_timezone::UT);
+
+	      REQUIRE(size == 3);
 
 	      GIVEN("Size")
 		{
-		  THEN("Prepare")
+		  GIVEN_A_BUFFER(3)
 		    {
-		      end = differential_timezone<config::static_, action::prepare>(begin, true, 14, 45);
+		      THEN("Prepare, write or reset")
+			{
+			  end = universal_timezone<config::dynamic, align::left, pad, action::prepare>(begin, universal_timezone::UT);
 
-		      REQUIRE(end - begin == 5);
-		      REQUIRE(std::string(begin, end) == "+1445");
+			  REQUIRE(end - begin == 3);
+			  REQUIRE(std::string(begin, end) == "UT ");
+			}
+		    }
+		}
+	    }
+
+	  WHEN("Right-aligned")
+	    {
+	      std::size_t size = (std::size_t)universal_timezone<config::dynamic, align::right, pad, action::size>(nullptr, universal_timezone::GMT);
+
+	      REQUIRE(size == 3);
+
+	      GIVEN("Size")
+		{
+		  GIVEN_A_BUFFER(3)
+		    {
+		      THEN("Prepare, write or reset")
+			{
+			  end = universal_timezone<config::dynamic, align::right, pad, action::prepare>(begin, universal_timezone::UT);
+
+			  REQUIRE(end - begin == 3);
+			  REQUIRE(std::string(begin, end) == " UT");
+			}
 		    }
 		}
 	    }
 	}
     }
+
+  WHEN("north american")
+    {
+      WHEN("Static or dynamic")
+	{
+	  std::size_t size = (std::size_t)north_american_timezone<config::static_, action::size>(nullptr, north_american_timezone::CST);
+
+	  REQUIRE(size == 3);
+
+	  GIVEN("Size")
+	    {
+	      GIVEN_A_BUFFER(3)
+		{
+		  end = north_american_timezone<config::static_, action::prepare>(begin, north_american_timezone::CST);
+
+		  REQUIRE(end - begin == 3);
+		  REQUIRE(std::string(begin, end) == "CST");
+		}
+	    }
+	}
+    }
+
+   WHEN("military")
+     {
+       //see character
+
+#define TST(C, I)							\
+       REQUIRE(details::military_timezone_offset_2_letter<int8_t>((int8_t)(I)) == (C)); \
+       REQUIRE(details::military_timezone_letter_2_offset(C) == (I))
+
+       TST('Z', 0);
+
+       TST('A', 1); TST('N', -1);
+       TST('B', 2); TST('O', -2);
+       TST('C', 3); TST('P', -3);
+       TST('D', 4); TST('Q', -4);
+       TST('E', 5); TST('R', -5);
+       TST('F', 6); TST('S', -6);
+       TST('G', 7); TST('T', -7);
+       TST('H', 8); TST('U', -8);
+       TST('I', 9); TST('V', -9);
+       TST('K', 10); TST('W', -10);
+       TST('L', 11); TST('X', -11);
+       TST('M', 12); TST('Y', -12);
+
+#undef TST
+     }
+
+   WHEN("differential")
+     {
+       WHEN("Static or dynamic")
+	 {
+	   std::size_t size = (std::size_t)differential_timezone<config::static_, action::size>(nullptr, true, 12, 54);
+
+	   REQUIRE(size == 5);
+
+	   GIVEN("Size")
+	     {
+	       GIVEN_A_BUFFER(5)
+		 {
+		   THEN("Prepare")
+		     {
+		       end = differential_timezone<config::static_, action::prepare>(begin, true, 14, 45);
+
+		       REQUIRE(end - begin == 5);
+		       REQUIRE(std::string(begin, end) == "+1445");
+		     }
+
+		   THEN("Prepare")
+		     {
+		       end = differential_timezone<config::static_, action::prepare>(begin, false, 00, 05);
+
+		       REQUIRE(end - begin == 5);
+		       REQUIRE(std::string(begin, end) == "-0005");
+		     }
+		 }
+	     }
+	 }
+     }
 }
 
 SCENARIO("Date", "[date]")
