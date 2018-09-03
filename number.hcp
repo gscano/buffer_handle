@@ -1,12 +1,15 @@
+#include <cassert> // assert()
 #include <cstring> // memset()
-
-#include <type_traits> // is_integral
+#include <type_traits> // is_integral is_signed
 
 namespace buffer_handle
 {
   template<config Config, char InsteadOfALeadingZero, action Action, typename I> inline
   char * two_digits_number(char * buffer, I i)
   {
+    static_assert(std::is_integral<I>::value, "Template parameter I must be an integral type.");
+    assert(0 <= i);
+
     if((Config == config::static_ && Action == action::prepare)
        || (Config == config::dynamic && Action != action::size))
       {
@@ -25,6 +28,9 @@ namespace buffer_handle
   template<config Config, action Action, typename I> inline
   char * four_digits_number(char * buffer, I i)
   {
+    static_assert(std::is_integral<I>::value, "Template parameter I must be an integral type.");
+    assert(0 <= i);
+
     if((Config == config::static_ && Action == action::prepare)
        || (Config == config::dynamic && Action != action::size))
       {
@@ -40,11 +46,14 @@ namespace buffer_handle
     return buffer + 4;
   }
 
-  template<class T>
-  constexpr uint8_t digits(T number, bool no_digits = true);
+  namespace details
+  {
+    template<class T>
+    constexpr uint8_t digits(T number, bool no_digits = true);
+  }
 
-  template<config Config, align Align, char Pad, class Itoa, action Action, typename I> inline
-  char * integral_number(char * buffer, I i, uint8_t & max_digits, const Itoa & itoa /* = Itoa() */)
+  template<config Config, align Align, char Pad, class Itoa, action Action, typename I, typename MaxDigits> inline
+  char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa /* = Itoa() */)
   {
     static_assert(std::is_integral<I>::value, "Template parameter T must be an integral type.");
 
@@ -52,11 +61,11 @@ namespace buffer_handle
       {
 	if(Action == action::prepare)
 	  {
-	    max_digits = digits(i);
+	    max_digits = details::digits(i);
 	    itoa.template fwd<I>(buffer, i);
 	  }
 
-	buffer += digits(i);
+	buffer += details::digits(i);
       }
     else if(Config == config::dynamic)
       {
@@ -64,11 +73,11 @@ namespace buffer_handle
 	  {
 	  case action::size:
 	    {
-	      return buffer + digits(i);
+	      return buffer + details::digits(i);
 	    }
 	  case action::prepare:
 	    {
-	      max_digits = digits(i);
+	      max_digits = details::digits(i);
 	    }
 	  case action::reset:
 	    {
@@ -97,33 +106,36 @@ namespace buffer_handle
     return buffer;
   }
 
-  template<config Config, align Align, char Pad, class Itoa, typename I> inline
-  integral_number_t<Config, Align, Pad, Itoa, I>::integral_number_t(I i /* = I() */) :
+  template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits> inline
+  integral_number_t<Config, Align, Pad, Itoa, I, MaxDigits>::integral_number_t(I i /* = I() */) :
     value(i),
     max_digits(0)
   {
 
   }
 
-  template<config Config, align Align, char Pad, class Itoa, typename I>
+  template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits>
   template<action Action> inline
-  char * integral_number_t<Config, Align, Pad, Itoa, I>::handle(char * buffer, const Itoa & itoa /* = Itoa() */)
+  char * integral_number_t<Config, Align, Pad, Itoa, I, MaxDigits>::handle(char * buffer, const Itoa & itoa /* = Itoa() */)
   {
-    return integral_number<Config, Align, Pad, Itoa, Action, I>(buffer, this->value, this->max_digits, itoa);
+    return integral_number<Config, Align, Pad, Itoa, Action, I, MaxDigits>(buffer, this->value, this->max_digits, itoa);
   }
 
-  template<class T> inline
-  constexpr uint8_t digits(T number, bool no_digits)
+  namespace details
   {
-    static_assert(std::is_integral<T>::value, "Template parameter T must be an integral type.");
+    template<class T> inline
+    constexpr uint8_t digits(T number, bool no_digits)
+    {
+      static_assert(std::is_integral<T>::value, "Template parameter T must be an integral type.");
 
-    return
-      (number == 0
-       ?
-       no_digits
-       :
-       (number < 0 && no_digits) + 1 + digits<T>(number / 10, false)
-       );
+      return
+	(number == 0
+	 ?
+	 no_digits
+	 :
+	 (number < 0 && no_digits) + 1 + digits<T>(number / 10, false)
+	 );
       ;
-  }
+    }
+  };
 };

@@ -90,6 +90,23 @@ template<config Config, align Align, char Pad, action Action>
 char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length);
 ```
 
+```cpp
+#include <buffer_handle/number.hpp>
+
+template<config Config, char InsteadOfALeadingZero, action Action, typename I>
+char * two_digits_number(char * buffer, I i);
+
+template<config Config, action Action, typename I>
+char * four_digits_number(char * buffer, I i);
+
+template<config Config, align Align, char Pad, class Itoa, action Action, typename I, typename MaxDigits = uint8_t>
+char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa = Itoa());
+```
+
+* The template parameter ```InsteadOfALeadingZero``` can be ```'\0'``` in order to have a leading zero.
+* The ```uint8_t & max_digits``` parameter is a reference because the function will assign the value based on the value passed in ```i``` when **prepare** is called. This value should not be modify for later invocations.
+* ```uint8_t``` to encode the number of digits should be enough for most applications.
+
 ### Functors
 
 ```cpp
@@ -115,6 +132,21 @@ struct string_t
 
   template<action Action>
   char * handle(char * buffer);
+};
+```
+
+```cpp
+#include <buffer_handle/number.hpp>
+
+template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits>
+struct integral_number_t
+{
+  integral_number_t(I value = I());
+
+  I value;
+
+  template<action Action>
+  char * handle(char * buffer, const Itoa & itoa = Itoa());
 };
 ```
 

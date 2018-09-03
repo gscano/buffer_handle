@@ -151,140 +151,256 @@ SCENARIO("Nothing", "[nothing]")
 SCENARIO("Number", "[Number]")
 {
   {
-    REQUIRE(digits<uint8_t>(0) == 1);
-    REQUIRE(digits<uint8_t>(1) == 1);
-    REQUIRE(digits<uint8_t>(4) == 1);
-    REQUIRE(digits<uint8_t>(67) == 2);
-    REQUIRE(digits<uint8_t>(234) == 3);
+    REQUIRE(details::digits<uint8_t>(0) == 1);
+    REQUIRE(details::digits<uint8_t>(1) == 1);
+    REQUIRE(details::digits<uint8_t>(4) == 1);
+    REQUIRE(details::digits<uint8_t>(67) == 2);
+    REQUIRE(details::digits<uint8_t>(234) == 3);
 
-    REQUIRE(digits<int>(-1) == 2);
-    REQUIRE(digits<int>(-4) == 2);
-    REQUIRE(digits<int>(-34) == 3);
+    REQUIRE(details::digits<int>(-1) == 2);
+    REQUIRE(details::digits<int>(-4) == 2);
+    REQUIRE(details::digits<int>(-34) == 3);
   }
 
-  char buffer[32] = {0};
-  char * begin = buffer;
-  char * end = buffer;
+  const char pad = ' ';
 
-  GIVEN("A buffer")
+  WHEN("Two digits number")
     {
-      WHEN("Two digits number")
+      WHEN("Static or dynamic")
 	{
-	  end = two_digits_number<config::static_, false, action::prepare, uint8_t>(begin, 43);
+	  WHEN("Leading zero")
+	    {
+	      REQUIRE(((std::size_t)two_digits_number<config::static_, '\0', action::size, uint8_t>(nullptr, 0) == 2));
 
-	  REQUIRE(end - begin == 2);
-	  REQUIRE(std::string(begin, end) == "43");
+	      GIVEN("Size")
+		{
+		  GIVEN_A_BUFFER(2)
+		    {
+		      WHEN("Prepare")
+			{
+			  end = two_digits_number<config::static_, '\0', action::prepare, uint8_t>(begin, 43);
 
-	  end = two_digits_number<config::static_, false, action::prepare, uint8_t>(begin, 7);
+			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::string(begin, end) == "43");
+			}
 
-	  REQUIRE(end - begin == 2);
-	  REQUIRE(std::string(begin, end) == "07");
+		      WHEN("Prepare")
+			{
+			  end = two_digits_number<config::static_, '\0', action::prepare, uint8_t>(begin, 7);
 
-	  end = two_digits_number<config::static_, ' ', action::prepare, uint8_t>(begin, 7);
+			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::string(begin, end) == "07");
+			}
 
-	  REQUIRE(end - begin == 2);
-	  REQUIRE(std::string(begin, end) == " 7");
+		      WHEN("Prepare")
+			{
+			  end = two_digits_number<config::static_, '\0', action::prepare, uint8_t>(begin, 0);
+
+			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::string(begin, end) == "00");
+			}
+		    }
+		}
+	    }
+
+	  WHEN("Leading space")
+	    {
+	      REQUIRE(((std::size_t)two_digits_number<config::static_, pad, action::size, uint8_t>(nullptr, 0) == 2));
+
+	      GIVEN("Size")
+		{
+		  GIVEN_A_BUFFER(2)
+		    {
+		      WHEN("Prepare")
+			{
+			  end = two_digits_number<config::static_, pad, action::prepare, uint8_t>(begin, 99);
+
+			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::string(begin, end) == "99");
+			}
+
+		      WHEN("Prepare")
+			{
+			  end = two_digits_number<config::static_, pad, action::prepare, uint8_t>(begin, 7);
+
+			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::string(begin, end) == " 7");
+			}
+
+		      WHEN("Prepare")
+			{
+			  end = two_digits_number<config::static_, pad, action::prepare, uint8_t>(begin, 0);
+
+			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::string(begin, end) == " 0");
+			}
+		    }
+		}
+	    }
 	}
+    }
 
-      WHEN("Four digits number")
+  WHEN("Four digits number")
+    {
+      WHEN("Static of dynamic")
 	{
-	  end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 2);
+	  REQUIRE(((std::size_t)four_digits_number<config::static_, action::size, uint16_t>(nullptr, 0) == 4));
 
-	  REQUIRE(end - begin == 4);
-	  REQUIRE(std::string(begin, end) == "0002");
+	  GIVEN("Size")
+	    {
+	      GIVEN_A_BUFFER(4)
+		{
+		  WHEN("Prepare")
+		    {
+		      end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 0);
 
-	  end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 56);
+		      REQUIRE(end - begin == 4);
+		      REQUIRE(std::string(begin, end) == "0000");
+		    }
 
-	  REQUIRE(end - begin == 4);
-	  REQUIRE(std::string(begin, end) == "0056");
+		  WHEN("Prepare")
+		    {
+		      end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 2);
 
-	  end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 723);
+		      REQUIRE(end - begin == 4);
+		      REQUIRE(std::string(begin, end) == "0002");
+		    }
 
-	  REQUIRE(end - begin == 4);
-	  REQUIRE(std::string(begin, end) == "0723");
+		  WHEN("Prepare")
+		    {
+		      end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 56);
 
-	  end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 2968);
+		      REQUIRE(end - begin == 4);
+		      REQUIRE(std::string(begin, end) == "0056");
+		    }
 
-	  REQUIRE(end - begin == 4);
-	  REQUIRE(std::string(begin, end) == "2968");
+		  WHEN("Prepare")
+		    {
+		      end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 723);
+
+		      REQUIRE(end - begin == 4);
+		      REQUIRE(std::string(begin, end) == "0723");
+		    }
+
+		  WHEN("Prepare")
+		    {
+		      end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 2968);
+
+		      REQUIRE(end - begin == 4);
+		      REQUIRE(std::string(begin, end) == "2968");
+		    }
+		}
+	    }
 	}
+    }
 
+  WHEN("Integral number")
+    {
       uint8_t max_digits = 0;
+      const char pad = ' ';
 
       WHEN("Static")
 	{
-	  REQUIRE(((std::size_t)integral_number<config::static_, align::right, ' ', adapter::itoa, action::size>(nullptr, 1998, max_digits) == 4));
+	  WHEN("Left or right aligned, any padding")
+	    {
+	      std::size_t size = (std::size_t)integral_number<config::static_, align::left, pad, adapter::itoa, action::size>(nullptr, 1998, max_digits);
 
-	  end = integral_number<config::static_, align::right, ' ', adapter::itoa, action::prepare>(begin, 1998, max_digits);
+	      GIVEN("Size")
+		{
+		  GIVEN_A_BUFFER(size)
+		  {
+		    THEN("Prepare")
+		      {
+			end = integral_number<config::static_, align::left, pad, adapter::itoa, action::prepare>(begin, 1998, max_digits);
 
-	  REQUIRE(end == begin + 4);
-	  REQUIRE(max_digits == 4);
-	  REQUIRE(std::string(begin, end) == "1998");
+			REQUIRE(end == begin + 4);
+			REQUIRE(max_digits == 4);
+			REQUIRE(std::string(begin, end) == "1998");
+		      }
+		  }
+		}
+	    }
 	}
 
       WHEN("Dynamic")
 	{
-	  WHEN("Right-aligned")
+	  WHEN("Left-aligned")
 	    {
-	      REQUIRE(((std::size_t)integral_number<config::dynamic, align::right, ' ', adapter::itoa, action::size>(nullptr, 19237840, max_digits) == 8));
+	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::left, pad, adapter::itoa, action::size>(nullptr, 19237840, max_digits);
+
+	      REQUIRE(size == 8);
 
 	      GIVEN("Size")
 		{
+		  GIVEN_A_BUFFER(size)
+		  {
+		    THEN("Prepare")
+		      {
+			end = integral_number<config::dynamic, align::left, pad, adapter::itoa, action::prepare>(begin, 19237840, max_digits);
+
+			REQUIRE(end - begin == 8);
+			REQUIRE(max_digits == 8);
+			REQUIRE(std::string(begin, end) == std::string(8, pad));
+
+			THEN("Write")
+			  {
+			    end = integral_number<config::dynamic, align::left, pad, adapter::itoa, action::write>(begin, 1923784, max_digits);
+
+			    REQUIRE(end - begin == 8);
+			    REQUIRE(max_digits == 8);
+			    REQUIRE(std::string(begin, end) == "1923784 ");
+
+			    THEN("Reset")
+			      {
+				end = integral_number<config::dynamic, align::left, pad, adapter::itoa, action::reset>(begin, 1923784, max_digits);
+
+				REQUIRE(end - begin == 8);
+				REQUIRE(max_digits == 8);
+				REQUIRE(std::string(begin, end) == std::string(8, pad));
+			      }
+			  }
+		      }
+		    }
+		}
+	    }
+
+	  WHEN("Right-aligned")
+	    {
+	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::right, pad, adapter::itoa, action::size>(nullptr, 19237840, max_digits);
+
+	      REQUIRE(size == 8);
+
+	      GIVEN("Size")
+		{
+		  GIVEN_A_BUFFER(size)
+		  {
 		  THEN("Prepare")
 		    {
-		      end = integral_number<config::dynamic, align::right, ' ', adapter::itoa, action::prepare>(begin, 19237840, max_digits);
+		      end = integral_number<config::dynamic, align::right, pad, adapter::itoa, action::prepare>(begin, 19237840, max_digits);
+
 		      REQUIRE(end - begin == 8);
 		      REQUIRE(max_digits == 8);
-		      REQUIRE(std::string(begin, end) == std::string(8, ' '));
+		      REQUIRE(std::string(begin, end) == std::string(8, pad));
 
 		      THEN("Write")
 			{
-			  end = integral_number<config::dynamic, align::right, ' ', adapter::itoa, action::write>(begin, 1923784, max_digits);
+			  end = integral_number<config::dynamic, align::right, pad, adapter::itoa, action::write>(begin, 1923784, max_digits);
+
 			  REQUIRE(end - begin == 8);
 			  REQUIRE(max_digits == 8);
 			  REQUIRE(std::string(begin, end) == " 1923784");
 
 			  THEN("Reset")
 			    {
-			      end = integral_number<config::dynamic, align::right, ' ', adapter::itoa, action::reset>(begin, 1923784, max_digits);
+			      end = integral_number<config::dynamic, align::right, pad, adapter::itoa, action::reset>(begin, 1923784, max_digits);
+
 			      REQUIRE(end - begin == 8);
 			      REQUIRE(max_digits == 8);
-			      REQUIRE(std::string(begin, end) == std::string(8, ' '));
+			      REQUIRE(std::string(begin, end) == std::string(8, pad));
 			    }
 			}
 		    }
-		}
-	    }
-
-	  WHEN("Left-aligned")
-	    {
-	      REQUIRE(((std::size_t)integral_number<config::dynamic, align::left, ' ', adapter::itoa, action::size>(nullptr, 19237840, max_digits) == 8));
-
-	      GIVEN("Size")
-		{
-		  THEN("Prepare")
-		    {
-		      end = integral_number<config::dynamic, align::left, ' ', adapter::itoa, action::prepare>(begin, 19237840, max_digits);
-		      REQUIRE(end - begin == 8);
-		      REQUIRE(max_digits == 8);
-		      REQUIRE(std::string(begin, end) == std::string(8, ' '));
-
-		      THEN("Write")
-			{
-			  end = integral_number<config::dynamic, align::left, ' ', adapter::itoa, action::write>(begin, 1923784, max_digits);
-			  REQUIRE(end - begin == 8);
-			  REQUIRE(max_digits == 8);
-			  REQUIRE(std::string(begin, end) == "1923784 ");
-
-			  THEN("Reset")
-			    {
-			      end = integral_number<config::dynamic, align::left, ' ', adapter::itoa, action::reset>(begin, 1923784, max_digits);
-			      REQUIRE(end - begin == 8);
-			      REQUIRE(max_digits == 8);
-			      REQUIRE(std::string(begin, end) == std::string(8, ' '));
-			    }
-			}
-		    }
+		  }
 		}
 	    }
 	}

@@ -13,10 +13,10 @@ namespace buffer_handle
   template<config Config, action Action, typename I>
   char * four_digits_number(char * buffer, I i);
 
-  template<config Config, align Align, char Pad, class Itoa, action Action, typename I>
-  char * integral_number(char * buffer, I i, uint8_t & max_digits, const Itoa & itoa = Itoa());
+  template<config Config, align Align, char Pad, class Itoa, action Action, typename I, typename MaxDigits = uint8_t>
+  char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa = Itoa());
 
-  template<config Config, align Align, char Pad, class Itoa, typename I>
+  template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits = uint8_t>
   struct integral_number_t
   {
   public:
@@ -26,7 +26,7 @@ namespace buffer_handle
     I value;
 
   protected:
-    uint8_t max_digits;
+    MaxDigits max_digits;
 
   public:
     template<action Action>

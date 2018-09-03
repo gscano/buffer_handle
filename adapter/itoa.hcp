@@ -1,4 +1,4 @@
-#include <itoa.h> // itoa_fwd() itoa_bwd()
+#include <itoa.h> // itoa_fwd() itoa_rev()
 
 namespace buffer_handle
 {
