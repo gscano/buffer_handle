@@ -20,7 +20,7 @@ char * handle(char * buffer, int hours, int minutes, int when, const char * desc
 
   if(when < 0)
     {
-      buffer = string<Config, align::left, ' ', Action>(buffer, "will be", 7, 7);
+      buffer = string<Config, align::left, ' ', Action>(buffer, "was", 3, 7);
     }
   else if(when == 0)
     {
@@ -28,7 +28,7 @@ char * handle(char * buffer, int hours, int minutes, int when, const char * desc
     }
   else
     {
-      buffer = string<Config, align::left, ' ', Action>(buffer, "was", 3, 7);
+      buffer = string<Config, align::left, ' ', Action>(buffer, "will be", 7, 7);
     }
 
   buffer = space<Config, Action>(buffer);

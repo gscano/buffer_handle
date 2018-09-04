@@ -3,12 +3,13 @@
 When buffers are extensively used to send textual output, their management requires a work to be eased by this **C++** library.
 
 * [Concept](#concept)
+* [Example](#example)
 * [Reference](#reference)
 * [Tests](#tests)
 
 ## Concept
 
-Functions and functors of this library can perform [**actions**](#action) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter are used for behavior and content [**configurations**](#configuration).
+[Functions](#functions) and [functors](#functors) of this library can perform [**actions**](#action) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configuration).
 
 ### Action
 
@@ -31,11 +32,71 @@ When values could be shorter than or equal to the allocated space, the assigned 
 
 #### Padding
 
-Since *alignment* may leave some space untouched from the previous **prepare** or **reset** action, it is necessary to fill the buffer with a given value or a default character.
+Since *alignment* may leave some space untouched from previous actions, it is necessary to fill the buffer with a default character.
 
 #### Case
 
-When localization does not apply constant strings could be written with either a **lower**, **upper** or **lower with a first upper letter** case.
+When localization does not apply, constant strings could be written with either a **lower**, **upper** or **lower with a first upper letter** case.
+
+## Example
+
+Let's consider as an example a buffer which would hold `At 09:23, the weather is sunny with a temperature of 23°C.` and where the `09:23`, `is`, `sunny`, `23` and `C` parts would be subject to modifications.
+
+It can be written as a function
+
+```cpp
+template<config Config, action Action, std::size_t MaxDescriptionLength>
+char * handle(char * buffer, int hours, int minutes, int when,
+	      const char * description, int temperature, char degree)
+{
+  buffer = string<config::static_, Action>(buffer, "At ", 3);
+  buffer = time_<Config, Action>(buffer, hours, minutes);
+
+  const char * tmp1 = ", the weather ";
+  buffer = string<config::static_, Action>(buffer, tmp1, std::strlen(tmp1));
+
+  if(when < 0)
+    {
+      buffer = string<Config, align::left, ' ', Action>(buffer, "will be", 7, 7);
+    }
+  else if(when == 0)
+    {
+      buffer = string<Config, align::left, ' ', Action>(buffer, "is", 2, 7);
+    }
+  else
+    {
+      buffer = string<Config, align::left, ' ', Action>(buffer, "was", 3, 7);
+    }
+
+  buffer = space<Config, Action>(buffer);
+
+  int length = description == nullptr ? 0 : std::strlen(description);
+  buffer = string<Config, align::right, ' ', Action>(buffer, description, length, MaxDescriptionLength);
+
+  const char * tmp2 = " with a temperature of ";
+  buffer = string<config::static_, Action>(buffer, tmp2, std::strlen(tmp2));
+
+  buffer = two_digits_number<Config, ' ', Action>(buffer, temperature);
+  buffer = string<config::static_, Action>(buffer, "°", std::strlen("°"));
+  buffer = character<Config, Action>(buffer, degree);
+  buffer = dot<config::static_, Action>(buffer);
+
+  return buffer;
+}
+```
+which would output
+```console
+At 09:23, the weather is sunny with a temperature of 23°C.
+At 02:00, the weather was cloudy with a temperature of 68°F.
+At 23:58, the weather will be freezing with a temperature of 99°K.
+```
+for ***static*** configurations, inn which case the buffer size would be specific for each invocation, and
+```console
+At 09:23, the weather is           sunny with a temperature of 23°C.
+At 02:00, the weather was         cloudy with a temperature of 68°F.
+At 23:58, the weather will be   freezing with a temperature of 99°K.
+```
+for ***dynamic*** configurations where the buffer is overwritten.
 
 ## Reference
 
@@ -59,6 +120,7 @@ enum class config { static_, dynamic };
 
 ### Functions
 
+###### Character
 ```cpp
 #include <buffer_handle/character.hpp>
 
@@ -66,6 +128,7 @@ template<config Config, action Action>
 char * character(char * buffer, char c);
 ```
 
+###### Token
 ```cpp
 #include <buffer_handle/token.hpp>
 
@@ -73,6 +136,7 @@ template<config Config, action Action>
 char * TOKEN(char * buffer);//TOKEN = new_line, carriage_return, space, comma, dot, colon, semicolon, equal
 ```
 
+###### Boolean
 ```cpp
 #include <buffer_handle/boolean.hpp>
 
@@ -80,6 +144,7 @@ template<config Config, case_ Case, align Align, char Pad, action Action>
 char * boolean(char * buffer, bool value);
 ```
 
+###### String
 ```cpp
 #include <buffer_handle/string.hpp>
 
@@ -90,6 +155,10 @@ template<config Config, align Align, char Pad, action Action>
 char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length);
 ```
 
+* If ```value == nullptr``` then the buffer will be padded with ```max_length``` characters.
+* If ```value != nullptr``` then its ```length``` must be ```<=``` to ```max_length```.
+
+###### Number
 ```cpp
 #include <buffer_handle/number.hpp>
 
@@ -105,9 +174,11 @@ char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & 
 ```
 
 * The template parameter ```InsteadOfALeadingZero``` can be ```'\0'``` in order to have a leading zero.
-* The ```uint8_t & max_digits``` parameter is a reference because the function will assign the value based on the value passed in ```i``` when **prepare** is called. This value should not be modify for later invocations.
+* The ```uint8_t & max_digits``` parameter is a reference because the function will assign the value based on the value passed in ```i``` when **prepare** is called. This value should not be modified for later invocations.
 * ```uint8_t``` to encode the number of digits should be enough for most applications.
+* The ```itoa``` functor must conform to the provided [adapter](#itoa) contract.
 
+###### Time
 ```cpp
 #include <buffer_handle/time.hpp>
 
@@ -124,6 +195,7 @@ template<config Config, action Action>
 char * time_(char * buffer, std::tm time);
 ```
 
+###### Timezone
 ```cpp
 #include <buffer_handle/timezone.hpp>
 
@@ -147,6 +219,7 @@ template<config Config, action Action, typename Hours, typename Minutes>
 char * differential_timezone(char * buffer, bool sign, Hours hours, Minutes minutes);
 ```
 
+###### Date
 ```cpp
 #include <buffer_handle/date.hpp>
 
@@ -213,6 +286,7 @@ namespace rfc1123//§5.2.14
 };
 ```
 
+###### Container
 ```cpp
 #include <buffer_handle/container.hpp>
 
@@ -224,6 +298,19 @@ char * container(char * buffer, const Iterator & begin, const Iterator & end, st
 
 ### Functors
 
+Every functor must conform to the following contract:
+
+```cpp
+struct functor_t
+{
+  template<action Action, ...>
+  char * handle(char * buffer);
+};
+```
+
+where the function ```handle``` may be ```const```. Template argument deduction must always be possible so that calling functions may only pass the ***action*** as first parameter.
+
+###### Nothing
 ```cpp
 #include <buffer_handle/nothing.hpp>
 
@@ -234,6 +321,7 @@ struct nothing_t
 };
 ```
 
+###### String
 ```cpp
 #include <buffer_handle/string.hpp>
 
@@ -250,6 +338,7 @@ struct string_t
 };
 ```
 
+###### Number
 ```cpp
 #include <buffer_handle/number.hpp>
 
@@ -265,6 +354,7 @@ struct integral_number_t
 };
 ```
 
+###### Timezone
 ```cpp
 #include <buffer_handle/timezone.hpp>
 
@@ -320,7 +410,7 @@ struct differential_timezone_t
   char * handle(char * buffer) const;
 };
 ```
-
+###### Container
 ```cpp
 template<config Config, align Align, char Pad, class Handler, class Separator>
 struct container_t
@@ -330,6 +420,24 @@ struct container_t
 
   template<action Action, class Iterator>
   char * handle(char * buffer, const Iterator & begin, const Iterator & end);
+};
+```
+
+### Adapters
+
+###### [Itoa](https://github.com/amdn/itoa)
+
+```cpp
+namespace adapter
+{
+  struct itoa
+  {
+    template<typename I>
+    char * fwd(char * buffer, I i) const;
+
+    template<typename I>
+    char * bwd(char * buffer, I i) const;
+  };
 };
 ```
 
