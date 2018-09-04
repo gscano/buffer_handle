@@ -27,7 +27,7 @@ namespace buffer_handle
 		Hours hours, Minutes minutes, Seconds seconds);
 
     template<config Config, action Action>
-    char * date(char * buffer, struct tm date_time);
+    char * date(char * buffer, std::tm date_time);
   };
 
   namespace rfc822//§5
@@ -41,7 +41,7 @@ namespace buffer_handle
 		const Timezone & timezone);
 
     template<config Config, bool HandleWeekday, bool HandleSeconds, class Timezone, action Action>
-    char * date(char * buffer, struct tm date_time, const Timezone & timezone);
+    char * date(char * buffer, std::tm date_time, const Timezone & timezone);
   };
 
   namespace rfc850//§2.1.4
@@ -55,7 +55,7 @@ namespace buffer_handle
 		const Timezone & timezone);
 
     template<config Config, class Timezone, action Action>
-    char * date(char * buffer, struct tm date_time, const Timezone & timezone);
+    char * date(char * buffer, std::tm date_time, const Timezone & timezone);
   };
 
   namespace rfc1123//§5.2.14
@@ -69,7 +69,7 @@ namespace buffer_handle
 		const Timezone & timezone);
 
     template<config Config, bool HandleWeekday, bool HandleSeconds, class Timezone, action Action>
-    char * date(char * buffer, struct tm date_time, const Timezone & timezone);
+    char * date(char * buffer, std::tm date_time, const Timezone & timezone);
   };
 };
 

@@ -36,11 +36,12 @@ namespace buffer_handle
 	  case action::write:
 	  case action::reset:
 	    {
-	      assert(1 <= day && day <= 31);
+	      assert(0 <= day && day <= 31);//Allow zero for reset purpose
 	      assert(1 <= month && month <= 12);
 	      assert(0 <= year && year <= 9999);
 
 	      two_digits_number<Config, InsteadOfALeadingZeroForDay, Action, Day>(buffer, day);
+
 	      std::memcpy(buffer + 3, details::month<Month>(month - 1), std::strlen(details::month<Month>(month - 1)));
 
 	      if(YearOn4Digits)
@@ -49,7 +50,7 @@ namespace buffer_handle
 		}
 	      else
 		{
-		  two_digits_number<Config, 0, Action, Year>(buffer + 7, year % 100);
+		  two_digits_number<Config, '\0', Action, Year>(buffer + 7, year % 100);
 		}
 	    }
 	  }
@@ -77,12 +78,7 @@ namespace buffer_handle
 	      assert(1 <= month && month <= 12);
 
 	      std::memcpy(buffer, details::month<Month>(month - 1), std::strlen(details::month<Month>(month - 1)));
-	      two_digits_number<Config, false, Action, Day>(buffer + 4, day);
-
-	      if(buffer[5] == '0')
-		{
-		  space<config::static_, action::write>(buffer + 5);
-		}
+	      two_digits_number<Config, '\0', Action, Day>(buffer + 4, day);
 	    }
 	  }
       }
@@ -130,7 +126,7 @@ namespace buffer_handle
     }
 
     template<config Config, action Action> inline
-    char * date(char * buffer, struct tm date_time)
+    char * date(char * buffer, std::tm date_time)
     {
       return date<Config, Action>
 	(buffer,
@@ -209,7 +205,7 @@ namespace buffer_handle
     }
 
     template<config Config, bool HandleWeekday, bool HandleSeconds, class Timezone, action Action> inline
-    char * date(char * buffer, struct tm date_time, const Timezone & timezone)
+    char * date(char * buffer, std::tm date_time, const Timezone & timezone)
     {
       return date<Config, HandleWeekday, HandleSeconds, Timezone, Action>
 	(buffer,
@@ -233,7 +229,9 @@ namespace buffer_handle
 
       if(Config == config::static_)
 	{
-	  buffer = string<Config, align::right, ' ', Action>(buffer, details::weekday(weekday), std::strlen(details::weekday(weekday)), max_length);
+	  max_length = std::strlen(details::weekday(weekday));
+
+	  buffer = string<Config, align::right, ' ', Action>(buffer, details::weekday(weekday), max_length, max_length);
 	}
       else if(Config == config::dynamic)
 	{
@@ -241,7 +239,7 @@ namespace buffer_handle
 
 	  string<Config, align::right, ' ', Action>(buffer, details::weekday(weekday), std::strlen(details::weekday(weekday)), max_length);
 
-	  buffer += std::strlen(details::weekday(7));
+	  buffer += max_length;
 	}
 
       buffer = comma<Config, Action>(buffer);
@@ -262,7 +260,7 @@ namespace buffer_handle
     }
 
     template<config Config, class Timezone, action Action> inline
-    char * date(char * buffer, struct tm date_time, const Timezone & timezone)
+    char * date(char * buffer, std::tm date_time, const Timezone & timezone)
     {
       return
 	date<Config, Timezone, Action>
@@ -293,7 +291,7 @@ namespace buffer_handle
     }
 
     template<config Config, bool HandleWeekday, bool HandleSeconds, class Timezone, action Action> inline
-    char * date(char * buffer, struct tm date_time, const Timezone & timezone)
+    char * date(char * buffer, std::tm date_time, const Timezone & timezone)
     {
       return
 	date<Config, HandleWeekday, HandleSeconds, Timezone, Action>
