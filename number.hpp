@@ -1,6 +1,8 @@
 #ifndef BUFFER_HANDLE_NUMBER_HPP
 #define BUFFER_HANDLE_NUMBER_HPP
 
+#include <cstdint> // uint8_t
+
 #include <buffer_handle/action.hpp>
 #include <buffer_handle/align.hpp>
 #include <buffer_handle/config.hpp>

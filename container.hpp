@@ -1,6 +1,8 @@
 #ifndef BUFFER_HANDLE_CONTAINER_HPP
 #define BUFFER_HANDLE_CONTAINER_HPP
 
+#include <cstddef> // size_t
+
 #include <buffer_handle/action.hpp>
 #include <buffer_handle/config.hpp>
 

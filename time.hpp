@@ -2,6 +2,7 @@
 #define BUFFER_HANDLE_TIME_HPP
 
 #include <ctime> // time_t tm
+#include <cstdint> // uint8_t
 
 #include <buffer_handle/action.hpp>
 #include <buffer_handle/align.hpp>

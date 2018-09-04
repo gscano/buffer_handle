@@ -3,7 +3,7 @@
 
 namespace buffer_handle
 {
-  enum class action : uint8_t
+  enum class action
   {
     size,
       prepare,

@@ -3,7 +3,7 @@
 
 namespace buffer_handle
 {
-  enum class case_ : uint8_t
+  enum class case_
   {
     lower,
       first_upper,

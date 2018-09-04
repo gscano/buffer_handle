@@ -1,3 +1,4 @@
+#include <cstddef> // size_t
 #include <cstring> // memcpy() strlen()
 
 #include <buffer_handle/number.hpp> // four_digits_number() two_digits_number()

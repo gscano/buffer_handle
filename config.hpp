@@ -3,7 +3,7 @@
 
 namespace buffer_handle
 {
-  enum class config : uint8_t
+  enum class config
   {
     static_,
       dynamic
