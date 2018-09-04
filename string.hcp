@@ -24,19 +24,10 @@ namespace buffer_handle
 	  {
 	    assert(value != nullptr && "A static string requires a non null value initializer.");
 
-	    if(Align == align::left)
-	      {
-		std::memcpy(buffer, value, length);
-		std::memset(buffer + length, Pad, max_length - length);
-	      }
-	    else if(Align == align::right)
-	      {
-		std::memset(buffer, Pad, max_length - length);
-		std::memcpy(buffer + max_length - length, value, length);
-	      }
+	    std::memcpy(buffer, value, length);
 	  }
 
-	buffer += max_length;
+	buffer += length;
       }
     else if(Config == config::dynamic)
       {

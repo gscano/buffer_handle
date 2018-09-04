@@ -1462,8 +1462,7 @@ SCENARIO("String", "[string]")
 	    {
 	      std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, data, length, max_length);
 
-	      REQUIRE(size == max_length);
-	      REQUIRE(max_length == max_length_);
+	      REQUIRE(size == length);
 
 	      GIVEN("Size")
 		{
@@ -1473,8 +1472,8 @@ SCENARIO("String", "[string]")
 		      {
 			end = string<config::static_, align::left, pad, action::prepare>(begin, data, std::strlen(data), max_length);
 
-			REQUIRE(end - begin == max_length);
-			REQUIRE(std::string(begin, end) == data + std::string(max_length - length, pad));
+			REQUIRE(end - begin == length);
+			REQUIRE(std::string(begin, end) == data);
 		      }
 		  }
 		}
@@ -1484,8 +1483,7 @@ SCENARIO("String", "[string]")
 	    {
 	      std::size_t size = (std::size_t)string<config::static_, align::right, pad, action::size>(nullptr, data, length, max_length);
 
-	      REQUIRE(size == max_length);
-	      REQUIRE(max_length == max_length_);
+	      REQUIRE(size == length);
 
 	      GIVEN("Size")
 		{
@@ -1495,8 +1493,8 @@ SCENARIO("String", "[string]")
 		      {
 			end = string<config::static_, align::right, pad, action::prepare>(begin, data, std::strlen(data), max_length);
 
-			REQUIRE(end - begin == max_length);
-			REQUIRE(std::string(begin, end) == std::string(max_length - length, pad) + data);
+			REQUIRE(end - begin == length);
+			REQUIRE(std::string(begin, end) == data);
 		      }
 		  }
 		}
