@@ -6,8 +6,10 @@
 
 namespace buffer_handle
 {
-  template<config Config, align Align, char Pad, action Action, class Iterator, class Handler, class Separator>
-  char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length, Handler & handler, Separator & separator);
+  template<config Config, align Align, char Pad, action Action,
+	   class Iterator, class Handler, class Separator>
+  char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
+		   Handler & handler, Separator & separator);
 
   template<config Config, align Align, char Pad, class Handler, class Separator>
   struct container_t

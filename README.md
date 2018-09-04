@@ -99,7 +99,8 @@ char * two_digits_number(char * buffer, I i);
 template<config Config, action Action, typename I>
 char * four_digits_number(char * buffer, I i);
 
-template<config Config, align Align, char Pad, class Itoa, action Action, typename I, typename MaxDigits = uint8_t>
+template<config Config, align Align, char Pad, class Itoa, action Action,
+	 typename I, typename MaxDigits = uint8_t>
 char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa = Itoa());
 ```
 
@@ -212,6 +213,15 @@ namespace rfc1123//§5.2.14
 };
 ```
 
+```cpp
+#include <buffer_handle/container.hpp>
+
+template<config Config, align Align, char Pad, action Action,
+	 class Iterator, class Handler, class Separator>
+char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
+		 Handler & handler, Separator & separator);
+```
+
 ### Functors
 
 ```cpp
@@ -308,6 +318,18 @@ struct differential_timezone_t
 
   template<action Action>
   char * handle(char * buffer) const;
+};
+```
+
+```cpp
+template<config Config, align Align, char Pad, class Handler, class Separator>
+struct container_t
+{
+  container_t(std::size_t max_length,
+	      const Handler & handler = Handler(), const Separator & separator = Separator());
+
+  template<action Action, class Iterator>
+  char * handle(char * buffer, const Iterator & begin, const Iterator & end);
 };
 ```
 
