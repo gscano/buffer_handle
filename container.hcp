@@ -5,9 +5,9 @@ namespace buffer_handle
   namespace details
   {
     template<config Config, align Align, action Action,
-	     typename Iterator, class Handler, class Separator> inline
+	     typename Iterator, class Element, class Separator> inline
     char * container_process(char * buffer, const Iterator & begin, const Iterator & end,
-			     Handler & handle, Separator & separator)
+			     Element & element, Separator & separator)
     {
       for(Iterator current = begin; current != end; ++current)
 	{
@@ -15,23 +15,23 @@ namespace buffer_handle
 	    {
 	      if(current != begin)
 		{
-		  buffer = separator.template operator ()<Config, Action>(buffer);
+		  buffer = separator.template handle<Config, Action>(buffer);
 		}
 
-	      buffer = handle.template operator ()<Config, Action>(buffer, current);
+	      buffer = element.template handle<Config, Action>(buffer, current);
 	    }
 	  else if(Align == align::right)
 	    {
 	      if(current != begin)
 		{
-		  buffer -= (std::size_t)separator.template operator ()<Config, action::size>(nullptr);
+		  buffer -= (std::size_t)separator.template handle<Config, action::size>(nullptr);
 
-		  separator.template operator ()<Config, Action>(buffer);
+		  separator.template handle<Config, Action>(buffer);
 		}
 
-	      buffer -= (std::size_t)handle.template operator()<Config, action::size>(nullptr, current);
+	      buffer -= (std::size_t)element.template handle<Config, action::size>(nullptr, current);
 
-	      handle.template operator ()<Config, Action>(buffer, current);
+	      element.template handle<Config, Action>(buffer, current);
 	    }
 	}
 
@@ -40,22 +40,22 @@ namespace buffer_handle
   };
 
   template<config Config, align Align, char Pad, action Action,
-	   typename Iterator, class Handler, class Separator> inline
+	   typename Iterator, class Element, class Separator> inline
   char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
-		   Handler & handler, Separator & separator)
+		   Element & element, Separator & separator)
   {
     if(Config == config::static_)
       {
 	if(Align == align::right)
 	  {
-	    buffer += -(std::size_t)details::container_process<config::static_, Align, action::size>(nullptr, begin, end, handler, separator);
+	    buffer += -(std::size_t)details::container_process<config::static_, Align, action::size>(nullptr, begin, end, element, separator);
 	  }
 
 	char * local = buffer;
 
 	if(Action == action::prepare)
 	  {
-	    local = details::container_process<Config, Align, Action>(local, begin, end, handler, separator);
+	    local = details::container_process<Config, Align, Action>(local, begin, end, element, separator);
 	  }
 
 	if(Align == align::left)
@@ -73,12 +73,12 @@ namespace buffer_handle
 	    {
 	      if(Align == align::left)
 		{
-		  char * local = details::container_process<Config, Align, Action>(buffer, begin, end, handler, separator);
+		  char * local = details::container_process<Config, Align, Action>(buffer, begin, end, element, separator);
 		  std::memset(local, Pad, max_length - (local - buffer));
 		}
 	      else if(Align == align::right)
 		{
-		  char * local = details::container_process<Config, Align, Action>(buffer + max_length, begin, end, handler, separator);
+		  char * local = details::container_process<Config, Align, Action>(buffer + max_length, begin, end, element, separator);
 		  std::memset(buffer, Pad, local - buffer);
 		}
 	    }
@@ -90,19 +90,19 @@ namespace buffer_handle
     return buffer;
   }
 
-  template<config Config, align Align, char Pad, class Handler, class Separator> inline
-  container_t<Config, Align, Pad, Handler, Separator>::container_t(std::size_t max_length, const Handler & handler /* = Handler() */, const Separator & separator /* = Separator() */) :
+  template<config Config, align Align, char Pad, class Element, class Separator> inline
+  container_t<Config, Align, Pad, Element, Separator>::container_t(std::size_t max_length, const Element & element /* = Element() */, const Separator & separator /* = Separator() */) :
     max_length(max_length),
-    handler(handler),
+    element(element),
     separator(separator)
   {
 
   }
 
-  template<config Config, align Align, char Pad, class Handler, class Separator>
+  template<config Config, align Align, char Pad, class Element, class Separator>
   template<action Action, class Iterator> inline
-  char * container_t<Config, Align, Pad, Handler, Separator>::handle(char * buffer, const Iterator & begin, const Iterator & end)
+  char * container_t<Config, Align, Pad, Element, Separator>::handle(char * buffer, const Iterator & begin, const Iterator & end)
   {
-    return container<Config, Align, Pad, Action, Iterator, Handler, Separator>(buffer, begin, end, this->max_length, this->handler, this->separator);
+    return container<Config, Align, Pad, Action, Iterator, Element, Separator>(buffer, begin, end, this->max_length, this->element, this->separator);
   }
 };

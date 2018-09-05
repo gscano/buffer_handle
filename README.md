@@ -9,7 +9,7 @@ When buffers are extensively used to send textual output, their management requi
 
 ## Concept
 
-[Functions](#functions) and [functors](#functors) of this library can perform [**actions**](#action) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configuration).
+[Functions](#functions) and [functors](#functors) of this library perform [**actions**](#action) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configuration).
 
 ### Action
 
@@ -17,6 +17,20 @@ When buffers are extensively used to send textual output, their management requi
 * **Prepare** a buffer with constant expressions and default values
 * **Write** changing portions of a buffer
 * **Reset** default or given values to these portions
+
+In this library, **prepare**, **write** and **reset** actions all have the same behavior: they simply write the arguments. However, they could be used by applications in order to preempt and change their behavior as for instance:
+```cpp
+if(Action == action::reset)
+{
+  std::memset(buffer, ' ', size);
+}
+else
+{
+  handle<Config, ..., Action, ...>(buffer, ...);
+}
+```
+
+This would typically be used in applications where buffers could be reused and information must be deleted to prevent unwanted disclosure.
 
 ### Configuration
 
@@ -28,15 +42,39 @@ For some functions, more *specific* configurations can be achieved regarding [al
 
 #### Alignment
 
-When values could be shorter than or equal to the allocated space, the assigned content can be **left** or **right** justified.
+When values could be shorter than or equal to the allocated space, the content can be **left** or **right** justified.
 
 #### Padding
 
-Since *alignment* may leave some space untouched from previous actions, it is necessary to fill the buffer with a default character.
+Since *alignment* may leave some space untouched, it is necessary to fill the rest of the buffer with a default character.
 
 #### Case
 
 When localization does not apply, constant strings could be written with either a **lower**, **upper** or **lower with a first upper letter** case.
+
+### Coding style
+
+#### Function signature
+
+The configuration comes as the first template parameter. It is then followed by other configuration template parameters, such as *alignment*, *padding* and *case*, and functors. Then the action parameter is supplied, followed by template parameters for which argument deduction would happen frequently. For clarity, the first argument is the buffer.
+
+```cpp
+template<config Config, ..., action Action, ...>
+char * handle(char * buffer, ...);
+```
+
+#### Structure layout
+
+Similarly to functions, the functor is defined by configuration and functor template parameters. The function `handle` is templated on the action and function argument types. However, template argument deduction must always be possible so that a calling function may only pass the action parameter.
+
+```cpp
+template<config Config, ...>
+struct functor_t
+{
+  template<action Action, ...>
+  char * handle(char * buffer, ...) /* const */;
+};
+```
 
 ## Example
 
@@ -90,13 +128,13 @@ At 09:23, the weather is sunny with a temperature of 23°C.
 At 02:00, the weather was cloudy with a temperature of 68°F.
 At 23:58, the weather will be freezing with a temperature of 99°K.
 ```
-for ***static*** configurations, inn which case the buffer size would be specific for each invocation, and
+for **static** configurations, in which case the buffer size would be specific for each invocation, and
 ```console
 At 09:23, the weather is           sunny with a temperature of 23°C.
 At 02:00, the weather was         cloudy with a temperature of 68°F.
 At 23:58, the weather will be   freezing with a temperature of 99°K.
 ```
-for ***dynamic*** configurations where the buffer is overwritten.
+for **dynamic** configurations where the buffer is overwritten.
 
 ## Reference
 
@@ -173,10 +211,11 @@ template<config Config, align Align, char Pad, class Itoa, action Action,
 char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa = Itoa());
 ```
 
-* The template parameter ```InsteadOfALeadingZero``` can be ```'\0'``` in order to have a leading zero.
-* The ```uint8_t & max_digits``` parameter is a reference because the function will assign the value based on the value passed in ```i``` when **prepare** is called. This value should not be modified for later invocations.
-* ```uint8_t``` to encode the number of digits should be enough for most applications.
-* The ```itoa``` functor must conform to the provided [adapter](#itoa) contract.
+* The template parameter `InsteadOfALeadingZero` can be `'\0'` in order to have a leading zero.
+* Type `I` must be integral and `i`must be positive.
+* The `max_digits` argument is a reference because the function will assign the value based on the value passed in `i` when **prepare** is called. This value should not be modified in later invocations.
+* `uint8_t` should be enough to encode the number of digits for most applications.
+* The `itoa` functor must conform to the provided [adapter](#itoa) contract.
 
 ###### Time
 ```cpp
@@ -194,6 +233,8 @@ char * time_(char * buffer, Hours hours, Minutes minutes, Seconds seconds);
 template<config Config, action Action>
 char * time_(char * buffer, std::tm time);
 ```
+
+* The `itoa` functor must conform to the provided [adapter](#itoa) contract.
 
 ###### Timezone
 ```cpp
@@ -286,29 +327,24 @@ namespace rfc1123//§5.2.14
 };
 ```
 
+* The template parameters
+  * `InsteadOfALeadingZeroForDay` can be `\0` in order to have a leading zero
+  * `YearOn4Digits` toggles the year format to 'YYYY' instead of 'YY'
+* For functions accepting  directly a month or a year
+  * 1 is for January
+  * years start at 0 not 1900
+
 ###### Container
 ```cpp
 #include <buffer_handle/container.hpp>
 
 template<config Config, align Align, char Pad, action Action,
-	 class Iterator, class Handler, class Separator>
+	 class Iterator, class Element, class Separator>
 char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
-		 Handler & handler, Separator & separator);
+		 Element & element, Separator & separator);
 ```
 
 ### Functors
-
-Every functor must conform to the following contract:
-
-```cpp
-struct functor_t
-{
-  template<action Action, ...>
-  char * handle(char * buffer);
-};
-```
-
-where the function ```handle``` may be ```const```. Template argument deduction must always be possible so that calling functions may only pass the ***action*** as first parameter.
 
 ###### Nothing
 ```cpp
@@ -353,6 +389,8 @@ struct integral_number_t
   char * handle(char * buffer, const Itoa & itoa = Itoa());
 };
 ```
+
+* The `itoa` functor must conform to the provided [adapter](#itoa) contract.
 
 ###### Timezone
 ```cpp
@@ -412,11 +450,11 @@ struct differential_timezone_t
 ```
 ###### Container
 ```cpp
-template<config Config, align Align, char Pad, class Handler, class Separator>
+template<config Config, align Align, char Pad, class Element, class Separator>
 struct container_t
 {
   container_t(std::size_t max_length,
-	      const Handler & handler = Handler(), const Separator & separator = Separator());
+	      const Element & element = Element(), const Separator & separator = Separator());
 
   template<action Action, class Iterator>
   char * handle(char * buffer, const Iterator & begin, const Iterator & end);
@@ -425,7 +463,7 @@ struct container_t
 
 ### Adapters
 
-###### [Itoa](https://github.com/amdn/itoa)
+###### Itoa](https://github.com/amdn/itoa)
 
 ```cpp
 namespace adapter

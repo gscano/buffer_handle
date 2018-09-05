@@ -229,10 +229,10 @@ SCENARIO("Character", "[character]")
 }
 
 template<class Iterator>
-struct handler_t
+struct element_handler_t
 {
   template<config Config, action Action>
-  char * operator () (char * buffer, const Iterator & it) const
+  char * handle(char * buffer, const Iterator & it) const
   {
     if(Action != action::size)
       {
@@ -246,7 +246,7 @@ struct handler_t
 struct separator_t
 {
   template<config Config, action Action>
-  char * operator () (char * buffer) const
+  char * handle(char * buffer) const
   {
     buffer = space<Config, Action>(buffer);
 
@@ -274,8 +274,8 @@ SCENARIO("Container", "[container]")
 
   GIVEN("A container and its iterators")
     {
-      handler_t<typename list_type::const_iterator > handler;
-      handler_t<typename list_type::const_reverse_iterator > reverse_handler;
+      element_handler_t<typename list_type::const_iterator > element_handler;
+      element_handler_t<typename list_type::const_reverse_iterator > reverse_element_handler;
 
       separator_t separator;
 
@@ -293,7 +293,7 @@ SCENARIO("Container", "[container]")
 		    {
 		      WHEN("Left-aligned")
 			{
-			  std::size_t size = (std::size_t)details::container_process<config::static_, align::left, action::size>(nullptr, cbegin, cend, handler, separator);
+			  std::size_t size = (std::size_t)details::container_process<config::static_, align::left, action::size>(nullptr, cbegin, cend, element_handler, separator);
 
 			  REQUIRE(size == std::strlen(data));
 
@@ -301,7 +301,7 @@ SCENARIO("Container", "[container]")
 			    {
 			      THEN("Prepare")
 				{
-				  end = details::container_process<config::static_, align::left, action::prepare>(begin, cbegin, cend, handler, separator);
+				  end = details::container_process<config::static_, align::left, action::prepare>(begin, cbegin, cend, element_handler, separator);
 
 				  REQUIRE(end - begin == std::strlen(data));
 				  REQUIRE(std::string(begin, end) == data);
@@ -311,7 +311,7 @@ SCENARIO("Container", "[container]")
 
 		      WHEN("Right-aligned")
 			{
-			  std::size_t size = -(std::size_t)details::container_process<config::static_, align::right, action::size>(nullptr, crbegin, crend, reverse_handler, separator);
+			  std::size_t size = -(std::size_t)details::container_process<config::static_, align::right, action::size>(nullptr, crbegin, crend, reverse_element_handler, separator);
 
 			  REQUIRE(size == std::strlen(data));
 
@@ -319,7 +319,7 @@ SCENARIO("Container", "[container]")
 			    {
 			      THEN("Prepare")
 				{
-				  begin = details::container_process<config::static_, align::right, action::prepare>(begin + size, crbegin, crend, reverse_handler, separator);
+				  begin = details::container_process<config::static_, align::right, action::prepare>(begin + size, crbegin, crend, reverse_element_handler, separator);
 
 				  REQUIRE(std::string(begin, begin + size) == data);
 				}
@@ -331,13 +331,13 @@ SCENARIO("Container", "[container]")
 		    {
 		      WHEN("Left-aligned")
 			{
-			  std::size_t size = (std::size_t)details::container_process<config::dynamic, align::left, action::size>(nullptr, cbegin, cend, handler, separator);
+			  std::size_t size = (std::size_t)details::container_process<config::dynamic, align::left, action::size>(nullptr, cbegin, cend, element_handler, separator);
 
 			  REQUIRE(size == std::strlen(data));
 
 			  THEN("Prepare, write or reset")
 			    {
-			      end = details::container_process<config::dynamic, align::left, action::write>(begin, cbegin, cend, handler, separator);
+			      end = details::container_process<config::dynamic, align::left, action::write>(begin, cbegin, cend, element_handler, separator);
 
 			      REQUIRE(end - begin == std::strlen(data));
 			      REQUIRE(std::string(begin, end) == data);
@@ -346,7 +346,7 @@ SCENARIO("Container", "[container]")
 
 		      WHEN("Right-aligned")
 			{
-			  std::size_t size = (std::size_t)details::container_process<config::dynamic, align::right, action::size>(nullptr, crbegin, crend, reverse_handler, separator);
+			  std::size_t size = (std::size_t)details::container_process<config::dynamic, align::right, action::size>(nullptr, crbegin, crend, reverse_element_handler, separator);
 
 			  REQUIRE(size == -std::strlen(data));
 
@@ -354,7 +354,7 @@ SCENARIO("Container", "[container]")
 			    {
 			      THEN("Prepare, write or reset")
 				{
-				  begin = details::container_process<config::dynamic, align::right, action::write>(begin + std::strlen(data), crbegin, crend, reverse_handler, separator);
+				  begin = details::container_process<config::dynamic, align::right, action::write>(begin + std::strlen(data), crbegin, crend, reverse_element_handler, separator);
 
 				  REQUIRE(std::string(begin, begin + std::strlen(data)) == data);
 				}
@@ -374,7 +374,7 @@ SCENARIO("Container", "[container]")
 
 		  WHEN("Left-aligned")
 		    {
-		      std::size_t size = (std::size_t)container<config::static_, align::left, pad, action::size>(nullptr, cbegin, cend, max_length, handler, separator);
+		      std::size_t size = (std::size_t)container<config::static_, align::left, pad, action::size>(nullptr, cbegin, cend, max_length, element_handler, separator);
 
 		      GIVEN("Size")
 			{
@@ -382,7 +382,7 @@ SCENARIO("Container", "[container]")
 			  {
 			    THEN("Prepare")
 			      {
-				end = container<config::static_, align::left, pad, action::prepare>(begin, cbegin, cend, max_length, handler, separator);
+				end = container<config::static_, align::left, pad, action::prepare>(begin, cbegin, cend, max_length, element_handler, separator);
 
 				REQUIRE(end - begin == length);
 				REQUIRE(std::string(begin, end) == data);
@@ -393,7 +393,7 @@ SCENARIO("Container", "[container]")
 
 		  WHEN("Right-aligned")
 		    {
-		      std::size_t size = (std::size_t)container<config::static_, align::right, pad, action::size>(nullptr, crbegin, crend, max_length, reverse_handler, separator);
+		      std::size_t size = (std::size_t)container<config::static_, align::right, pad, action::size>(nullptr, crbegin, crend, max_length, reverse_element_handler, separator);
 
 		      GIVEN("Size")
 			{
@@ -401,7 +401,7 @@ SCENARIO("Container", "[container]")
 			  {
 			    THEN("Prepare")
 			      {
-				end = container<config::static_, align::right, pad, action::prepare>(begin, crbegin, crend, max_length, reverse_handler, separator);
+				end = container<config::static_, align::right, pad, action::prepare>(begin, crbegin, crend, max_length, reverse_element_handler, separator);
 
 				REQUIRE(end - begin == size);
 				REQUIRE(std::string(begin, end) == data);
@@ -417,7 +417,7 @@ SCENARIO("Container", "[container]")
 
 		  WHEN("Left-aligned")
 		    {
-		      const std::size_t size = (std::size_t)container<config::dynamic, align::left, pad, action::size>(nullptr, cbegin, cend, max_length, handler, separator);
+		      const std::size_t size = (std::size_t)container<config::dynamic, align::left, pad, action::size>(nullptr, cbegin, cend, max_length, element_handler, separator);
 
 		      REQUIRE(size == max_length);
 
@@ -427,7 +427,7 @@ SCENARIO("Container", "[container]")
 			  {
 			    THEN("Prepare")
 			      {
-				end = container<config::dynamic, align::left, pad, action::prepare>(begin, cbegin, cend, max_length, handler, separator);
+				end = container<config::dynamic, align::left, pad, action::prepare>(begin, cbegin, cend, max_length, element_handler, separator);
 
 				REQUIRE(end - begin == size);
 				REQUIRE(std::string(begin, end) == data + std::string(max_length - length, ' '));
@@ -445,14 +445,14 @@ SCENARIO("Container", "[container]")
 				    crbegin = list.crbegin();
 				    crend = list.crend();
 
-				    end = container<config::dynamic, align::left, pad, action::write>(begin, cbegin, cend, max_length, handler, separator);
+				    end = container<config::dynamic, align::left, pad, action::write>(begin, cbegin, cend, max_length, element_handler, separator);
 
 				    REQUIRE(end -  begin == size);
 				    REQUIRE(std::string(begin, end) == data2 + std::string(max_length - std::strlen(data2), pad));
 
 				    THEN("Reset")
 				      {
-					end = container<config::dynamic, align::left, pad, action::reset>(begin, cend, cend, max_length, handler, separator);
+					end = container<config::dynamic, align::left, pad, action::reset>(begin, cend, cend, max_length, element_handler, separator);
 
 					REQUIRE(end - begin == size);
 					REQUIRE(std::string(begin, end) == std::string(max_length, pad));
@@ -465,7 +465,7 @@ SCENARIO("Container", "[container]")
 
 		  WHEN("Right-aligned")
 		    {
-		      const std::size_t size = (std::size_t)container<config::dynamic, align::right, pad, action::size>(nullptr, crbegin, crend, max_length, reverse_handler, separator);
+		      const std::size_t size = (std::size_t)container<config::dynamic, align::right, pad, action::size>(nullptr, crbegin, crend, max_length, reverse_element_handler, separator);
 
 		      REQUIRE(size == max_length);
 
@@ -475,7 +475,7 @@ SCENARIO("Container", "[container]")
 			  {
 			    THEN("Prepare")
 			      {
-				end = container<config::dynamic, align::right, pad, action::prepare>(begin, crbegin, crend, max_length, reverse_handler, separator);
+				end = container<config::dynamic, align::right, pad, action::prepare>(begin, crbegin, crend, max_length, reverse_element_handler, separator);
 
 				REQUIRE(end - begin == size);
 				REQUIRE(std::string(begin, end) == std::string(max_length - length, ' ') + data);
@@ -493,14 +493,14 @@ SCENARIO("Container", "[container]")
 				    crbegin = list.crbegin();
 				    crend = list.crend();
 
-				    end = container<config::dynamic, align::right, pad, action::write>(begin, crbegin, crend, max_length, reverse_handler, separator);
+				    end = container<config::dynamic, align::right, pad, action::write>(begin, crbegin, crend, max_length, reverse_element_handler, separator);
 
 				    REQUIRE(end -  begin == size);
 				    REQUIRE(std::string(begin, end) == std::string(max_length - std::strlen(data2), pad) + data2);
 
 				    THEN("Reset")
 				      {
-					end = container<config::dynamic, align::right, pad, action::reset>(begin, crend, crend, max_length, reverse_handler, separator);
+					end = container<config::dynamic, align::right, pad, action::reset>(begin, crend, crend, max_length, reverse_element_handler, separator);
 
 					REQUIRE(end - begin == size);
 					REQUIRE(std::string(begin, end) == std::string(max_length, pad));

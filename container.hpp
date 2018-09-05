@@ -9,21 +9,21 @@
 namespace buffer_handle
 {
   template<config Config, align Align, char Pad, action Action,
-	   class Iterator, class Handler, class Separator>
+	   class Iterator, class Element, class Separator>
   char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
-		   Handler & handler, Separator & separator);
+		   Element & element, Separator & separator);
 
-  template<config Config, align Align, char Pad, class Handler, class Separator>
+  template<config Config, align Align, char Pad, class Element, class Separator>
   struct container_t
   {
   public:
-    container_t(std::size_t max_length, const Handler & handler = Handler(), const Separator & separator = Separator());
+    container_t(std::size_t max_length, const Element & element = Element(), const Separator & separator = Separator());
 
   protected:
     std::size_t max_length;
 
   protected:
-    Handler handler;
+    Element element;
     Separator separator;
 
   public:
