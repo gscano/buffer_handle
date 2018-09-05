@@ -43,11 +43,11 @@ namespace buffer_handle
 		if(Align == align::left)
 		  {
 		    char * local = boolean_true<Case>(buffer);
-		    character<config::static_, Action>(local, Pad);
+		    character<config::static_, action::prepare>(local, Pad);
 		  }
 		else if(Align == align::right)
 		  {
-		    char * local = character<config::static_, Action>(buffer, Pad);
+		    char * local = character<config::static_, action::prepare>(buffer, Pad);
 		    boolean_true<Case>(local);
 		  }
 	      }

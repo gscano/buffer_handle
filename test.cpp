@@ -52,7 +52,7 @@ SCENARIO("Boolean", "[boolean]")
 	    {
 	      GIVEN_A_BUFFER(5)
 		{
-		  THEN("Prepare, write or reset")
+		  THEN("Prepare")
 		    {
 		      WHEN("True")
 			{
@@ -70,6 +70,44 @@ SCENARIO("Boolean", "[boolean]")
 			  REQUIRE(std::string(begin, end) == "false");
 			}
 		    }
+
+		  THEN("Write")
+		    {
+		      WHEN("True")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::write>(begin, true);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == "true ");
+			}
+
+		      WHEN("False")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::write>(begin, false);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == "false");
+			}
+		    }
+
+		  THEN("Reset")
+		    {
+		      WHEN("True")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::reset>(begin, true);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == "true ");
+			}
+
+		      WHEN("False")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::reset>(begin, false);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == "false");
+			}
+		    }
 		}
 	    }
 	}
@@ -82,7 +120,7 @@ SCENARIO("Boolean", "[boolean]")
 	    {
 	      GIVEN_A_BUFFER(5)
 		{
-		  THEN("Prepare, write or reset")
+		  THEN("Prepare")
 		    {
 		      WHEN("True")
 			{
@@ -95,6 +133,44 @@ SCENARIO("Boolean", "[boolean]")
 		      WHEN("False")
 			{
 			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::prepare>(begin, false);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == "false");
+			}
+		    }
+
+		  THEN("Write")
+		    {
+		      WHEN("True")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::write>(begin, true);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == " true");
+			}
+
+		      WHEN("False")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::write>(begin, false);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == "false");
+			}
+		    }
+
+		  THEN("Reset")
+		    {
+		      WHEN("True")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::reset>(begin, true);
+
+			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::string(begin, end) == " true");
+			}
+
+		      WHEN("False")
+			{
+			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::reset>(begin, false);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "false");
@@ -126,9 +202,25 @@ SCENARIO("Character", "[character]")
     {
       REQUIRE((std::size_t)character<config::static_, action::size>(nullptr, 0) == 1);
 
-      WHEN("Prepare, write or reset")
+      WHEN("Prepare")
 	{
-	  end = character<config::static_, action::prepare>(begin, 'c');
+	  end = character<config::dynamic, action::prepare>(begin, 'c');
+
+	  REQUIRE(end - begin == 1);
+	  REQUIRE(c == 'c');
+	}
+
+      WHEN("Prepare")
+	{
+	  end = character<config::dynamic, action::write>(begin, 'c');
+
+	  REQUIRE(end - begin == 1);
+	  REQUIRE(c == 'c');
+	}
+
+      WHEN("Prepare")
+	{
+	  end = character<config::dynamic, action::reset>(begin, 'c');
 
 	  REQUIRE(end - begin == 1);
 	  REQUIRE(c == 'c');
@@ -207,7 +299,7 @@ SCENARIO("Container", "[container]")
 
 			  GIVEN("Size")
 			    {
-			      THEN("Prepare, write or reset")
+			      THEN("Prepare")
 				{
 				  end = details::container_process<config::static_, align::left, action::prepare>(begin, cbegin, cend, handler, separator);
 
@@ -225,7 +317,7 @@ SCENARIO("Container", "[container]")
 
 			  GIVEN("Size")
 			    {
-			      THEN("Prepare, write or reset")
+			      THEN("Prepare")
 				{
 				  begin = details::container_process<config::static_, align::right, action::prepare>(begin + size, crbegin, crend, reverse_handler, separator);
 
@@ -243,7 +335,7 @@ SCENARIO("Container", "[container]")
 
 			  REQUIRE(size == std::strlen(data));
 
-			  WHEN("Prepare, write or reset")
+			  THEN("Prepare, write or reset")
 			    {
 			      end = details::container_process<config::dynamic, align::left, action::write>(begin, cbegin, cend, handler, separator);
 
@@ -313,14 +405,6 @@ SCENARIO("Container", "[container]")
 
 				REQUIRE(end - begin == size);
 				REQUIRE(std::string(begin, end) == data);
-
-				THEN("Write")
-				  {
-				    end = container<config::static_, align::right, pad, action::write>(begin, crbegin, crend, max_length, reverse_handler, separator);
-
-				    REQUIRE(end - begin == size);
-				    REQUIRE(std::string(begin, end) == data);
-				  }
 			      }
 			  }
 			}
@@ -346,18 +430,29 @@ SCENARIO("Container", "[container]")
 				end = container<config::dynamic, align::left, pad, action::prepare>(begin, cbegin, cend, max_length, handler, separator);
 
 				REQUIRE(end - begin == size);
-				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+				REQUIRE(std::string(begin, end) == data + std::string(max_length - length, ' '));
 
 				THEN("Write")
 				  {
+				    list.pop_back();
+				    list.pop_back();
+
+				    list.push_back(std::make_pair("world,", 6));
+				    list.push_back(std::make_pair("once again!", 11));
+
+				    const char * data2 = "Hello world, once again!";
+
+				    crbegin = list.crbegin();
+				    crend = list.crend();
+
 				    end = container<config::dynamic, align::left, pad, action::write>(begin, cbegin, cend, max_length, handler, separator);
 
-				    REQUIRE(end - begin == size);
-				    REQUIRE(std::string(begin, end) == data + std::string(max_length - length, ' '));
+				    REQUIRE(end -  begin == size);
+				    REQUIRE(std::string(begin, end) == data2 + std::string(max_length - std::strlen(data2), pad));
 
 				    THEN("Reset")
 				      {
-					end = container<config::dynamic, align::left, pad, action::reset>(begin, cbegin, cend, max_length, handler, separator);
+					end = container<config::dynamic, align::left, pad, action::reset>(begin, cend, cend, max_length, handler, separator);
 
 					REQUIRE(end - begin == size);
 					REQUIRE(std::string(begin, end) == std::string(max_length, pad));
@@ -383,40 +478,32 @@ SCENARIO("Container", "[container]")
 				end = container<config::dynamic, align::right, pad, action::prepare>(begin, crbegin, crend, max_length, reverse_handler, separator);
 
 				REQUIRE(end - begin == size);
-				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+				REQUIRE(std::string(begin, end) == std::string(max_length - length, ' ') + data);
 
 				THEN("Write")
 				  {
+				    list.pop_back();
+				    list.pop_back();
+
+				    list.push_back(std::make_pair("world,", 6));
+				    list.push_back(std::make_pair("once again!", 11));
+
+				    const char * data2 = "Hello world, once again!";
+
+				    crbegin = list.crbegin();
+				    crend = list.crend();
+
 				    end = container<config::dynamic, align::right, pad, action::write>(begin, crbegin, crend, max_length, reverse_handler, separator);
 
-				    REQUIRE(end - begin == size);
-				    REQUIRE(std::string(begin, end) == std::string(max_length - length, ' ') + data);
+				    REQUIRE(end -  begin == size);
+				    REQUIRE(std::string(begin, end) == std::string(max_length - std::strlen(data2), pad) + data2);
 
 				    THEN("Reset")
 				      {
-					end = container<config::dynamic, align::right, pad, action::reset>(begin, crbegin, crend, max_length, reverse_handler, separator);
+					end = container<config::dynamic, align::right, pad, action::reset>(begin, crend, crend, max_length, reverse_handler, separator);
 
 					REQUIRE(end - begin == size);
 					REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-
-					THEN("Rewrite")
-					  {
-					    list.pop_back();
-					    list.pop_back();
-
-					    list.push_back(std::make_pair("world,", 6));
-					    list.push_back(std::make_pair("once again!", 11));
-
-					    const char * data2 = "Hello world, once again!";
-
-					    crbegin = list.crbegin();
-					    crend = list.crend();
-
-					    end = container<config::dynamic, align::right, pad, action::write>(begin, crbegin, crend, max_length, reverse_handler, separator);
-
-					    REQUIRE(end -  begin == size);
-					    REQUIRE(std::string(begin, end) == std::string(max_length - std::strlen(data2), pad) + data2);
-					  }
 				      }
 				  }
 			      }
@@ -1133,7 +1220,7 @@ SCENARIO("Number", "[Number]")
 
 			REQUIRE(end - begin == 8);
 			REQUIRE(max_digits == 8);
-			REQUIRE(std::string(begin, end) == std::string(8, pad));
+			REQUIRE(std::string(begin, end) == "19237840");
 
 			THEN("Write")
 			  {
@@ -1145,11 +1232,11 @@ SCENARIO("Number", "[Number]")
 
 			    THEN("Reset")
 			      {
-				end = integral_number<config::dynamic, align::left, pad, adapter::itoa, action::reset>(begin, 1923784, max_digits);
+				end = integral_number<config::dynamic, align::left, pad, adapter::itoa, action::reset>(begin, 19, max_digits);
 
 				REQUIRE(end - begin == 8);
 				REQUIRE(max_digits == 8);
-				REQUIRE(std::string(begin, end) == std::string(8, pad));
+				REQUIRE(std::string(begin, end) == "19" + std::string(8 - 2, pad));
 			      }
 			  }
 		      }
@@ -1173,7 +1260,7 @@ SCENARIO("Number", "[Number]")
 
 			REQUIRE(end - begin == 8);
 			REQUIRE(max_digits == 8);
-			REQUIRE(std::string(begin, end) == std::string(8, pad));
+			REQUIRE(std::string(begin, end) == "19237840");
 
 			THEN("Write")
 			  {
@@ -1185,11 +1272,11 @@ SCENARIO("Number", "[Number]")
 
 			    THEN("Reset")
 			      {
-				end = integral_number<config::dynamic, align::right, pad, adapter::itoa, action::reset>(begin, 1923784, max_digits);
+				end = integral_number<config::dynamic, align::right, pad, adapter::itoa, action::reset>(begin, 19, max_digits);
 
 				REQUIRE(end - begin == 8);
 				REQUIRE(max_digits == 8);
-				REQUIRE(std::string(begin, end) == std::string(8, pad));
+				REQUIRE(std::string(begin, end) == std::string(8 - 2, pad) + "19");
 			      }
 			  }
 		      }

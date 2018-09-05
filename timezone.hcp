@@ -44,13 +44,13 @@ namespace buffer_handle
 		{
 		case universal_timezone::UT:
 		  {
-		    if(Align == align::right)
-		      {
-			std::memcpy(buffer, " UT", 3);
-		      }
-		    else if(Align == align::left)
+		    if(Align == align::left)
 		      {
 			std::memcpy(buffer, "UT ", 3);
+		      }
+		    else if(Align == align::right)
+		      {
+			std::memcpy(buffer, " UT", 3);
 		      }
 
 		    break;
@@ -179,7 +179,7 @@ namespace buffer_handle
   template<config Config, action Action, typename T> inline
   char * military_timezone(char * buffer, T offset)
   {
-    return military_timezone<Config, Action>(buffer, details::military_timezone_offset_2_letter<T>(offset));
+    return character<Config, Action>(buffer, details::military_timezone_offset_2_letter<T>(offset));
   }
 
   template<config Config> inline

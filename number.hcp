@@ -79,24 +79,19 @@ namespace buffer_handle
 	    {
 	      max_digits = details::digits(i);
 	    }
-	  case action::reset:
-	    {
-	      std::memset(buffer, Pad, max_digits);
-
-	      break;
-	    }
 	  case action::write:
+	  case action::reset:
 	    {
 	      if(Align == align::left)
 		{
-		  itoa.template fwd<I>(buffer, i);
+		  char * local = itoa.template fwd<I>(buffer, i);
+		  std::memset(local, Pad, max_digits - (local - buffer));
 		}
-	      else
+	      else if(Align == align::right)
 		{
-		  itoa.template bwd<I>(buffer + max_digits, i);
+		  char * local = itoa.template bwd<I>(buffer + max_digits, i);
+		  std::memset(buffer, Pad, local - buffer);
 		}
-
-	      break;
 	    }
 	  }
 

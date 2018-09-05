@@ -32,13 +32,13 @@ namespace buffer_handle
     return character<Config, Action>(buffer, ',');
   }
 
-  template<config Config, action Action>
+  template<config Config, action Action> inline
   char * hyphen(char * buffer)
   {
-    return minus<Config, Action>(buffer);
+    return character<Config, Action>(buffer, '-');
   }
 
-  template<config Config, action Action>
+  template<config Config, action Action> inline
   char * minus(char * buffer)
   {
     return character<Config, Action>(buffer, '-');

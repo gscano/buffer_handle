@@ -68,24 +68,19 @@ namespace buffer_handle
 	switch(Action)
 	  {
 	  case action::prepare:
-	  case action::reset:
-	    {
-	      std::memset(buffer, Pad, max_length);
-
-	      break;
-	    }
 	  case action::write:
+	  case action::reset:
 	    {
 	      if(Align == align::left)
 		{
-		  details::container_process<Config, Align, Action>(buffer, begin, end, handler, separator);
+		  char * local = details::container_process<Config, Align, Action>(buffer, begin, end, handler, separator);
+		  std::memset(local, Pad, max_length - (local - buffer));
 		}
 	      else if(Align == align::right)
 		{
-		  details::container_process<Config, Align, Action>(buffer + max_length, begin, end, handler, separator);
+		  char * local = details::container_process<Config, Align, Action>(buffer + max_length, begin, end, handler, separator);
+		  std::memset(buffer, Pad, local - buffer);
 		}
-
-	      break;
 	    }
 	  }
 

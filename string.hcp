@@ -38,6 +38,7 @@ namespace buffer_handle
 	      return buffer + max_length;
 	    }
 	  case action::prepare:
+	  case action::write:
 	  case action::reset:
 	    {
 	      if(value == nullptr)
@@ -59,21 +60,6 @@ namespace buffer_handle
 		      std::memcpy(buffer + max_length - length, value, length);
 		    }
 		}
-
-	      break;
-	    }
-	  case action::write:
-	    {
-	      if(Align == align::left)
-		{
-		  std::memcpy(buffer, value, length);
-		}
-	      else if(Align == align::right)
-		{
-		  std::memcpy(buffer + max_length - length, value, length);
-		}
-
-	      break;
 	    }
 	  }
 
