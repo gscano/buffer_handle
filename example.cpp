@@ -9,8 +9,8 @@
 
 using namespace buffer_handle;
 
-template<config Config, action Action, std::size_t MaxDescriptionLength>
-char * handle(char * buffer, int hours, int minutes, int when, const char * description, int temperature, char degree)
+template<config Config, std::size_t MaxDescriptionLength, action Action, typename Hours, typename Minutes, typename Temperature>
+char * handle(char * buffer, Hours hours, Minutes minutes, int when, const char * description, Temperature temperature, char scale)
 {
   buffer = string<config::static_, Action>(buffer, "At ", 3);
   buffer = time_<Config, Action>(buffer, hours, minutes);
@@ -31,7 +31,7 @@ char * handle(char * buffer, int hours, int minutes, int when, const char * desc
       buffer = string<Config, align::left, ' ', Action>(buffer, "will be", 7, 7);
     }
 
-  buffer = space<Config, Action>(buffer);
+  buffer = space<config::static_, Action>(buffer);
 
   int length = description == nullptr ? 0 : std::strlen(description);
   buffer = string<Config, align::right, ' ', Action>(buffer, description, length, MaxDescriptionLength);
@@ -41,24 +41,24 @@ char * handle(char * buffer, int hours, int minutes, int when, const char * desc
 
   buffer = two_digits_number<Config, ' ', Action>(buffer, temperature);
   buffer = string<config::static_, Action>(buffer, "°", std::strlen("°"));
-  buffer = character<Config, Action>(buffer, degree);
+  buffer = character<Config, Action>(buffer, scale);
   buffer = dot<config::static_, Action>(buffer);
 
   return buffer;
 }
 
 template<std::size_t MaxDescriptionLength>
-void static_(int hours, int minutes, int when, const char * description, int temperature, char degree)
+void static_(int hours, int minutes, int when, const char * description, int temperature, char scale)
 {
   std::cerr << "Static usage, ";
 
-  std::size_t size = (std::size_t)handle<config::static_, action::size, MaxDescriptionLength>(nullptr, hours, minutes, when, description, temperature, degree);
+  std::size_t size = (std::size_t)handle<config::static_, MaxDescriptionLength, action::size>(nullptr, hours, minutes, when, description, temperature, scale);
 
   std::cerr << "size = " << size << ": ";
 
   char buffer[size] = {0};
 
-  handle<config::static_, action::prepare, MaxDescriptionLength>(buffer, hours, minutes, when, description, temperature, degree);
+  handle<config::static_, MaxDescriptionLength, action::prepare>(buffer, hours, minutes, when, description, temperature, scale);
   std::cerr << std::string(buffer, size) << std::endl;
 }
 
@@ -66,19 +66,19 @@ void dynamic()
 {
   std::cerr << "Dynamic usage, ";
 
-  std::size_t size = (std::size_t)handle<config::dynamic, action::size, 10>(nullptr, 0, 0, 0, nullptr, 0, 'K');
+  std::size_t size = (std::size_t)handle<config::dynamic, 10, action::size>(nullptr, 0, 0, 0, nullptr, 0, 'K');
 
   std::cerr << "size = " << size << ":" << std::endl << std::endl;
 
   char buffer[size] = {0};
 
-  handle<config::dynamic, action::prepare, 10>(buffer, 9, 23, 0, "sunny", 23, 'C');
+  handle<config::dynamic, 10, action::prepare>(buffer, 9, 23, 0, "sunny", 23, 'C');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 
-  handle<config::dynamic, action::write, 10>(buffer, 2, 0, -1, "cloudy", 68, 'F');
+  handle<config::dynamic, 10, action::write>(buffer, 2, 0, -1, "cloudy", 68, 'F');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 
-  handle<config::dynamic, action::reset, 10>(buffer, 23, 58, 1, "freezing", 99, 'K');
+  handle<config::dynamic, 10, action::reset>(buffer, 23, 58, 1, "freezing", 9, 'K');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 }
 
@@ -86,7 +86,7 @@ int main()
 {
   static_<10>(9, 23, 0, "sunny", 23, 'C');
   static_<10>(2, 0, -1, "cloudy", 68, 'F');
-  static_<10>(23, 58, 1, "freezing", 99, 'K');
+  static_<10>(23, 58, 1, "freezing", 9, 'K');
 
   std::cerr << std::endl;
 

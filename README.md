@@ -80,22 +80,46 @@ struct functor_t
 
 Let's consider as an example a buffer which would hold `At 09:23, the weather is sunny with a temperature of 23°C.` and where the `09:23`, `is`, `sunny`, `23` and `C` parts would be subject to modifications.
 
-It can be written as a function
+First, the signature of the function handling such buffer would be as follow:
 
 ```cpp
-template<config Config, action Action, std::size_t MaxDescriptionLength>
-char * handle(char * buffer, int hours, int minutes, int when,
-	      const char * description, int temperature, char degree)
-{
-  buffer = string<config::static_, Action>(buffer, "At ", 3);
-  buffer = time_<Config, Action>(buffer, hours, minutes);
+template<config Config, std::size_t MaxDescriptionLength, action Action,
+	 typename Hours, typename Minutes, typename Temperature>
+char * handle(char * buffer, Hours hours, Minutes minutes, int when,
+	      const char * description, Temperature temperature, char scale);
+```
 
+In this case, the description `sunny` may be replaced by a string which length must be bounded. So this template parameter is part of the configuration of the object and comes before the action parameter. `Hours`, `Minutes` and `Temperature` are here to be more convenient for the user who may give any type of integral type with positive values. The compiler will deduce them from the arguments.
+The `when` parameter is positive for future, negative for past and null for present.
+
+Moving to the implementation, the first thing is to write constant strings:
+
+```cpp
+  buffer = string<config::static_, Action>(buffer, "At ", 3);
+  //time
   const char * tmp1 = ", the weather ";
   buffer = string<config::static_, Action>(buffer, tmp1, std::strlen(tmp1));
+  //when
+  buffer = space<config::static_, Action>(buffer);
+  //description
+  const char * tmp2 = " with a temperature of ";
+  buffer = string<config::static_, Action>(buffer, tmp2, std::strlen(tmp2));
+  //temperature
+  buffer = string<config::static_, Action>(buffer, "°", std::strlen("°"));
+  //scale
+  buffer = dot<config::static_, Action>(buffer);
+```
 
+Note that `<config::static_, Action>` is used and not `<config::static_, action::prepare>` because in the second case the content would be rewritten every time the function is called may it be with **write** or **reset**.
+
+Then the varying strings could be introduced
+
+```cpp
+  ...
+  //when
   if(when < 0)
     {
-      buffer = string<Config, align::left, ' ', Action>(buffer, "will be", 7, 7);
+      buffer = string<Config, align::left, ' ', Action>(buffer, "was", 3, 7);
     }
   else if(when == 0)
     {
@@ -103,38 +127,66 @@ char * handle(char * buffer, int hours, int minutes, int when,
     }
   else
     {
-      buffer = string<Config, align::left, ' ', Action>(buffer, "was", 3, 7);
+      buffer = string<Config, align::left, ' ', Action>(buffer, "will be", 7, 7);
     }
-
-  buffer = space<Config, Action>(buffer);
-
+  //when
+  ...
+  //description
   int length = description == nullptr ? 0 : std::strlen(description);
   buffer = string<Config, align::right, ' ', Action>(buffer, description, length, MaxDescriptionLength);
-
-  const char * tmp2 = " with a temperature of ";
-  buffer = string<config::static_, Action>(buffer, tmp2, std::strlen(tmp2));
-
-  buffer = two_digits_number<Config, ' ', Action>(buffer, temperature);
-  buffer = string<config::static_, Action>(buffer, "°", std::strlen("°"));
-  buffer = character<Config, Action>(buffer, degree);
-  buffer = dot<config::static_, Action>(buffer);
-
-  return buffer;
-}
+  //description
+  ...
+  //scale
+  buffer = character<Config, Action>(buffer, scale);
+  //scale
 ```
-which would output
+
+with the verb left-aligned and the description right-aligned. They are both padded with spaces	.
+Then the time and the temperature are left
+
+```cpp
+  ...
+  //time
+  buffer = time_<Config, Action>(buffer, hours, minutes);
+  //time
+  ...
+  //temperature
+  buffer = two_digits_number<Config, ' ', Action>(buffer, temperature);
+  //temperature
+  ...
+```
+
+and the temperature will start with a space when a single digit number is provided. Note that the `two_digits_number` function will always be two characters long.
+
+For **static** configurations, the required buffer size would be obtained for each unique call with
+```cpp
+(std::size_t)handle<config::static_, MaxDescriptionLength, action::size>
+	     (nullptr, hours, minutes, when, description, temperature, scale);
+```
+
+(note that `nullptr` is passed so that conversion to `std::size_t` of the return value yields the size the buffer would require if really written) and the output would be
+
 ```console
 At 09:23, the weather is sunny with a temperature of 23°C.
 At 02:00, the weather was cloudy with a temperature of 68°F.
 At 23:58, the weather will be freezing with a temperature of 99°K.
 ```
-for **static** configurations, in which case the buffer size would be specific for each invocation, and
+
+while for **dynamic** ones, the buffer would be overwritten as such:
+
 ```console
 At 09:23, the weather is           sunny with a temperature of 23°C.
 At 02:00, the weather was         cloudy with a temperature of 68°F.
 At 23:58, the weather will be   freezing with a temperature of 99°K.
 ```
-for **dynamic** configurations where the buffer is overwritten.
+
+after a maximum size obtained with
+
+```cpp
+(std::size_t)handle<config::dynamic, 10, action::size>(nullptr, 0, 0, 0, nullptr, 0, 'K');
+```
+
+where dummy arguments are passed.
 
 ## Reference
 
@@ -463,7 +515,7 @@ struct container_t
 
 ### Adapters
 
-###### Itoa](https://github.com/amdn/itoa)
+###### [Itoa](https://github.com/amdn/itoa)
 
 ```cpp
 namespace adapter
