@@ -31,6 +31,9 @@ namespace buffer_handle
   char * dot(char * buffer);
 
   template<config Config, action Action>
+  char * slash(char * buffer);
+
+  template<config Config, action Action>
   char * colon(char * buffer);
 
   template<config Config, action Action>
