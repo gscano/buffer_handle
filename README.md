@@ -525,11 +525,7 @@ struct container_t
 
 ##### Itoa
 
-###### [Itoa](https://github.com/amdn/itoa)
-
 ```cpp
-//Defined in buffer_handle/adapter/itoa.hpp
-
 namespace adapter
 {
   struct itoa
@@ -543,11 +539,18 @@ namespace adapter
 };
 ```
 
+Available implementations are
+
+* `std::to_string`: `struct to_string_t` defined in `buffer_handle/adapter/itoa/to_string.hpp`
+* [Itoa](https://github.com/amdn/itoa): `struct itoa_t` defined in `buffer_handle/adapter/itoa/itoa.hpp`
+
 ### Helpers
 
 ###### Must write
 
 ```cpp
+//Defined in buffer_handle/helper.hpp
+
 template<config Config, action Action>
 constexpr bool must_write()
 {
@@ -558,11 +561,10 @@ constexpr bool must_write()
 
 ## Tests
 
-Run ```make test``` to compile and ```make run-test``` to execute, or simply ```make```.
+Run `make test` to compile and `make run-test` to execute, or simply `make`.
 
 ### Dependencies
 
-* [Itoa header only version](https://github.com/gscano/itoa)
 * [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.3.0](https://github.com/catchorg/Catch2/releases/tag/v2.3.0))
 
-To change the path of these dependencies, create a ```config.mk``` file and then assign ```CATCH``` and ```ITOA``` variables with the appropriate locations (```.``` is used by default).
+To change the path of these dependencies, create a `config.mk` file and then assign `CATCH`  variables with the appropriate locations (`.` is used by default).

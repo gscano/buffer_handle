@@ -13,6 +13,8 @@
 #include <buffer_handle/timezone.hpp>
 #include <buffer_handle/token.hpp>
 
+#include <buffer_handle/adapter/itoa/to_string.hpp>
+
 using namespace buffer_handle;
 
 #define GIVEN_A_BUFFER(size)			\
@@ -1016,6 +1018,58 @@ SCENARIO("Date", "[date]")
     }
 }
 
+SCENARIO("Itoa adapter", "[itoa, adapter]")
+{
+  char buffer[64] = {0};
+  char * begin = buffer;
+  char * end = buffer;
+
+  WHEN("To string")
+    {
+      adapter::itoa::to_string_t to_string;
+
+      WHEN("Forward")
+	{
+#define TEST(I, L)					\
+	  THEN(#I)					\
+	    {						\
+	      char * end = to_string.fwd(begin, I);	\
+							\
+	      REQUIRE(end - begin == L);		\
+	      REQUIRE(std::string(begin, end) == #I);	\
+	    }
+
+	  TEST(0, 1);
+	  TEST(1, 1);
+	  TEST(10, 2);
+	  TEST(99, 2);
+	  TEST(3993, 4);
+
+#undef TEST
+	}
+
+      WHEN("Backward")
+	{
+#define TEST(I, L)					\
+	  THEN(#I)					\
+	    {						\
+	      char * begin = to_string.bwd(end, I);	\
+							\
+	      REQUIRE(end - begin == L);		\
+	      REQUIRE(std::string(begin, end) == #I);	\
+	    }
+
+	  TEST(0, 1);
+	  TEST(1, 1);
+	  TEST(10, 2);
+	  TEST(99, 2);
+	  TEST(3993, 4);
+
+#undef TEST
+	}
+    }
+}
+
 SCENARIO("Nothing", "[nothing]")
 {
   char c;
@@ -1025,8 +1079,6 @@ SCENARIO("Nothing", "[nothing]")
   REQUIRE(nothing_t().handle<action::write>(&c) == &c);
   REQUIRE(nothing_t().handle<action::reset>(&c) == &c);
 }
-
-#include <buffer_handle/adapter/itoa.hpp>
 
 SCENARIO("Number", "[Number]")
 {
@@ -1183,7 +1235,7 @@ SCENARIO("Number", "[Number]")
 	{
 	  WHEN("Left or right aligned, any padding")
 	    {
-	      std::size_t size = (std::size_t)integral_number<config::static_, align::left, pad, adapter::itoa, action::size>(nullptr, 1998, max_digits);
+	      std::size_t size = (std::size_t)integral_number<config::static_, align::left, pad, adapter::itoa::to_string_t, action::size>(nullptr, 1998, max_digits);
 
 	      GIVEN("Size")
 		{
@@ -1191,7 +1243,7 @@ SCENARIO("Number", "[Number]")
 		  {
 		    THEN("Prepare")
 		      {
-			end = integral_number<config::static_, align::left, pad, adapter::itoa, action::prepare>(begin, 1998, max_digits);
+			end = integral_number<config::static_, align::left, pad, adapter::itoa::to_string_t, action::prepare>(begin, 1998, max_digits);
 
 			REQUIRE(end == begin + 4);
 			REQUIRE(max_digits == 4);
@@ -1206,7 +1258,7 @@ SCENARIO("Number", "[Number]")
 	{
 	  WHEN("Left-aligned")
 	    {
-	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::left, pad, adapter::itoa, action::size>(nullptr, 19237840, max_digits);
+	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::left, pad, adapter::itoa::to_string_t, action::size>(nullptr, 19237840, max_digits);
 
 	      REQUIRE(size == 8);
 
@@ -1216,7 +1268,7 @@ SCENARIO("Number", "[Number]")
 		  {
 		    THEN("Prepare")
 		      {
-			end = integral_number<config::dynamic, align::left, pad, adapter::itoa, action::prepare>(begin, 19237840, max_digits);
+			end = integral_number<config::dynamic, align::left, pad, adapter::itoa::to_string_t, action::prepare>(begin, 19237840, max_digits);
 
 			REQUIRE(end - begin == 8);
 			REQUIRE(max_digits == 8);
@@ -1224,7 +1276,7 @@ SCENARIO("Number", "[Number]")
 
 			THEN("Write")
 			  {
-			    end = integral_number<config::dynamic, align::left, pad, adapter::itoa, action::write>(begin, 1923784, max_digits);
+			    end = integral_number<config::dynamic, align::left, pad, adapter::itoa::to_string_t, action::write>(begin, 1923784, max_digits);
 
 			    REQUIRE(end - begin == 8);
 			    REQUIRE(max_digits == 8);
@@ -1232,7 +1284,7 @@ SCENARIO("Number", "[Number]")
 
 			    THEN("Reset")
 			      {
-				end = integral_number<config::dynamic, align::left, pad, adapter::itoa, action::reset>(begin, 19, max_digits);
+				end = integral_number<config::dynamic, align::left, pad, adapter::itoa::to_string_t, action::reset>(begin, 19, max_digits);
 
 				REQUIRE(end - begin == 8);
 				REQUIRE(max_digits == 8);
@@ -1246,7 +1298,7 @@ SCENARIO("Number", "[Number]")
 
 	  WHEN("Right-aligned")
 	    {
-	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::right, pad, adapter::itoa, action::size>(nullptr, 19237840, max_digits);
+	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::right, pad, adapter::itoa::to_string_t, action::size>(nullptr, 19237840, max_digits);
 
 	      REQUIRE(size == 8);
 
@@ -1256,7 +1308,7 @@ SCENARIO("Number", "[Number]")
 		  {
 		    THEN("Prepare")
 		      {
-			end = integral_number<config::dynamic, align::right, pad, adapter::itoa, action::prepare>(begin, 19237840, max_digits);
+			end = integral_number<config::dynamic, align::right, pad, adapter::itoa::to_string_t, action::prepare>(begin, 19237840, max_digits);
 
 			REQUIRE(end - begin == 8);
 			REQUIRE(max_digits == 8);
@@ -1264,7 +1316,7 @@ SCENARIO("Number", "[Number]")
 
 			THEN("Write")
 			  {
-			    end = integral_number<config::dynamic, align::right, pad, adapter::itoa, action::write>(begin, 1923784, max_digits);
+			    end = integral_number<config::dynamic, align::right, pad, adapter::itoa::to_string_t, action::write>(begin, 1923784, max_digits);
 
 			    REQUIRE(end - begin == 8);
 			    REQUIRE(max_digits == 8);
@@ -1272,7 +1324,7 @@ SCENARIO("Number", "[Number]")
 
 			    THEN("Reset")
 			      {
-				end = integral_number<config::dynamic, align::right, pad, adapter::itoa, action::reset>(begin, 19, max_digits);
+				end = integral_number<config::dynamic, align::right, pad, adapter::itoa::to_string_t, action::reset>(begin, 19, max_digits);
 
 				REQUIRE(end - begin == 8);
 				REQUIRE(max_digits == 8);

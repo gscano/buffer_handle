@@ -1,7 +1,6 @@
 -include config.mk
 
 CATCH ?= .
-ITOA  ?= .
 
 all: test run-test Makefile
 
@@ -12,7 +11,7 @@ test: test.o Makefile
 	g++ $< -o $@
 
 test.o: test.cpp Makefile
-	g++ -c $< -std=c++14 -MD -g -O0 -I $(CATCH) -I $(ITOA) -I ../ -o $@
+	g++ -c $< -std=c++14 -MD -g -O0 -I $(CATCH) -I ../ -o $@
 
 -include test.d
 

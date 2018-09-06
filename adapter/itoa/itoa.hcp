@@ -1,0 +1,20 @@
+#include <itoa.h> // itoa_fwd() itoa_rev()
+
+namespace buffer_handle
+{
+  namespace adapter
+  {
+      template<typename I> inline
+      char * itoa_t::fwd(char * buffer, I i) const
+      {
+	return itoa_fwd<I>(i, buffer);
+      }
+
+      template<typename I> inline
+      char * itoa_t::bwd(char * buffer, I i) const
+      {
+	return itoa_rev<I>(i, buffer);
+      }
+    };
+  };
+};

@@ -1,0 +1,30 @@
+#include <string> // to_string()
+
+namespace buffer_handle
+{
+  namespace adapter
+  {
+    namespace itoa
+    {
+      template<typename I> inline
+      char * to_string_t::fwd(char * buffer, I i) const
+      {
+	std::string value = std::to_string(i);
+
+	std::memcpy(buffer, value.c_str(), value.length());
+
+	return buffer + value.length();
+      }
+
+      template<typename I> inline
+      char * to_string_t::bwd(char * buffer, I i) const
+      {
+	std::string value = std::to_string(i);
+
+	std::memcpy(buffer - value.length(), value.c_str(), value.length());
+
+	return buffer - value.length();
+      }
+    };
+  };
+};
