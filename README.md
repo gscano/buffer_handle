@@ -11,7 +11,7 @@ When buffers are extensively used to send textual output, their management requi
 
 [Functions](#functions) and [functors](#functors) of this library perform [**actions**](#actions) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configurations).
 
-The purpose of this library is to provide a single function to perform different **actions**.
+The purpose of this library is to provide a single function to perform different actions.
 
 ### Actions
 
@@ -62,7 +62,7 @@ When localization does not apply, constant strings could be written with either 
 
 #### Function signature
 
-The configuration comes as the first template parameter. It is then followed by other configuration template parameters, such as *alignment*, *padding* and *case*, and functors. Then the action parameter is supplied, followed by template parameters for which argument deduction would happen frequently. For clarity, the first argument is the buffer.
+The configuration comes as the first template parameter. It is then followed by other configuration template parameters, such as *alignment*, *padding*, *case*, and functors. Then the action parameter is supplied, followed by template parameters for which argument deduction would happen frequently. For clarity, the first argument is the buffer.
 
 ```cpp
 template<config Config, ..., action Action, ...>
@@ -71,7 +71,7 @@ char * handle(char * buffer, ...);
 
 #### Structure layout
 
-Similarly to functions, the functor is defined by configuration and functor template parameters. The function `handle` is templated on the action and function argument types. However, template argument deduction must always be possible so that a calling function may only pass the action parameter.
+Similarly to functions, the functor is defined by configuration and functor template parameters. The function `handle` is templated on the action and function argument types. It is a plus if template argument deduction could be possible so that a calling function may only pass the action parameter.
 
 ```cpp
 template<config Config, ...>
@@ -95,7 +95,7 @@ char * handle(char * buffer, Hours hours, Minutes minutes, int when,
 	      const char * description, Temperature temperature, char scale);
 ```
 
-In this case, the description `sunny` may be replaced by a string which length must be bounded. So this template parameter is part of the configuration of the object and comes before the action parameter. `Hours`, `Minutes` and `Temperature` are here to be more convenient for a user who may give any type of integral type with positive values. The compiler will deduce them from the arguments.
+In this case, the description `sunny` may be replaced by a string which length must be bounded. So the `MaxDescriptionLength` template parameter is part of the configuration of the object and comes before the action parameter. `Hours`, `Minutes` and `Temperature` are here to be more convenient for a user who may give any type of integral type with positive values. The compiler will deduce them from the arguments.
 The `when` parameter is positive for future, negative for past and null for present.
 
 Moving to the implementation, the first thing is to write constant strings:
@@ -186,7 +186,7 @@ At 02:00, the weather was         cloudy with a temperature of 68°F.
 At 23:58, the weather will be   freezing with a temperature of 99°K.
 ```
 
-after a maximum size obtained with
+after a maximum size is obtained with
 
 ```cpp
 (std::size_t)handle<config::dynamic, 10, action::size>(nullptr, 0, 0, 0, nullptr, 0, 'K');
@@ -271,7 +271,7 @@ char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & 
 
 * The template parameter `InsteadOfALeadingZero` can be `'\0'` in order to have a leading zero.
 * Type `I` must be integral and `i`must be positive.
-* The `max_digits` argument is a reference because the function will assign it based on the value passed in `i` when **prepare** is called. This value should not be modified in later invocations.
+* The `max_digits` argument is a reference because the function will assign it when **prepare** is called based on the value passed in `i`. This value should not be modified in later invocations.
 * `uint8_t` should be enough to encode the number of digits for most applications.
 * The `itoa` functor must conform to the provided [adapter](#itoa) contract.
 
@@ -386,7 +386,7 @@ namespace rfc1123//§5.2.14
 ```
 
 * The template parameters
-  * `InsteadOfALeadingZeroForDay` can be `\0` in order to have a leading zero
+  * `InsteadOfALeadingZeroForDay` can be `'\0'` in order to have a leading zero
   * `YearOn4Digits` toggles the year format to 'YYYY' instead of 'YY'
 * For functions accepting  directly a month or a year
   * 1 is for January
@@ -523,6 +523,8 @@ struct container_t
 
 ### Adapters
 
+##### Itoa
+
 ###### [Itoa](https://github.com/amdn/itoa)
 
 ```cpp
@@ -543,7 +545,7 @@ namespace adapter
 
 ### Helpers
 
-####### Must write
+###### Must write
 
 ```cpp
 template<config Config, action Action>
