@@ -1,7 +1,8 @@
 #include <cassert> // assert()
 
-#include <buffer_handle/token.hpp> // comma()
+#include <buffer_handle/helper.hpp> // must_write()
 #include <buffer_handle/number.hpp> // integral_number() two_digits_number()
+#include <buffer_handle/token.hpp> // comma()
 
 namespace buffer_handle
 {
@@ -14,8 +15,7 @@ namespace buffer_handle
   template<config Config, action Action, typename Hours, typename Minutes> inline
   char * time_(char * buffer, Hours hours, Minutes minutes)
   {
-    if((Config == config::static_ && Action == action::prepare)
-       || (Config == config::dynamic && Action != action::size))
+    if(must_write<Config, Action>())
       {
 	switch(Action)
 	  {
@@ -43,8 +43,7 @@ namespace buffer_handle
   {
     buffer = time_<Config, Action, Hours, Minutes>(buffer, hours, minutes);
 
-    if((Config == config::static_ && Action == action::prepare)
-       || (Config == config::dynamic && Action != action::size))
+    if(must_write<Config, Action>())
       {
 	switch(Action)
 	  {

@@ -1,5 +1,7 @@
 #include <cstring> // memcpy()
 
+#include <buffer_handle/helper.hpp> // must_write()
+
 namespace buffer_handle
 {
   template<config Config, align Align, char Pad, action Action> inline
@@ -104,8 +106,7 @@ namespace buffer_handle
   template<config Config, action Action>
   char * north_american_timezone(char * buffer, enum north_american_timezone value)
   {
-    if((Config == config::static_ && Action == action::prepare)
-       || (Config == config::dynamic && Action != action::size))
+    if(must_write<Config, Action>())
       {
 	std::memcpy(buffer, north_american_timezone(value), 3);
       }

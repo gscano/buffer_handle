@@ -1,6 +1,7 @@
 #include <cstddef> // size_t
 #include <cstring> // memcpy() strlen()
 
+#include <buffer_handle/helper.hpp> // must_write()
 #include <buffer_handle/number.hpp> // four_digits_number() two_digits_number()
 #include <buffer_handle/string.hpp> // string()
 #include <buffer_handle/time.hpp> // time_()
@@ -24,8 +25,7 @@ namespace buffer_handle
 	   typename Day, typename Month, typename Year> inline
   char * day_month_year(char * buffer, Day day, Month month, Year year)
   {
-    if((Config == config::static_ && Action == action::prepare)
-       || (Config == config::dynamic && Action != action::size))
+    if(must_write<Config, Action>())
       {
 	switch(Action)
 	  {
@@ -64,8 +64,7 @@ namespace buffer_handle
 	   typename Month, typename Day> inline
   char * month_day(char * buffer, Month month, Day day)
   {
-    if((Config == config::static_ && Action == action::prepare)
-       || (Config == config::dynamic && Action != action::size))
+    if(must_write<Config, Action>())
       {
 	switch(Action)
 	  {

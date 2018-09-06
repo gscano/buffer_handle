@@ -1,6 +1,6 @@
 # Handle buffer content
 
-When buffers are extensively used to send textual output, their management requires a work to be eased by this **C++** library.
+When buffers are extensively used to send textual output, their management requires a work to be eased by this **C++ 14** library under [MIT license](LICENSE).
 
 * [Concept](#concept)
 * [Example](#example)
@@ -9,11 +9,15 @@ When buffers are extensively used to send textual output, their management requi
 
 ## Concept
 
-[Functions](#functions) and [functors](#functors) of this library perform [**actions**](#action) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configuration).
+[Functions](#functions) and [functors](#functors) of this library perform [**actions**](#actions) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configurations).
 
-### Action
+The purpose of this library is to provide a single function to perform different **actions**.
 
-* **Size** a buffer would require for the longest output
+### Actions
+
+There are four possible actions:
+
+* Evaluate the **size** a buffer would require for the longest output
 * **Prepare** a buffer with constant expressions and default values
 * **Write** changing portions of a buffer
 * **Reset** default or given values to these portions
@@ -30,19 +34,21 @@ else
 }
 ```
 
-This would typically be used in applications where buffers could be reused and information must be deleted to prevent unwanted disclosure.
+This would typically be used in applications where buffers could be reused and must be cleared to prevent unwanted disclosure.
 
-### Configuration
+### Configurations
+
+There are two available configurations:
 
 * **static** to set a buffer based on arguments and parameters
-* **dynamic** to edit a buffer using parameters
+* **dynamic** to edit a buffer using arguments
 
-Only **size** and **prepare** actions have side effects for the **static** configuration, while **write** and **reset** are silently ignored.
+For the **static** configuration, only **size** and **prepare** actions modify the buffer, while **write** and **reset** actions are silently ignored.
 For some functions, more *specific* configurations can be achieved regarding [alignment](#alignment), [padding](#padding) and [case](#case).
 
 #### Alignment
 
-When values could be shorter than or equal to the allocated space, the content can be **left** or **right** justified.
+When values could be shorter than the buffer capacity, the content can be **left** or **right** justified.
 
 #### Padding
 
@@ -89,7 +95,7 @@ char * handle(char * buffer, Hours hours, Minutes minutes, int when,
 	      const char * description, Temperature temperature, char scale);
 ```
 
-In this case, the description `sunny` may be replaced by a string which length must be bounded. So this template parameter is part of the configuration of the object and comes before the action parameter. `Hours`, `Minutes` and `Temperature` are here to be more convenient for the user who may give any type of integral type with positive values. The compiler will deduce them from the arguments.
+In this case, the description `sunny` may be replaced by a string which length must be bounded. So this template parameter is part of the configuration of the object and comes before the action parameter. `Hours`, `Minutes` and `Temperature` are here to be more convenient for a user who may give any type of integral type with positive values. The compiler will deduce them from the arguments.
 The `when` parameter is positive for future, negative for past and null for present.
 
 Moving to the implementation, the first thing is to write constant strings:
@@ -164,7 +170,7 @@ For **static** configurations, the required buffer size would be obtained for ea
 	     (nullptr, hours, minutes, when, description, temperature, scale);
 ```
 
-(note that `nullptr` is passed so that conversion to `std::size_t` of the return value yields the size the buffer would require if really written) and the output would be
+(note that `nullptr` is passed so that a cast to `std::size_t` of the return value yields the size the buffer would require if really written) and the output would be
 
 ```console
 At 09:23, the weather is sunny with a temperature of 23°C.
@@ -195,16 +201,16 @@ All code is scoped in `namespace buffer_handle`.
 ### Types
 
 ```cpp
-#include <buffer_handle/action.hpp>
+//Declared in buffer_handle/action.hpp
 enum class action { size, prepare, write, reset };
 
-#include <buffer_handle/align.hpp>
+//Declared in buffer_handle/align.hpp
 enum class align { left, right };
 
-#include <buffer_handle/case.hpp>
+//Declared in buffer_handle/case.hpp
 enum class case_ { lower, first_upper, upper };
 
-#include <buffer_handle/config.hpp>
+//Declared in buffer_handle/config.hpp
 enum class config { static_, dynamic };
 ```
 
@@ -212,15 +218,15 @@ enum class config { static_, dynamic };
 
 ###### Character
 ```cpp
-#include <buffer_handle/character.hpp>
+//Defined in buffer_handle/character.hpp
 
-template<config Config, action Action>
+<config Config, action Action>
 char * character(char * buffer, char c);
 ```
 
 ###### Token
 ```cpp
-#include <buffer_handle/token.hpp>
+//Defined in buffer_handle/token.hpp
 
 template<config Config, action Action>
 char * TOKEN(char * buffer);//TOKEN = new_line, carriage_return, space, comma, dot, colon, semicolon, equal
@@ -228,7 +234,7 @@ char * TOKEN(char * buffer);//TOKEN = new_line, carriage_return, space, comma, d
 
 ###### Boolean
 ```cpp
-#include <buffer_handle/boolean.hpp>
+//Defined in buffer_handle/boolean.hpp
 
 template<config Config, case_ Case, align Align, char Pad, action Action>
 char * boolean(char * buffer, bool value);
@@ -236,7 +242,7 @@ char * boolean(char * buffer, bool value);
 
 ###### String
 ```cpp
-#include <buffer_handle/string.hpp>
+//Defined in buffer_handle/string.hpp
 
 template<config Config, action Action>
 char * string(char * buffer, const char * value, std::size_t length);
@@ -250,7 +256,7 @@ char * string(char * buffer, const char * value, std::size_t length, std::size_t
 
 ###### Number
 ```cpp
-#include <buffer_handle/number.hpp>
+//Defined in buffer_handle/number.hpp
 
 template<config Config, char InsteadOfALeadingZero, action Action, typename I>
 char * two_digits_number(char * buffer, I i);
@@ -265,13 +271,13 @@ char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & 
 
 * The template parameter `InsteadOfALeadingZero` can be `'\0'` in order to have a leading zero.
 * Type `I` must be integral and `i`must be positive.
-* The `max_digits` argument is a reference because the function will assign the value based on the value passed in `i` when **prepare** is called. This value should not be modified in later invocations.
+* The `max_digits` argument is a reference because the function will assign it based on the value passed in `i` when **prepare** is called. This value should not be modified in later invocations.
 * `uint8_t` should be enough to encode the number of digits for most applications.
 * The `itoa` functor must conform to the provided [adapter](#itoa) contract.
 
 ###### Time
 ```cpp
-#include <buffer_handle/time.hpp>
+//Defined in buffer_handle/time.hpp
 
 template<config Config, align Align, char Pad, class Itoa, action Action, typename MaxDigits = uint8_t>
 char * time_(char * buffer, time_t time, MaxDigits & max_digits, const Itoa & itoa = Itoa());
@@ -290,7 +296,7 @@ char * time_(char * buffer, std::tm time);
 
 ###### Timezone
 ```cpp
-#include <buffer_handle/timezone.hpp>
+//Defined in buffer_handle/timezone.hpp
 
 enum class universal_timezone : uint8_t { UT, GMT };
 
@@ -314,7 +320,7 @@ char * differential_timezone(char * buffer, bool sign, Hours hours, Minutes minu
 
 ###### Date
 ```cpp
-#include <buffer_handle/date.hpp>
+//Defined in buffer_handle/date.hpp
 
 template<config Config, char InsteadOfALeadingZeroForDay, char Separator, bool YearOn4Digits, action Action,
 	 typename Day, typename Month, typename Year>
@@ -388,7 +394,7 @@ namespace rfc1123//§5.2.14
 
 ###### Container
 ```cpp
-#include <buffer_handle/container.hpp>
+//Defined in buffer_handle/container.hpp
 
 template<config Config, align Align, char Pad, action Action,
 	 class Iterator, class Element, class Separator>
@@ -400,7 +406,7 @@ char * container(char * buffer, const Iterator & begin, const Iterator & end, st
 
 ###### Nothing
 ```cpp
-#include <buffer_handle/nothing.hpp>
+//Defined in buffer_handle/nothing.hpp
 
 struct nothing_t
 {
@@ -411,7 +417,7 @@ struct nothing_t
 
 ###### String
 ```cpp
-#include <buffer_handle/string.hpp>
+//Defined in buffer_handle/string.hpp
 
 template<config Config, align Align, char Pad>
 struct string_t
@@ -428,7 +434,7 @@ struct string_t
 
 ###### Number
 ```cpp
-#include <buffer_handle/number.hpp>
+//Defined in buffer_handle/number.hpp
 
 template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits>
 struct integral_number_t
@@ -446,7 +452,7 @@ struct integral_number_t
 
 ###### Timezone
 ```cpp
-#include <buffer_handle/timezone.hpp>
+//Defined in buffer_handle/timezone.hpp
 
 template<config Config, align Align, char Pad>
 struct universal_timezone_t
@@ -502,6 +508,8 @@ struct differential_timezone_t
 ```
 ###### Container
 ```cpp
+//Defined in buffer_handle/container.hpp
+
 template<config Config, align Align, char Pad, class Element, class Separator>
 struct container_t
 {
@@ -518,6 +526,8 @@ struct container_t
 ###### [Itoa](https://github.com/amdn/itoa)
 
 ```cpp
+//Defined in buffer_handle/adapter/itoa.hpp
+
 namespace adapter
 {
   struct itoa
@@ -529,6 +539,19 @@ namespace adapter
     char * bwd(char * buffer, I i) const;
   };
 };
+```
+
+### Helpers
+
+####### Must write
+
+```cpp
+template<config Config, action Action>
+constexpr bool must_write()
+{
+  return (Config == config::static_ && Action == action::prepare)
+      || (Config == config::dynamic && Action != action::size);
+}
 ```
 
 ## Tests

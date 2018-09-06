@@ -2,6 +2,8 @@
 #include <cstring> // memset()
 #include <type_traits> // is_integral is_signed
 
+#include <buffer_handle/helper.hpp> // must_write()
+
 namespace buffer_handle
 {
   template<config Config, char InsteadOfALeadingZero, action Action, typename I> inline
@@ -10,8 +12,7 @@ namespace buffer_handle
     static_assert(std::is_integral<I>::value, "Template parameter I must be an integral type.");
     assert(0 <= i);
 
-    if((Config == config::static_ && Action == action::prepare)
-       || (Config == config::dynamic && Action != action::size))
+    if(must_write<Config, Action>())
       {
 	buffer[0] = '0' + i / 10;
 	buffer[1] = '0' + i - 10 * (buffer[0] - '0');
@@ -31,8 +32,7 @@ namespace buffer_handle
     static_assert(std::is_integral<I>::value, "Template parameter I must be an integral type.");
     assert(0 <= i);
 
-    if((Config == config::static_ && Action == action::prepare)
-       || (Config == config::dynamic && Action != action::size))
+    if(must_write<Config, Action>())
       {
 	buffer[0] = '0' + i / 1000;
 	i = i - 1000 * (buffer[0] - '0');

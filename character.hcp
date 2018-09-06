@@ -1,10 +1,11 @@
+#include <buffer_handle/helper.hpp> // must_write()
+
 namespace buffer_handle
 {
   template<config Config, action Action> inline
   char * character(char * buffer, char c)
   {
-    if((Config == config::static_ && Action == action::prepare)
-       || (Config == config::dynamic && Action != action::size))
+    if(must_write<Config, Action>())
       {
 	buffer[0] = c;
       }
