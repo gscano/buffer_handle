@@ -247,12 +247,17 @@ char * boolean(char * buffer, bool value);
 template<config Config, action Action>
 char * string(char * buffer, const char * value, std::size_t length);
 
+template<config Config, align Align, char Pad, action Action> inline
+char * string(char * buffer, const char * value, std::size_t length,
+	      std::size_t max_length, std::size_t & previous_length);
+
 template<config Config, align Align, char Pad, action Action>
 char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length);
 ```
 
 * If ```value == nullptr``` then the buffer will be padded with ```max_length``` characters.
 * If ```value != nullptr``` then its ```length``` must be ```<=``` to ```max_length```.
+* The `previous_length` argument is used to avoid padding large buffers which content are usually slightly modified.
 
 ###### Number
 ```cpp
@@ -430,7 +435,18 @@ struct string_t
   template<action Action>
   char * handle(char * buffer) const;
 };
+
+template<config Config, align Align, char Pad>
+struct recycled_string_t : public string_t<Config, Align, Pad>
+{
+  recycled_string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
+
+  template<action Action>
+  char * handle(char * buffer) const;
+};
 ```
+
+* `recycled_string_t::handle` uses the `previous_length` version of `string()`.
 
 ###### Number
 ```cpp

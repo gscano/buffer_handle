@@ -12,6 +12,9 @@ namespace buffer_handle
   template<config Config, action Action>
   char * string(char * buffer, const char * value, std::size_t length);
 
+  template<config Config, align Align, char Pad, action Action> inline
+  char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length, std::size_t & previous_length);
+
   template<config Config, align Align, char Pad, action Action>
   char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length);
 
@@ -27,6 +30,20 @@ namespace buffer_handle
 
   protected:
     std::size_t max_length;
+
+  public:
+    template<action Action>
+    char * handle(char * buffer) const;
+  };
+
+  template<config Config, align Align, char Pad>
+  struct recycled_string_t : public string_t<Config, Align, Pad>
+  {
+  public:
+    recycled_string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
+
+  protected:
+    std::size_t previous_length;
 
   public:
     template<action Action>
