@@ -544,13 +544,16 @@ struct container_t
 ```cpp
 namespace adapter
 {
-  struct itoa
+  namespace itoa
   {
-    template<typename I>
-    char * fwd(char * buffer, I i) const;
+    struct NAME
+    {
+      template<typename I>
+      char * fwd(char * buffer, I i) const;
 
-    template<typename I>
-    char * bwd(char * buffer, I i) const;
+      template<typename I>
+      char * bwd(char * buffer, I i) const;
+    };
   };
 };
 ```
