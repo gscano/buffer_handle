@@ -87,6 +87,7 @@ namespace buffer_handle
     return universal_timezone<Config, Align, Pad, Action>(buffer, this->value);
   }
 
+  inline
   const char * north_american_timezone(enum north_american_timezone value)
   {
     switch(value)
@@ -103,7 +104,7 @@ namespace buffer_handle
       }
   }
 
-  template<config Config, action Action>
+  template<config Config, action Action> inline
   char * north_american_timezone(char * buffer, enum north_american_timezone value)
   {
     if(must_write<Config, Action>())
@@ -125,7 +126,7 @@ namespace buffer_handle
   template<action Action> inline
   char * north_american_timezone_t<Config>::handle(char * buffer) const
   {
-    return north_american_timezone(buffer, this->value);
+    return north_american_timezone<Config, Action>(buffer, this->value);
   }
 
   namespace details

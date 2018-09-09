@@ -1,0 +1,58 @@
+#include <cassert> // assert()
+#include <cstring> // memset()
+
+namespace buffer_handle
+{
+  template<config Config, action Action> inline
+  constexpr bool must_write()
+  {
+    return (Config == config::static_ && Action == action::prepare)
+      || (Config == config::dynamic && Action != action::size);
+  }
+
+  template<bool UsePreviousLength, char Pad, typename Size> inline
+  void pad_left(char * begin, char * end, Size max_length, Size & previous_length)//for align::right content
+  {
+    Size current_length = (begin + max_length) - end;
+
+    assert(current_length <= max_length);
+    assert(previous_length <= max_length);
+
+    if(UsePreviousLength)
+      {
+	if(current_length < previous_length)
+	  {
+	    std::memset(begin + max_length - previous_length, Pad, previous_length - current_length);
+	  }
+
+	previous_length = current_length;
+      }
+    else
+      {
+	std::memset(begin, Pad, end - begin);// == max_length - current_length
+      }
+  }
+
+  template<bool UsePreviousLength, char Pad, typename Size> inline
+  void pad_right(char * begin, char * end, Size max_length, Size & previous_length)//for align::left content
+  {
+    Size current_length = end - begin;
+
+    assert(current_length <= max_length);
+    assert(previous_length <= max_length);
+
+    if(UsePreviousLength)
+      {
+	if(current_length < previous_length)
+	  {
+	    std::memset(end, Pad, previous_length - current_length);
+	  }
+
+	previous_length = current_length;
+      }
+    else
+      {
+	std::memset(end, Pad, max_length - current_length);
+      }
+  }
+};

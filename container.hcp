@@ -1,11 +1,9 @@
-#include <cstring> // memset()
-
 namespace buffer_handle
 {
   namespace details
   {
     template<config Config, align Align, action Action,
-	     typename Iterator, class Element, class Separator> inline
+	     class Element, class Separator, typename Iterator> inline
     char * container_process(char * buffer, const Iterator & begin, const Iterator & end,
 			     Element & element, Separator & separator)
     {
@@ -37,57 +35,85 @@ namespace buffer_handle
 
       return buffer;
     }
+
+    template<config Config, align Align, char Pad, action Action,
+	     class Element, class Separator, typename Iterator, bool UsePreviousLength> inline
+    char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
+		     Element & element, Separator & separator, std::size_t & previous_length)
+    {
+      if(Config == config::static_)
+	{
+	  if(Align == align::right)
+	    {
+	      buffer += -(std::size_t)details::container_process<config::static_, Align, action::size, Element, Separator, Iterator>(nullptr, begin, end, element, separator);
+	    }
+
+	  char * local = buffer;
+
+	  if(Action == action::prepare)
+	    {
+	      local = details::container_process<Config, Align, Action, Element, Separator, Iterator>(local, begin, end, element, separator);
+	    }
+
+	  if(Align == align::left)
+	    {
+	      buffer = local;
+	    }
+	}
+      else if(Config == config::dynamic)
+	{
+	  switch(Action)
+	    {
+	    case action::prepare:
+	      {
+		if(UsePreviousLength)
+		  {
+		    previous_length = max_length;
+		  }
+	      }
+	    case action::write:
+	    case action::reset:
+	      {
+		std::size_t current_length = 0;
+
+		if(Align == align::left)
+		  {
+		    char * local = details::container_process<Config, Align, Action, Element, Separator, Iterator>(buffer, begin, end, element, separator);
+
+		    pad_right<UsePreviousLength, Pad>(buffer, local, max_length, previous_length);
+		  }
+		else if(Align == align::right)
+		  {
+		    char * local = details::container_process<Config, Align, Action, Element, Separator, Iterator>(buffer + max_length, begin, end, element, separator);
+
+		    pad_left<UsePreviousLength, Pad>(buffer, local, max_length, previous_length);
+		  }
+	      }
+	    }
+
+	  buffer += max_length;
+	}
+
+      return buffer;
+    }
   };
 
   template<config Config, align Align, char Pad, action Action,
-	   typename Iterator, class Element, class Separator> inline
+	   class Element, class Separator, typename Iterator> inline
+  char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
+		   Element & element, Separator & separator, std::size_t & previous_length)
+  {
+    return details::container<Config, Align, Pad, Action, Element, Separator, Iterator, true>
+      (buffer, begin, end, max_length, element, separator, previous_length);
+  }
+
+  template<config Config, align Align, char Pad, action Action,
+	   class Element, class Separator, typename Iterator> inline
   char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
 		   Element & element, Separator & separator)
   {
-    if(Config == config::static_)
-      {
-	if(Align == align::right)
-	  {
-	    buffer += -(std::size_t)details::container_process<config::static_, Align, action::size>(nullptr, begin, end, element, separator);
-	  }
-
-	char * local = buffer;
-
-	if(Action == action::prepare)
-	  {
-	    local = details::container_process<Config, Align, Action>(local, begin, end, element, separator);
-	  }
-
-	if(Align == align::left)
-	  {
-	    buffer = local;
-	  }
-      }
-    else if(Config == config::dynamic)
-      {
-	switch(Action)
-	  {
-	  case action::prepare:
-	  case action::write:
-	  case action::reset:
-	    {
-	      if(Align == align::left)
-		{
-		  char * local = details::container_process<Config, Align, Action>(buffer, begin, end, element, separator);
-		  std::memset(local, Pad, max_length - (local - buffer));
-		}
-	      else if(Align == align::right)
-		{
-		  char * local = details::container_process<Config, Align, Action>(buffer + max_length, begin, end, element, separator);
-		  std::memset(buffer, Pad, local - buffer);
-		}
-	    }
-	  }
-
-	buffer += max_length;
-      }
-
-    return buffer;
+    return details::container<Config, Align, Pad, Action, Element, Separator, Iterator, false>
+      (buffer, begin, end, max_length, element, separator, max_length);
   }
 
   template<config Config, align Align, char Pad, class Element, class Separator> inline
@@ -103,6 +129,21 @@ namespace buffer_handle
   template<action Action, class Iterator> inline
   char * container_t<Config, Align, Pad, Element, Separator>::handle(char * buffer, const Iterator & begin, const Iterator & end)
   {
-    return container<Config, Align, Pad, Action, Iterator, Element, Separator>(buffer, begin, end, this->max_length, this->element, this->separator);
+    return container<Config, Align, Pad, Action, Element, Separator, Iterator>(buffer, begin, end, this->max_length, this->element, this->separator);
+  }
+
+  template<config Config, align Align, char Pad, class Element, class Separator> inline
+  long_container_t<Config, Align, Pad, Element, Separator>::long_container_t(std::size_t max_length, const Element & element /* = Element() */, const Separator & separator /* = Separator() */) :
+    container_t<Config, Align, Pad, Element, Separator>(max_length, element, separator),
+    previous_length(0)
+  {
+
+  }
+
+  template<config Config, align Align, char Pad, class Element, class Separator>
+  template<action Action, class Iterator> inline
+  char * long_container_t<Config, Align, Pad, Element, Separator>::handle(char * buffer, const Iterator & begin, const Iterator & end)
+  {
+    return container<Config, Align, Pad, Action, Element, Separator, Iterator>(buffer, begin, end, this->max_length, this->element, this->separator, this->previous_length);
   }
 };

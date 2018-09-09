@@ -1,5 +1,4 @@
 #include <cassert> // assert()
-#include <cstring> // memset()
 #include <type_traits> // is_integral is_signed
 
 #include <buffer_handle/helper.hpp> // must_write()
@@ -52,68 +51,109 @@ namespace buffer_handle
     constexpr uint8_t digits(T number, bool no_digits = true);
   }
 
-  template<config Config, align Align, char Pad, class Itoa, action Action, typename I, typename MaxDigits> inline
-  char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa /* = Itoa() */)
+  namespace details
   {
-    static_assert(std::is_integral<I>::value, "Template parameter T must be an integral type.");
+    template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits, bool UsePreviousDigits> inline
+    char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa, MaxDigits & previous_digits)
+    {
+      static_assert(std::is_integral<I>::value, "Template parameter T must be an integral type.");
 
-    if(Config == config::static_)
-      {
-	if(Action == action::prepare)
-	  {
-	    max_digits = details::digits(i);
-	    itoa.template fwd<I>(buffer, i);
-	  }
-
-	buffer += details::digits(i);
-      }
-    else if(Config == config::dynamic)
-      {
-	switch(Action)
-	  {
-	  case action::size:
-	    {
-	      return buffer + details::digits(i);
-	    }
-	  case action::prepare:
+      if(Config == config::static_)
+	{
+	  if(Action == action::prepare)
 	    {
 	      max_digits = details::digits(i);
+	      itoa.template fwd<I>(buffer, i);
 	    }
-	  case action::write:
-	  case action::reset:
+
+	  buffer += details::digits(i);
+	}
+      else if(Config == config::dynamic)
+	{
+	  switch(Action)
 	    {
-	      if(Align == align::left)
-		{
-		  char * local = itoa.template fwd<I>(buffer, i);
-		  std::memset(local, Pad, max_digits - (local - buffer));
-		}
-	      else if(Align == align::right)
-		{
-		  char * local = itoa.template bwd<I>(buffer + max_digits, i);
-		  std::memset(buffer, Pad, local - buffer);
-		}
+	    case action::size:
+	      {
+		return buffer + details::digits(i);
+	      }
+	    case action::prepare:
+	      {
+		max_digits = details::digits(i);
+
+		if(UsePreviousDigits)
+		  {
+		    previous_digits = 0;
+		  }
+	      }
+	    case action::write:
+	    case action::reset:
+	      {
+		assert(previous_digits <= max_digits);
+
+		MaxDigits current_digits = 0;
+
+		if(Align == align::left)
+		  {
+		    char * local = itoa.template fwd<I>(buffer, i);
+
+		    pad_right<UsePreviousDigits, Pad>(buffer, local, max_digits, previous_digits);
+		  }
+		else if(Align == align::right)
+		  {
+		    char * local = itoa.template bwd<I>(buffer + max_digits, i);
+
+		    pad_left<UsePreviousDigits, Pad>(buffer, local, max_digits, previous_digits);
+		  }
+	      }
 	    }
-	  }
 
-	buffer += max_digits;
-      }
+	  buffer += max_digits;
+	}
 
-    return buffer;
+      return buffer;
+    }
+  };
+
+  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits = uint8_t>
+  char * integral_number(char * buffer, I i, MaxDigits & max_digits, MaxDigits & previous_digits, const Itoa & itoa)
+  {
+    return details::integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits, true>(buffer, i, max_digits, itoa, previous_digits);
   }
 
-  template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits> inline
-  integral_number_t<Config, Align, Pad, Itoa, I, MaxDigits>::integral_number_t(I i /* = I() */) :
+  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits = uint8_t>
+  char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa)
+  {
+    return details::integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits, false>(buffer, i, max_digits, itoa, max_digits);
+  }
+
+  template<config Config, align Align, char Pad, typename I, typename MaxDigits> inline
+  integral_number_t<Config, Align, Pad, I, MaxDigits>::integral_number_t(I i /* = I() */) :
     value(i),
     max_digits(0)
   {
 
   }
 
-  template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits>
-  template<action Action> inline
-  char * integral_number_t<Config, Align, Pad, Itoa, I, MaxDigits>::handle(char * buffer, const Itoa & itoa /* = Itoa() */)
+  template<config Config, align Align, char Pad, typename I, typename MaxDigits>
+  template<action Action, class Itoa> inline
+  char * integral_number_t<Config, Align, Pad, I, MaxDigits>::handle(char * buffer, const Itoa & itoa /* = Itoa() */)
   {
-    return integral_number<Config, Align, Pad, Itoa, Action, I, MaxDigits>(buffer, this->value, this->max_digits, itoa);
+    return integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits>(buffer, this->value, this->max_digits, itoa);
+  }
+
+  template<config Config, align Align, char Pad, typename I, typename MaxDigits> inline
+  long_integral_number_t<Config, Align, Pad, I, MaxDigits>::long_integral_number_t(I i /* = I() */) :
+    integral_number_t<Config, Align, Pad, I, MaxDigits>(i),
+    previous_digits(0)
+  {
+
+  }
+
+  template<config Config, align Align, char Pad, typename I, typename MaxDigits>
+  template<action Action, class Itoa> inline
+  char * long_integral_number_t<Config, Align, Pad, I, MaxDigits>::handle(char * buffer, const Itoa & itoa /* = Itoa() */)
+  {
+    return integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits>(buffer, this->value, this->max_digits, this->previous_digits, itoa);
   }
 
   namespace details

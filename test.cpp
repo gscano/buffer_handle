@@ -13,6 +13,8 @@
 #include <buffer_handle/timezone.hpp>
 #include <buffer_handle/token.hpp>
 
+#include <buffer_handle/helper.hpp>
+
 #include <buffer_handle/adapter/itoa/to_string.hpp>
 
 using namespace buffer_handle;
@@ -25,9 +27,11 @@ using namespace buffer_handle;
 
 SCENARIO("Boolean", "[boolean]")
 {
+  const char pad = ' ';
+
   WHEN("Static, any case, left or right aligned, any pad")
     {
-      REQUIRE(((std::size_t)boolean<config::static_, case_::lower, align::left, ' ', action::size>(nullptr, true) == 4));
+      REQUIRE(((std::size_t)boolean<config::static_, case_::lower, align::left, pad, action::size>(nullptr, true) == 4));
 
       GIVEN("Size")
 	{
@@ -35,7 +39,7 @@ SCENARIO("Boolean", "[boolean]")
 	    {
 	      THEN("Prepare")
 		{
-		  end = boolean<config::static_, case_::lower, align::left, ' ', action::prepare>(begin, true);
+		  end = boolean<config::static_, case_::lower, align::left, pad, action::prepare>(begin, true);
 
 		  REQUIRE(end - begin == 4);
 		  REQUIRE(std::string(begin, end) == "true");
@@ -48,7 +52,7 @@ SCENARIO("Boolean", "[boolean]")
     {
       WHEN("Left-aligned")
 	{
-	  REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::left, ' ', action::size>(nullptr, true) == 5));
+	  REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::left, pad, action::size>(nullptr, true) == 5));
 
 	  GIVEN("Size")
 	    {
@@ -58,7 +62,7 @@ SCENARIO("Boolean", "[boolean]")
 		    {
 		      WHEN("True")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::prepare>(begin, true);
+			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::prepare>(begin, true);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "true ");
@@ -66,7 +70,7 @@ SCENARIO("Boolean", "[boolean]")
 
 		      WHEN("False")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::prepare>(begin, false);
+			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::prepare>(begin, false);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "false");
@@ -77,7 +81,7 @@ SCENARIO("Boolean", "[boolean]")
 		    {
 		      WHEN("True")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::write>(begin, true);
+			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::write>(begin, true);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "true ");
@@ -85,7 +89,7 @@ SCENARIO("Boolean", "[boolean]")
 
 		      WHEN("False")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::write>(begin, false);
+			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::write>(begin, false);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "false");
@@ -96,7 +100,7 @@ SCENARIO("Boolean", "[boolean]")
 		    {
 		      WHEN("True")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::reset>(begin, true);
+			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::reset>(begin, true);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "true ");
@@ -104,7 +108,7 @@ SCENARIO("Boolean", "[boolean]")
 
 		      WHEN("False")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::left, ' ', action::reset>(begin, false);
+			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::reset>(begin, false);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "false");
@@ -116,7 +120,7 @@ SCENARIO("Boolean", "[boolean]")
 
       WHEN("Right-aligned")
 	{
-	  REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::right, ' ', action::size>(nullptr, true) == 5));
+	  REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::right, pad, action::size>(nullptr, true) == 5));
 
 	  GIVEN("Size")
 	    {
@@ -126,7 +130,7 @@ SCENARIO("Boolean", "[boolean]")
 		    {
 		      WHEN("True")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::prepare>(begin, true);
+			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::prepare>(begin, true);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == " true");
@@ -134,7 +138,7 @@ SCENARIO("Boolean", "[boolean]")
 
 		      WHEN("False")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::prepare>(begin, false);
+			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::prepare>(begin, false);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "false");
@@ -145,7 +149,7 @@ SCENARIO("Boolean", "[boolean]")
 		    {
 		      WHEN("True")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::write>(begin, true);
+			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::write>(begin, true);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == " true");
@@ -153,7 +157,7 @@ SCENARIO("Boolean", "[boolean]")
 
 		      WHEN("False")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::write>(begin, false);
+			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::write>(begin, false);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "false");
@@ -164,7 +168,7 @@ SCENARIO("Boolean", "[boolean]")
 		    {
 		      WHEN("True")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::reset>(begin, true);
+			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::reset>(begin, true);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == " true");
@@ -172,7 +176,7 @@ SCENARIO("Boolean", "[boolean]")
 
 		      WHEN("False")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::right, ' ', action::reset>(begin, false);
+			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::reset>(begin, false);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "false");
@@ -212,7 +216,7 @@ SCENARIO("Character", "[character]")
 	  REQUIRE(c == 'c');
 	}
 
-      WHEN("Prepare")
+      WHEN("Write")
 	{
 	  end = character<config::dynamic, action::write>(begin, 'c');
 
@@ -220,7 +224,7 @@ SCENARIO("Character", "[character]")
 	  REQUIRE(c == 'c');
 	}
 
-      WHEN("Prepare")
+      WHEN("Reset")
 	{
 	  end = character<config::dynamic, action::reset>(begin, 'c');
 
@@ -276,8 +280,8 @@ SCENARIO("Container", "[container]")
 
   GIVEN("A container and its iterators")
     {
-      element_handler_t<typename list_type::const_iterator > element_handler;
-      element_handler_t<typename list_type::const_reverse_iterator > reverse_element_handler;
+      element_handler_t<typename list_type::const_iterator> element_handler;
+      element_handler_t<typename list_type::const_reverse_iterator> reverse_element_handler;
 
       separator_t separator;
 
@@ -513,6 +517,28 @@ SCENARIO("Container", "[container]")
 			}
 		    }
 		}
+	    }
+
+	  WHEN("container_t")
+	    {
+	      typedef container_t<config::dynamic, align::left, ' ', element_handler_t<typename list_type::const_iterator>, separator_t> container_type;
+
+	      container_type container = container_type(64);
+
+	      std::size_t size = (std::size_t)container.handle<action::size>(nullptr, cbegin, cend);
+
+	      REQUIRE(size == 64);
+	    }
+
+	  WHEN("long_container_t")
+	    {
+	      typedef long_container_t<config::dynamic, align::left, ' ', element_handler_t<typename list_type::const_iterator>, separator_t> container_type;
+
+	      container_type container = container_type(128);
+
+	      std::size_t size = (std::size_t)container.handle<action::size>(nullptr, cbegin, cend);
+
+	      REQUIRE(size == 128);
 	    }
 	}
     }
@@ -1018,6 +1044,88 @@ SCENARIO("Date", "[date]")
     }
 }
 
+SCENARIO("Helper", "[helper]")
+{
+  const char pad = ' ';
+
+  const char reference[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+  char buffer[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+  const std::size_t max_length = std::strlen(buffer);
+  char * begin = buffer;
+  char * end = buffer + max_length;
+
+  GIVEN("A buffer")
+    {
+      WHEN("Pad left")
+	{
+	  std::size_t previous_length = max_length;
+
+	  WHEN("Use previous length")
+	    {
+	      THEN("Keep all")
+		{
+		  pad_left<true, pad>(begin + max_length, end, max_length, previous_length);
+
+		  REQUIRE(previous_length == max_length);
+		  REQUIRE(std::string(begin, end) == reference);
+		}
+
+	      THEN("Keep all characters but the first 10")
+		{
+		  pad_left<true, pad>(begin, end - 10, max_length, previous_length);
+
+		  REQUIRE(previous_length == 10);
+		  REQUIRE(std::string(begin, end) == (std::string(max_length - 10, pad) + std::string(reference).substr(max_length - 10)));
+		}
+	    }
+
+	  WHEN("Not use previous length")
+	    {
+	      THEN("Keep all characters but the first 10")
+		{
+		  pad_left<false, pad>(begin, end - 10, max_length, previous_length);
+
+		  REQUIRE(std::string(begin, end) == std::string(max_length - 10, pad) + std::string(reference).substr(max_length - 10));
+		}
+	    }
+	}
+
+      WHEN("Pad right")
+	{
+	  std::size_t previous_length = max_length;
+
+	  WHEN("Use previous length")
+	    {
+	      THEN("Keep all")
+		{
+		  pad_right<true, pad>(begin, end, max_length, previous_length);
+
+		  REQUIRE(previous_length == max_length);
+		  REQUIRE(std::string(begin, end) == reference);
+		}
+
+	      THEN("Keep first 10 characters")
+		{
+		  pad_right<true, pad>(begin, begin + 10, max_length, previous_length);
+
+		  REQUIRE(previous_length == 10);
+		  REQUIRE(std::string(begin, end) == std::string(reference).substr(0, 10) + std::string(max_length - 10, pad));
+		}
+	    }
+
+	  WHEN("Not use previous length")
+	    {
+	      THEN("Keep first 10 characters")
+		{
+		  pad_right<false, pad>(begin, begin + 10, max_length, previous_length);
+
+		  REQUIRE(std::string(begin, end) == std::string(reference).substr(0, 10) + std::string(max_length - 10, pad));
+		}
+	    }
+	}
+    }
+}
+
 SCENARIO("Itoa adapter", "[itoa, adapter]")
 {
   char buffer[64] = {0};
@@ -1231,11 +1339,13 @@ SCENARIO("Number", "[Number]")
       uint8_t max_digits = 0;
       const char pad = ' ';
 
+      adapter::itoa::to_string_t itoa;
+
       WHEN("Static")
 	{
 	  WHEN("Left or right aligned, any padding")
 	    {
-	      std::size_t size = (std::size_t)integral_number<config::static_, align::left, pad, adapter::itoa::to_string_t, action::size>(nullptr, 1998, max_digits);
+	      std::size_t size = (std::size_t)integral_number<config::static_, align::left, pad, action::size>(nullptr, 1998, max_digits, itoa);
 
 	      GIVEN("Size")
 		{
@@ -1243,7 +1353,7 @@ SCENARIO("Number", "[Number]")
 		  {
 		    THEN("Prepare")
 		      {
-			end = integral_number<config::static_, align::left, pad, adapter::itoa::to_string_t, action::prepare>(begin, 1998, max_digits);
+			end = integral_number<config::static_, align::left, pad, action::prepare>(begin, 1998, max_digits, itoa);
 
 			REQUIRE(end == begin + 4);
 			REQUIRE(max_digits == 4);
@@ -1256,11 +1366,15 @@ SCENARIO("Number", "[Number]")
 
       WHEN("Dynamic")
 	{
+	  uint8_t previous_digits = 0;
+	  const uint8_t max_digits_ = 8;
+
 	  WHEN("Left-aligned")
 	    {
-	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::left, pad, adapter::itoa::to_string_t, action::size>(nullptr, 19237840, max_digits);
+	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::left, pad, action::size>(nullptr, 19237840, max_digits, previous_digits, itoa);
 
-	      REQUIRE(size == 8);
+	      REQUIRE(size == max_digits_);
+	      REQUIRE(previous_digits == 0);
 
 	      GIVEN("Size")
 		{
@@ -1268,27 +1382,40 @@ SCENARIO("Number", "[Number]")
 		  {
 		    THEN("Prepare")
 		      {
-			end = integral_number<config::dynamic, align::left, pad, adapter::itoa::to_string_t, action::prepare>(begin, 19237840, max_digits);
+			end = integral_number<config::dynamic, align::left, pad, action::prepare>(begin, 19237840, max_digits, previous_digits, itoa);
 
-			REQUIRE(end - begin == 8);
-			REQUIRE(max_digits == 8);
+			REQUIRE(end - begin == max_digits_);
+			REQUIRE(max_digits == max_digits_);
+			REQUIRE(previous_digits == max_digits);
 			REQUIRE(std::string(begin, end) == "19237840");
 
 			THEN("Write")
 			  {
-			    end = integral_number<config::dynamic, align::left, pad, adapter::itoa::to_string_t, action::write>(begin, 1923784, max_digits);
+			    end = integral_number<config::dynamic, align::left, pad, action::write>(begin, 1923784, max_digits, previous_digits, itoa);
 
-			    REQUIRE(end - begin == 8);
-			    REQUIRE(max_digits == 8);
+			    REQUIRE(end - begin == max_digits_);
+			    REQUIRE(max_digits == max_digits_);
+			    REQUIRE(previous_digits == 7);
 			    REQUIRE(std::string(begin, end) == "1923784 ");
 
 			    THEN("Reset")
 			      {
-				end = integral_number<config::dynamic, align::left, pad, adapter::itoa::to_string_t, action::reset>(begin, 19, max_digits);
+				end = integral_number<config::dynamic, align::left, pad, action::reset>(begin, 19, max_digits, previous_digits, itoa);
 
-				REQUIRE(end - begin == 8);
-				REQUIRE(max_digits == 8);
-				REQUIRE(std::string(begin, end) == "19" + std::string(8 - 2, pad));
+				REQUIRE(end - begin == max_digits_);
+				REQUIRE(max_digits == max_digits_);
+				REQUIRE(previous_digits == 2);
+				REQUIRE(std::string(begin, end) == "19" + std::string(max_digits_ - 2, pad));
+
+				THEN("Write")
+				  {
+				    end = integral_number<config::dynamic, align::left, pad, action::reset>(begin, 7326, max_digits, previous_digits, itoa);
+
+				    REQUIRE(end - begin == max_digits_);
+				    REQUIRE(max_digits == max_digits_);
+				    REQUIRE(previous_digits == 4);
+				    REQUIRE(std::string(begin, end) == "7326" + std::string(max_digits_ - 4, pad));
+				  }
 			      }
 			  }
 		      }
@@ -1298,9 +1425,10 @@ SCENARIO("Number", "[Number]")
 
 	  WHEN("Right-aligned")
 	    {
-	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::right, pad, adapter::itoa::to_string_t, action::size>(nullptr, 19237840, max_digits);
+	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::right, pad, action::size>(nullptr, 19237840, max_digits, previous_digits, itoa);
 
-	      REQUIRE(size == 8);
+	      REQUIRE(size == max_digits_);
+	      REQUIRE(previous_digits == 0);
 
 	      GIVEN("Size")
 		{
@@ -1308,27 +1436,40 @@ SCENARIO("Number", "[Number]")
 		  {
 		    THEN("Prepare")
 		      {
-			end = integral_number<config::dynamic, align::right, pad, adapter::itoa::to_string_t, action::prepare>(begin, 19237840, max_digits);
+			end = integral_number<config::dynamic, align::right, pad, action::prepare>(begin, 19237840, max_digits, previous_digits, itoa);
 
-			REQUIRE(end - begin == 8);
-			REQUIRE(max_digits == 8);
+			REQUIRE(end - begin == max_digits_);
+			REQUIRE(max_digits == max_digits_);
+			REQUIRE(previous_digits == max_digits_);
 			REQUIRE(std::string(begin, end) == "19237840");
 
 			THEN("Write")
 			  {
-			    end = integral_number<config::dynamic, align::right, pad, adapter::itoa::to_string_t, action::write>(begin, 1923784, max_digits);
+			    end = integral_number<config::dynamic, align::right, pad, action::write>(begin, 1923784, max_digits, previous_digits, itoa);
 
-			    REQUIRE(end - begin == 8);
-			    REQUIRE(max_digits == 8);
+			    REQUIRE(end - begin == max_digits_);
+			    REQUIRE(max_digits == max_digits_);
+			    REQUIRE(previous_digits == 7);
 			    REQUIRE(std::string(begin, end) == " 1923784");
 
 			    THEN("Reset")
 			      {
-				end = integral_number<config::dynamic, align::right, pad, adapter::itoa::to_string_t, action::reset>(begin, 19, max_digits);
+				end = integral_number<config::dynamic, align::right, pad, action::reset>(begin, 19, max_digits, previous_digits, itoa);
 
-				REQUIRE(end - begin == 8);
-				REQUIRE(max_digits == 8);
-				REQUIRE(std::string(begin, end) == std::string(8 - 2, pad) + "19");
+				REQUIRE(end - begin == max_digits_);
+				REQUIRE(max_digits == max_digits_);
+				REQUIRE(previous_digits == 2);
+				REQUIRE(std::string(begin, end) == std::string(max_digits_ - 2, pad) + "19");
+
+				THEN("Write")
+				  {
+				    end = integral_number<config::dynamic, align::right, pad, action::reset>(begin, 7236, max_digits, previous_digits, itoa);
+
+				    REQUIRE(end - begin == max_digits_);
+				    REQUIRE(max_digits == max_digits_);
+				    REQUIRE(previous_digits == 4);
+				    REQUIRE(std::string(begin, end) == std::string(max_digits_ - 4, pad) + "7236");
+				  }
 			      }
 			  }
 		      }
@@ -1336,6 +1477,32 @@ SCENARIO("Number", "[Number]")
 		}
 	    }
 	}
+    }
+
+  WHEN("integral_number_t")
+    {
+      adapter::itoa::to_string_t itoa;
+
+      typedef integral_number_t<config::dynamic, align::left, ' ', uint8_t> number_type;
+
+      number_type number = number_type(183);
+
+      std::size_t size = (std::size_t)number.handle<action::size>(nullptr, itoa);
+
+      REQUIRE(size == 3);
+    }
+
+  WHEN("long_integral_number_t")
+    {
+      adapter::itoa::to_string_t itoa;
+
+      typedef long_integral_number_t<config::dynamic, align::left, ' ', uint64_t> number_type;
+
+      number_type number = number_type(34378367);
+
+      std::size_t size = (std::size_t)number.handle<action::size>(nullptr, itoa);
+
+      REQUIRE(size == 8);
     }
 }
 
@@ -1346,6 +1513,14 @@ SCENARIO("Time", "[time]")
   WHEN("time_t")
     {
       //see integral_number
+      uint8_t max_digits;
+      adapter::itoa::to_string_t itoa;
+
+      time_t time = 8939;
+
+      std::size_t size = (std::size_t)time_<config::static_, align::left, pad, action::size>(nullptr, time, max_digits, itoa);
+
+      REQUIRE(size == 4);
     }
 
   WHEN("Hours and minutes")
@@ -1504,6 +1679,17 @@ SCENARIO("Timezone", "[timezone]")
 	}
     }
 
+  WHEN("universal_timezone_t")
+    {
+      typedef universal_timezone_t<config::dynamic, align::left, ' '> universal_timezone_type;
+
+      universal_timezone_type timezone;
+
+      std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
+
+      REQUIRE(size == 3);
+    }
+
   WHEN("north american")
     {
       WHEN("Static or dynamic")
@@ -1523,6 +1709,17 @@ SCENARIO("Timezone", "[timezone]")
 		}
 	    }
 	}
+    }
+
+  WHEN("north_american_timezone_t")
+    {
+      typedef north_american_timezone_t<config::dynamic> north_american_timezone_type;
+
+      north_american_timezone_type timezone;
+
+      std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
+
+      REQUIRE(size == 3);
     }
 
   WHEN("military")
@@ -1550,6 +1747,17 @@ SCENARIO("Timezone", "[timezone]")
 
 #undef TST
     }
+
+  WHEN("military_timezone_t")
+  {
+    typedef military_timezone_t<config::dynamic> military_timezone_type;
+
+    military_timezone_type timezone;
+
+    std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
+
+    REQUIRE(size == 1);
+  }
 
   WHEN("differential")
     {
@@ -1581,6 +1789,17 @@ SCENARIO("Timezone", "[timezone]")
 		}
 	    }
 	}
+    }
+
+  WHEN("differential_timezone_t")
+    {
+      typedef differential_timezone_t<config::dynamic, uint8_t, uint8_t> differential_timezone_type;
+
+      differential_timezone_type timezone;
+
+      std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
+
+      REQUIRE(size == 5);
     }
 }
 
@@ -1794,6 +2013,28 @@ SCENARIO("String", "[string]")
 		  }
 		}
 	    }
+	}
+
+      WHEN("string_t")
+	{
+	  typedef string_t<config::dynamic, align::left, ' '> string_type;
+
+	  string_type string = string_type(32);
+
+	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr);
+
+	  REQUIRE(size == 32);
+	}
+
+      WHEN("long_string_t")
+	{
+	  typedef long_string_t<config::dynamic, align::left, ' '> string_type;
+
+	  string_type string = string_type(32);
+
+	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr);
+
+	  REQUIRE(size == 32);
 	}
     }
 }

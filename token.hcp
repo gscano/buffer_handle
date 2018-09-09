@@ -1,4 +1,4 @@
-#include <buffer_handle/character.hpp>
+#include <buffer_handle/character.hpp> // character()
 
 namespace buffer_handle
 {

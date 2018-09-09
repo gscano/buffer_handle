@@ -6,10 +6,11 @@
 
 namespace buffer_handle
 {
-  template<config Config, align Align, char Pad, class Itoa, action Action, typename MaxDigits> inline
+  template<config Config, align Align, char Pad, action Action, class Itoa, typename MaxDigits> inline
   char * time_(char * buffer, time_t time, MaxDigits & max_digits, const Itoa & itoa /* = Itoa() */)
   {
-    return integral_number<Config, Align, Pad, Itoa, Action, time_t>(nullptr, time, max_digits, itoa);
+    return integral_number<Config, Align, Pad, Action, Itoa, time_t, MaxDigits>
+      (nullptr, time, max_digits, itoa);
   }
 
   template<config Config, action Action, typename Hours, typename Minutes> inline

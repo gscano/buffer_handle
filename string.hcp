@@ -16,80 +16,88 @@ namespace buffer_handle
     return buffer + length;
   }
 
+  namespace details
+  {
+    template<config Config, align Align, char Pad, action Action, bool UsePreviousLength> inline
+    char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length, std::size_t & previous_length)
+    {
+      if(Config == config::static_)
+	{
+	  if(Action == action::prepare)
+	    {
+	      assert(value != nullptr && "A static string requires a non null value initializer.");
+
+	      std::memcpy(buffer, value, length);
+	    }
+
+	  buffer += length;
+	}
+      else if(Config == config::dynamic)
+	{
+	  switch(Action)
+	    {
+	    case action::size:
+	      {
+		return buffer + max_length;
+	      }
+	    case action::prepare:
+	      {
+		if(UsePreviousLength)
+		  {
+		    previous_length = max_length;
+		  }
+	      }
+	    case action::write:
+	    case action::reset:
+	      {
+		if(value == nullptr)
+		  {
+		    std::memset(buffer, Pad, max_length);
+
+		    if(UsePreviousLength)
+		      {
+			previous_length = 0;
+		      }
+		  }
+		else
+		  {
+		    assert(length <= max_length);
+
+		    if(Align == align::left)
+		      {
+			std::memcpy(buffer, value, length);
+
+			pad_right<UsePreviousLength, Pad>(buffer, buffer + length, max_length, previous_length);
+		      }
+		    else if(Align == align::right)
+		      {
+			char * local = buffer + max_length - length;
+
+			std::memcpy(local, value, length);
+
+			pad_left<UsePreviousLength, Pad>(buffer, local, max_length, previous_length);
+		      }
+		  }
+	      }
+	    }
+
+	  buffer += max_length;
+	}
+
+      return buffer;
+    }
+  };
+
   template<config Config, align Align, char Pad, action Action> inline
   char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length, std::size_t & previous_length)
   {
-    if(Config == config::static_)
-      {
-	if(Action == action::prepare)
-	  {
-	    assert(value != nullptr && "A static string requires a non null value initializer.");
-
-	    std::memcpy(buffer, value, length);
-	  }
-
-	buffer += length;
-      }
-    else if(Config == config::dynamic)
-      {
-	switch(Action)
-	  {
-	  case action::size:
-	    {
-	      return buffer + max_length;
-	    }
-	  case action::prepare:
-	    {
-	      previous_length = max_length;
-	    }
-	  case action::write:
-	  case action::reset:
-	    {
-	      if(value == nullptr)
-		{
-		  std::memset(buffer, Pad, max_length);
-
-		  previous_length = 0;
-		}
-	      else
-		{
-		  assert(length <= max_length);
-		  assert(previous_length <= max_length);
-
-		  if(Align == align::left)
-		    {
-		      std::memcpy(buffer, value, length);
-
-		      if(length < previous_length)
-			{
-			  std::memset(buffer + length, Pad, previous_length - length);
-			}
-		    }
-		  else if(Align == align::right)
-		    {
-		      if(length < previous_length)
-			{
-			  std::memset(buffer + max_length - previous_length, Pad, previous_length - length);
-			}
-
-		      std::memcpy(buffer + max_length - length, value, length);
-		    }
-
-		  previous_length = length;
-		}
-	    }
-	  }
-
-	buffer += max_length;
-      }
-
-    return buffer;
+    return details::string<Config, Align, Pad, Action, true>(buffer, value, length, max_length, previous_length);
   }
 
   template<config Config, align Align, char Pad, action Action> inline
   char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length)
   {
-    return string<Config, Align, Pad, Action>(buffer, value, length, max_length, max_length);
+    return details::string<Config, Align, Pad, Action, false>(buffer, value, length, max_length, max_length);
   }
 
   template<config Config, align Align, char Pad> inline
@@ -103,13 +111,13 @@ namespace buffer_handle
 
   template<config Config, align Align, char Pad>
   template<action Action> inline
-  char * string_t<Config, Align, Pad>::handle(char * buffer) const
+  char * string_t<Config, Align, Pad>::handle(char * buffer)
   {
-    return string<Config, Action, Align, Pad>(buffer, this->value, this->length, this->max_length);
+    return string<Config, Align, Pad, Action>(buffer, this->value, this->length, this->max_length);
   }
 
   template<config Config, align Align, char Pad> inline
-  recycled_string_t<Config, Align, Pad>::recycled_string_t(std::size_t max_length, const char * value /* = nullptr */, std::size_t length /* = 0 */) :
+  long_string_t<Config, Align, Pad>::long_string_t(std::size_t max_length, const char * value /* = nullptr */, std::size_t length /* = 0 */) :
     string_t<Config, Align, Pad>(max_length, value, length),
     previous_length(max_length)
   {
@@ -118,8 +126,8 @@ namespace buffer_handle
 
   template<config Config, align Align, char Pad>
   template<action Action> inline
-  char * recycled_string_t<Config, Align, Pad>::handle(char * buffer) const
+  char * long_string_t<Config, Align, Pad>::handle(char * buffer)
   {
-    return string<Config, Action, Align, Pad>(buffer, this->value, this->length, this->max_length, this->previous_length);
+    return string<Config, Align, Pad, Action>(buffer, this->value, this->length, this->max_length, this->previous_length);
   }
 };

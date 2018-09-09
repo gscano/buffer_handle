@@ -1,10 +1,10 @@
 #ifndef HANDLE_BUFFER_BOOLEAN_HPP
 #define HANDLE_BUFFER_BOOLEAN_HPP
 
-#include <buffer_handle/action.hpp>
-#include <buffer_handle/align.hpp>
-#include <buffer_handle/case.hpp>
-#include <buffer_handle/config.hpp>
+#include <buffer_handle/action.hpp> // action
+#include <buffer_handle/align.hpp> // align
+#include <buffer_handle/case.hpp> // case
+#include <buffer_handle/config.hpp> // config
 
 namespace buffer_handle
 {

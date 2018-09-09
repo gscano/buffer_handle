@@ -1,7 +1,7 @@
 #ifndef BUFFER_HANDLE_NOTHING_HPP
 #define BUFFER_HANDLE_NOTHING_HPP
 
-#include <buffer_handle/action.hpp>
+#include <buffer_handle/action.hpp> // action
 
 namespace buffer_handle
 {

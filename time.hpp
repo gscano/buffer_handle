@@ -4,13 +4,13 @@
 #include <ctime> // time_t tm
 #include <cstdint> // uint8_t
 
-#include <buffer_handle/action.hpp>
-#include <buffer_handle/align.hpp>
-#include <buffer_handle/config.hpp>
+#include <buffer_handle/action.hpp> // action
+#include <buffer_handle/align.hpp> // align
+#include <buffer_handle/config.hpp> // config
 
 namespace buffer_handle
 {
-  template<config Config, align Align, char Pad, class Itoa, action Action, typename MaxDigits = uint8_t>
+  template<config Config, align Align, char Pad, action Action, class Itoa, typename MaxDigits = uint8_t>
   char * time_(char * buffer, time_t time, MaxDigits & max_digits, const Itoa & itoa = Itoa());
 
   template<config Config, action Action, typename Hours, typename Minutes>

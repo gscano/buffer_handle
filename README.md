@@ -22,7 +22,7 @@ There are four possible actions:
 * **Write** changing portions of a buffer
 * **Reset** default or given values to these portions
 
-In this library, **prepare**, **write** and **reset** actions all have the same behavior: they simply write the arguments. However, they could be used by applications in order to preempt and change their behavior as for instance:
+In this library, **prepare**, **write** and **reset** actions all have the same behavior: they simply write the arguments. However, the **prepare** action may change arguments passed by reference and should be called only once followed by **write** or **reset** actions. They could also be used by applications in order to preempt and change their behavior as for instance:
 ```cpp
 if(Action == action::reset)
 {
@@ -257,7 +257,7 @@ char * string(char * buffer, const char * value, std::size_t length, std::size_t
 
 * If ```value == nullptr``` then the buffer will be padded with ```max_length``` characters.
 * If ```value != nullptr``` then its ```length``` must be ```<=``` to ```max_length```.
-* The `previous_length` argument is used to avoid padding large buffers which content are usually slightly modified.
+* The `previous_length` argument is used to avoid padding large buffers which content are slightly modified.
 
 ###### Number
 ```cpp
@@ -269,7 +269,12 @@ char * two_digits_number(char * buffer, I i);
 template<config Config, action Action, typename I>
 char * four_digits_number(char * buffer, I i);
 
-template<config Config, align Align, char Pad, class Itoa, action Action,
+template<config Config, align Align, char Pad, action Action, class Itoa,
+	 typename I, typename MaxDigits = uint8_t>
+char * integral_number(char * buffer, I i, MaxDigits & max_digits, MaxDigits & previous_digits,
+		       const Itoa & itoa);
+
+template<config Config, align Align, char Pad, action Action, class Itoa,
 	 typename I, typename MaxDigits = uint8_t>
 char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa = Itoa());
 ```
@@ -279,12 +284,13 @@ char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & 
 * The `max_digits` argument is a reference because the function will assign it when **prepare** is called based on the value passed in `i`. This value should not be modified in later invocations.
 * `uint8_t` should be enough to encode the number of digits for most applications.
 * The `itoa` functor must conform to the provided [adapter](#itoa) contract.
+* The `previous_length` argument is used to avoid padding large buffers which content are slightly modified.
 
 ###### Time
 ```cpp
 //Defined in buffer_handle/time.hpp
 
-template<config Config, align Align, char Pad, class Itoa, action Action, typename MaxDigits = uint8_t>
+template<config Config, align Align, char Pad, action Action, class Itoa, typename MaxDigits = uint8_t>
 char * time_(char * buffer, time_t time, MaxDigits & max_digits, const Itoa & itoa = Itoa());
 
 template<config Config, action Action, typename Hours, typename Minutes>
@@ -327,7 +333,8 @@ char * differential_timezone(char * buffer, bool sign, Hours hours, Minutes minu
 ```cpp
 //Defined in buffer_handle/date.hpp
 
-template<config Config, char InsteadOfALeadingZeroForDay, char Separator, bool YearOn4Digits, action Action,
+template<config Config, char InsteadOfALeadingZeroForDay, char Separator, bool YearOn4Digits,
+	 action Action,
 	 typename Day, typename Month, typename Year>
 char * day_month_year(char * buffer, Day day, Month month, Year year);
 
@@ -394,18 +401,35 @@ namespace rfc1123//§5.2.14
   * `InsteadOfALeadingZeroForDay` can be `'\0'` in order to have a leading zero
   * `YearOn4Digits` toggles the year format to 'YYYY' instead of 'YY'
 * For functions accepting  directly a month or a year
-  * 1 is for January
-  * years start at 0 not 1900
+  * 1 is for January;
+  * years start at 0 not 1900.
 
 ###### Container
 ```cpp
 //Defined in buffer_handle/container.hpp
 
 template<config Config, align Align, char Pad, action Action,
-	 class Iterator, class Element, class Separator>
+	   class Element, class Separator, class Iterator>
 char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
 		 Element & element, Separator & separator);
+
+template<config Config, align Align, char Pad, action Action,
+	 class Element, class Separator, class Iterator>
+char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
+		 Element & element, Separator & separator, std::size_t & previous_length);
 ```
+
+* The `Element` contract must be
+  ```cpp
+  template<config Config, action Action>
+  char * handle(char * buffer, const Iterator & it) /* const */;
+  ```
+* The `Separator` contract must be
+  ```cpp
+  template<config Config, action Action>
+  char * handle(char * buffer) /* const */;
+  ```
+* The `previous_length` argument is used to avoid padding large buffers which content are slightly modified.
 
 ### Functors
 
@@ -437,16 +461,16 @@ struct string_t
 };
 
 template<config Config, align Align, char Pad>
-struct recycled_string_t : public string_t<Config, Align, Pad>
+struct long_string_t : public string_t<Config, Align, Pad>
 {
-  recycled_string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
+  long_string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
 
   template<action Action>
   char * handle(char * buffer) const;
 };
 ```
 
-* `recycled_string_t::handle` uses the `previous_length` version of `string()`.
+* `long_string_t::handle` uses the `previous_length` version of `string()`.
 
 ###### Number
 ```cpp
@@ -462,9 +486,19 @@ struct integral_number_t
   template<action Action>
   char * handle(char * buffer, const Itoa & itoa = Itoa());
 };
+
+template<config Config, align Align, char Pad, typename I, typename MaxDigits = uint8_t>
+struct long_integral_number_t : public integral_number_t<Config, Align, Pad, I, MaxDigits>
+{
+  long_integral_number_t(I value = I());
+
+  template<action Action, class Itoa>
+  char * handle(char * buffer, const Itoa & itoa = Itoa());
+};
 ```
 
 * The `itoa` functor must conform to the provided [adapter](#itoa) contract.
+* `long_integral_number_t::handle` uses the `previous_digits` version of `integral_number()`.
 
 ###### Timezone
 ```cpp
@@ -535,7 +569,18 @@ struct container_t
   template<action Action, class Iterator>
   char * handle(char * buffer, const Iterator & begin, const Iterator & end);
 };
+
+template<config Config, align Align, char Pad, class Element, class Separator>
+struct long_container_t : public container_t<Config, Align, Pad, Element, Separator>
+{
+  long_container_t(std::size_t max_length, const Element & element = Element(), const Separator & separator = Separator());
+
+  template<action Action, class Iterator>
+  char * handle(char * buffer, const Iterator & begin, const Iterator & end);
+};
 ```
+
+* `long_container_t::handle` uses the `previous_length` version of `container()`.
 
 ### Adapters
 
@@ -576,7 +621,15 @@ constexpr bool must_write()
   return (Config == config::static_ && Action == action::prepare)
       || (Config == config::dynamic && Action != action::size);
 }
+
+template<bool UsePreviousLength, char Pad, typename Size>
+void pad_left(char * begin, char * end, Size max_length, Size & previous_length);
+
+template<bool UsePreviousLength, char Pad, typename Size>
+void pad_right(char * begin, char * end, Size max_length, Size & previous_length);
 ```
+
+* `pad_left` and `pad_right` could be used to fill the left, respectively right, side of a buffer. For `pad_left`, the content to pad is between `begin` and `end` while for `pad_right` it is between `end` and `begin + max_length`. If `UsePreviousLength` is false then the `memset` will happen on these regions. However, if it is true, the `previous_length` argument will be compared to the current length. Then, if the previous length is smaller than the current length, no `memset` is required since the new content entirely overwrites the previous content. On the other hand, if the previous length is strictly bigger than the current length, the differential region between the previous and the actual content is reset by `memset`.
 
 ## Tests
 

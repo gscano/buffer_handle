@@ -42,13 +42,13 @@ namespace buffer_handle
 	      {
 		if(Align == align::left)
 		  {
-		    char * local = boolean_true<Case>(buffer);
-		    character<config::static_, action::prepare>(local, Pad);
+		    boolean_true<Case>(buffer);
+		    character<config::static_, action::prepare>(buffer + 4, Pad);
 		  }
 		else if(Align == align::right)
 		  {
-		    char * local = character<config::static_, action::prepare>(buffer, Pad);
-		    boolean_true<Case>(local);
+		    character<config::static_, action::prepare>(buffer, Pad);
+		    boolean_true<Case>(buffer + 1);
 		  }
 	      }
 	    else

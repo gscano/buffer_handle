@@ -3,9 +3,9 @@
 
 #include <cstddef> // size_t
 
-#include <buffer_handle/action.hpp>
-#include <buffer_handle/align.hpp>
-#include <buffer_handle/config.hpp>
+#include <buffer_handle/action.hpp> // action
+#include <buffer_handle/align.hpp> //align
+#include <buffer_handle/config.hpp> // config
 
 namespace buffer_handle
 {
@@ -33,21 +33,21 @@ namespace buffer_handle
 
   public:
     template<action Action>
-    char * handle(char * buffer) const;
+    char * handle(char * buffer);
   };
 
   template<config Config, align Align, char Pad>
-  struct recycled_string_t : public string_t<Config, Align, Pad>
+  struct long_string_t : public string_t<Config, Align, Pad>
   {
   public:
-    recycled_string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
+    long_string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
 
   protected:
     std::size_t previous_length;
 
   public:
     template<action Action>
-    char * handle(char * buffer) const;
+    char * handle(char * buffer);
   };
 };
 

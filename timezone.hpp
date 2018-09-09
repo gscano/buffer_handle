@@ -3,9 +3,9 @@
 
 #include <cstdint> // uint8_t
 
-#include <buffer_handle/action.hpp>
-#include <buffer_handle/align.hpp>
-#include <buffer_handle/config.hpp>
+#include <buffer_handle/action.hpp> // action
+#include <buffer_handle/align.hpp> // align
+#include <buffer_handle/config.hpp> // config
 
 namespace buffer_handle
 {
