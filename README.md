@@ -229,7 +229,8 @@ char * character(char * buffer, char c);
 //Defined in buffer_handle/token.hpp
 
 template<config Config, action Action>
-char * TOKEN(char * buffer);//TOKEN = new_line, carriage_return, space, comma, dot, colon, semicolon, equal
+char * TOKEN(char * buffer);
+//TOKEN = new_line, carriage_return, space, comma, dot, slash, colon, semicolon, equal
 ```
 
 ###### Boolean
