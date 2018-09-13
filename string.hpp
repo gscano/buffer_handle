@@ -22,32 +22,28 @@ namespace buffer_handle
   struct string_t
   {
   public:
-    string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
-
-  public:
-    const char * value;
-    std::size_t length;
+    string_t(std::size_t max_length);
 
   protected:
     std::size_t max_length;
 
   public:
     template<action Action>
-    char * handle(char * buffer);
+    char * handle(char * buffer, const char * value, std::size_t length);
   };
 
   template<config Config, align Align, char Pad>
   struct long_string_t : public string_t<Config, Align, Pad>
   {
   public:
-    long_string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
+    long_string_t(std::size_t max_length);
 
   protected:
     std::size_t previous_length;
 
   public:
     template<action Action>
-    char * handle(char * buffer);
+    char * handle(char * buffer, const char * value, std::size_t length);
   };
 };
 

@@ -521,22 +521,24 @@ SCENARIO("Container", "[container]")
 
 	  WHEN("container_t")
 	    {
-	      typedef container_t<config::dynamic, align::left, ' ', element_handler_t<typename list_type::const_iterator>, separator_t> container_type;
+	      typedef element_handler_t<typename list_type::const_iterator> element_handler_type;
+	      typedef container_t<config::dynamic, align::left, ' '> container_type;
 
 	      container_type container = container_type(64);
 
-	      std::size_t size = (std::size_t)container.handle<action::size>(nullptr, cbegin, cend);
+	      std::size_t size = (std::size_t)container.handle<action::size, typename list_type::const_iterator, const element_handler_type, const separator_t>(nullptr, cbegin, cend, element_handler_type(), separator_t());
 
 	      REQUIRE(size == 64);
 	    }
 
 	  WHEN("long_container_t")
 	    {
-	      typedef long_container_t<config::dynamic, align::left, ' ', element_handler_t<typename list_type::const_iterator>, separator_t> container_type;
+	      typedef element_handler_t<typename list_type::const_iterator> element_handler_type;
+	      typedef long_container_t<config::dynamic, align::left, ' '> container_type;
 
 	      container_type container = container_type(128);
 
-	      std::size_t size = (std::size_t)container.handle<action::size>(nullptr, cbegin, cend);
+	      std::size_t size = (std::size_t)container.handle<action::size, typename list_type::const_iterator, const element_handler_type, const separator_t>(nullptr, cbegin, cend, element_handler_type(), separator_t());
 
 	      REQUIRE(size == 128);
 	    }
@@ -1485,9 +1487,9 @@ SCENARIO("Number", "[Number]")
 
       typedef integral_number_t<config::dynamic, align::left, ' ', uint8_t> number_type;
 
-      number_type number = number_type(183);
+      number_type number = number_type();
 
-      std::size_t size = (std::size_t)number.handle<action::size>(nullptr, itoa);
+      std::size_t size = (std::size_t)number.handle<action::size>(nullptr, 183, itoa);
 
       REQUIRE(size == 3);
     }
@@ -1498,9 +1500,9 @@ SCENARIO("Number", "[Number]")
 
       typedef long_integral_number_t<config::dynamic, align::left, ' ', uint64_t> number_type;
 
-      number_type number = number_type(34378367);
+      number_type number = number_type();
 
-      std::size_t size = (std::size_t)number.handle<action::size>(nullptr, itoa);
+      std::size_t size = (std::size_t)number.handle<action::size>(nullptr, 34378367, itoa);
 
       REQUIRE(size == 8);
     }
@@ -2021,7 +2023,7 @@ SCENARIO("String", "[string]")
 
 	  string_type string = string_type(32);
 
-	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr);
+	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 0);
 
 	  REQUIRE(size == 32);
 	}
@@ -2032,7 +2034,7 @@ SCENARIO("String", "[string]")
 
 	  string_type string = string_type(32);
 
-	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr);
+	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 0);
 
 	  REQUIRE(size == 32);
 	}

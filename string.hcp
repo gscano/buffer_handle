@@ -101,9 +101,7 @@ namespace buffer_handle
   }
 
   template<config Config, align Align, char Pad> inline
-  string_t<Config, Align, Pad>::string_t(std::size_t max_length, const char * value /* = nullptr */, std::size_t length /* = 0 */) :
-    value(value),
-    length(length),
+  string_t<Config, Align, Pad>::string_t(std::size_t max_length) :
     max_length(max_length)
   {
 
@@ -111,14 +109,14 @@ namespace buffer_handle
 
   template<config Config, align Align, char Pad>
   template<action Action> inline
-  char * string_t<Config, Align, Pad>::handle(char * buffer)
+  char * string_t<Config, Align, Pad>::handle(char * buffer, const char * value, std::size_t length)
   {
-    return string<Config, Align, Pad, Action>(buffer, this->value, this->length, this->max_length);
+    return string<Config, Align, Pad, Action>(buffer, value, length, this->max_length);
   }
 
   template<config Config, align Align, char Pad> inline
-  long_string_t<Config, Align, Pad>::long_string_t(std::size_t max_length, const char * value /* = nullptr */, std::size_t length /* = 0 */) :
-    string_t<Config, Align, Pad>(max_length, value, length),
+  long_string_t<Config, Align, Pad>::long_string_t(std::size_t max_length) :
+    string_t<Config, Align, Pad>(max_length),
     previous_length(max_length)
   {
 
@@ -126,8 +124,8 @@ namespace buffer_handle
 
   template<config Config, align Align, char Pad>
   template<action Action> inline
-  char * long_string_t<Config, Align, Pad>::handle(char * buffer)
+  char * long_string_t<Config, Align, Pad>::handle(char * buffer, const char * value, std::size_t length)
   {
-    return string<Config, Align, Pad, Action>(buffer, this->value, this->length, this->max_length, this->previous_length);
+    return string<Config, Align, Pad, Action>(buffer, value, length, this->max_length, this->previous_length);
   }
 };

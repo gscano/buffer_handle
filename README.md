@@ -452,10 +452,7 @@ struct nothing_t
 template<config Config, align Align, char Pad>
 struct string_t
 {
-  string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
-
-  const char * value;
-  std::size_t length;
+  string_t(std::size_t max_length);
 
   template<action Action>
   char * handle(char * buffer) const;
@@ -464,7 +461,7 @@ struct string_t
 template<config Config, align Align, char Pad>
 struct long_string_t : public string_t<Config, Align, Pad>
 {
-  long_string_t(std::size_t max_length, const char * value = nullptr, std::size_t length = 0);
+  long_string_t(std::size_t max_length);
 
   template<action Action>
   char * handle(char * buffer) const;
@@ -480,21 +477,15 @@ struct long_string_t : public string_t<Config, Align, Pad>
 template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits>
 struct integral_number_t
 {
-  integral_number_t(I value = I());
-
-  I value;
-
   template<action Action>
-  char * handle(char * buffer, const Itoa & itoa = Itoa());
+  char * handle(char * buffer, I value, const Itoa & itoa = Itoa());
 };
 
 template<config Config, align Align, char Pad, typename I, typename MaxDigits = uint8_t>
 struct long_integral_number_t : public integral_number_t<Config, Align, Pad, I, MaxDigits>
 {
-  long_integral_number_t(I value = I());
-
   template<action Action, class Itoa>
-  char * handle(char * buffer, const Itoa & itoa = Itoa());
+  char * handle(char * buffer, I value, const Itoa & itoa = Itoa());
 };
 ```
 
@@ -557,27 +548,27 @@ struct differential_timezone_t
   char * handle(char * buffer) const;
 };
 ```
+
 ###### Container
 ```cpp
 //Defined in buffer_handle/container.hpp
 
-template<config Config, align Align, char Pad, class Element, class Separator>
+template<config Config, align Align, char Pad>
 struct container_t
 {
-  container_t(std::size_t max_length,
-	      const Element & element = Element(), const Separator & separator = Separator());
+  container_t(std::size_t max_length);
 
-  template<action Action, class Iterator>
-  char * handle(char * buffer, const Iterator & begin, const Iterator & end);
+  template<action Action, class Iterator, class Element, class Separator>
+  char * handle(char * buffer, Iterator & begin, Iterator & end, Element & element, Separator & separator);
 };
 
-template<config Config, align Align, char Pad, class Element, class Separator>
-struct long_container_t : public container_t<Config, Align, Pad, Element, Separator>
+template<config Config, align Align, char Pad>
+struct long_container_t : public container_t<Config, Align, Pad>
 {
-  long_container_t(std::size_t max_length, const Element & element = Element(), const Separator & separator = Separator());
+  long_container_t(std::size_t max_length);
 
-  template<action Action, class Iterator>
-  char * handle(char * buffer, const Iterator & begin, const Iterator & end);
+  template<action Action, class Iterator, class Element, class Separator>
+  char * handle(char * buffer, const Iterator & begin, const Iterator & end, Element & element, Separator & separator);
 };
 ```
 
@@ -640,4 +631,4 @@ Run `make test` to compile and `make run-test` to execute, or simply `make`.
 
 * [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.3.0](https://github.com/catchorg/Catch2/releases/tag/v2.3.0))
 
-To change the path of these dependencies, create a `config.mk` file and then assign `CATCH`  variables with the appropriate locations (`.` is used by default).
+To change the path of these dependencies, create a `config.mk` file and then assign the `CATCH` variable with the appropriate locations (`.` is used by default).

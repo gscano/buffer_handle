@@ -116,34 +116,32 @@ namespace buffer_handle
       (buffer, begin, end, max_length, element, separator, max_length);
   }
 
-  template<config Config, align Align, char Pad, class Element, class Separator> inline
-  container_t<Config, Align, Pad, Element, Separator>::container_t(std::size_t max_length, const Element & element /* = Element() */, const Separator & separator /* = Separator() */) :
-    max_length(max_length),
-    element(element),
-    separator(separator)
+  template<config Config, align Align, char Pad> inline
+  container_t<Config, Align, Pad>::container_t(std::size_t max_length) :
+    max_length(max_length)
   {
 
   }
 
-  template<config Config, align Align, char Pad, class Element, class Separator>
-  template<action Action, class Iterator> inline
-  char * container_t<Config, Align, Pad, Element, Separator>::handle(char * buffer, const Iterator & begin, const Iterator & end)
+  template<config Config, align Align, char Pad>
+  template<action Action, class Iterator, class Element, class Separator> inline
+  char * container_t<Config, Align, Pad>::handle(char * buffer, const Iterator & begin, const Iterator & end, Element & element, Separator & separator)
   {
-    return container<Config, Align, Pad, Action, Element, Separator, Iterator>(buffer, begin, end, this->max_length, this->element, this->separator);
+    return container<Config, Align, Pad, Action, Element, Separator, Iterator>(buffer, begin, end, this->max_length, element, separator);
   }
 
-  template<config Config, align Align, char Pad, class Element, class Separator> inline
-  long_container_t<Config, Align, Pad, Element, Separator>::long_container_t(std::size_t max_length, const Element & element /* = Element() */, const Separator & separator /* = Separator() */) :
-    container_t<Config, Align, Pad, Element, Separator>(max_length, element, separator),
+  template<config Config, align Align, char Pad> inline
+  long_container_t<Config, Align, Pad>::long_container_t(std::size_t max_length) :
+    container_t<Config, Align, Pad>(max_length),
     previous_length(0)
   {
 
   }
 
-  template<config Config, align Align, char Pad, class Element, class Separator>
-  template<action Action, class Iterator> inline
-  char * long_container_t<Config, Align, Pad, Element, Separator>::handle(char * buffer, const Iterator & begin, const Iterator & end)
+  template<config Config, align Align, char Pad>
+  template<action Action, class Iterator, class Element, class Separator> inline
+  char * long_container_t<Config, Align, Pad>::handle(char * buffer, const Iterator & begin, const Iterator & end, Element & element, Separator & separator)
   {
-    return container<Config, Align, Pad, Action, Element, Separator, Iterator>(buffer, begin, end, this->max_length, this->element, this->separator, this->previous_length);
+    return container<Config, Align, Pad, Action, Element, Separator, Iterator>(buffer, begin, end, this->max_length, element, separator, this->previous_length);
   }
 };

@@ -25,31 +25,28 @@ namespace buffer_handle
   struct integral_number_t
   {
   public:
-    integral_number_t(I value = I());
-
-  public:
-    I value;
+    integral_number_t();
 
   protected:
     MaxDigits max_digits;
 
   public:
     template<action Action, class Itoa>
-    char * handle(char * buffer, const Itoa & itoa = Itoa());
+    char * handle(char * buffer, I value, const Itoa & itoa = Itoa());
   };
 
   template<config Config, align Align, char Pad, typename I, typename MaxDigits = uint8_t>
   struct long_integral_number_t : public integral_number_t<Config, Align, Pad, I, MaxDigits>
   {
   public:
-    long_integral_number_t(I value = I());
+    long_integral_number_t();
 
   protected:
     MaxDigits previous_digits;
 
   public:
     template<action Action, class Itoa>
-    char * handle(char * buffer, const Itoa & itoa = Itoa());
+    char * handle(char * buffer, I value, const Itoa & itoa = Itoa());
   };
 };
 
