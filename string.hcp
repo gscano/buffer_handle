@@ -101,8 +101,8 @@ namespace buffer_handle
   }
 
   template<config Config, align Align, char Pad> inline
-  string_t<Config, Align, Pad>::string_t(std::size_t max_length) :
-    max_length(max_length)
+  string_t<Config, Align, Pad>::string_t() :
+    max_length(0)
   {
 
   }
@@ -111,13 +111,24 @@ namespace buffer_handle
   template<action Action> inline
   char * string_t<Config, Align, Pad>::handle(char * buffer, const char * value, std::size_t length)
   {
+    if(this->max_length == 0)
+      {
+	if(Action == action::size)
+	  {
+	    return buffer + length;
+	  }
+	else if(Action == action::prepare)
+	  {
+	    this->max_length = length;
+	  }
+      }
+
     return string<Config, Align, Pad, Action>(buffer, value, length, this->max_length);
   }
 
   template<config Config, align Align, char Pad> inline
-  long_string_t<Config, Align, Pad>::long_string_t(std::size_t max_length) :
-    string_t<Config, Align, Pad>(max_length),
-    previous_length(max_length)
+  long_string_t<Config, Align, Pad>::long_string_t() :
+    previous_length(0)
   {
 
   }
@@ -126,6 +137,18 @@ namespace buffer_handle
   template<action Action> inline
   char * long_string_t<Config, Align, Pad>::handle(char * buffer, const char * value, std::size_t length)
   {
+    if(this->max_length == 0)
+      {
+	if(Action == action::size)
+	  {
+	    return buffer + length;
+	  }
+	else if(Action == action::prepare)
+	  {
+	    this->max_length = length;
+	  }
+      }
+
     return string<Config, Align, Pad, Action>(buffer, value, length, this->max_length, this->previous_length);
   }
 };

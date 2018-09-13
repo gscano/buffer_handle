@@ -22,7 +22,7 @@ namespace buffer_handle
   struct string_t
   {
   public:
-    string_t(std::size_t max_length);
+    string_t();
 
   protected:
     std::size_t max_length;
@@ -36,7 +36,7 @@ namespace buffer_handle
   struct long_string_t : public string_t<Config, Align, Pad>
   {
   public:
-    long_string_t(std::size_t max_length);
+    long_string_t();
 
   protected:
     std::size_t previous_length;

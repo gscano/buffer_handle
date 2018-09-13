@@ -452,19 +452,15 @@ struct nothing_t
 template<config Config, align Align, char Pad>
 struct string_t
 {
-  string_t(std::size_t max_length);
-
   template<action Action>
-  char * handle(char * buffer) const;
+  char * handle(char * buffer, const char * value, std::size_t length) const;
 };
 
 template<config Config, align Align, char Pad>
 struct long_string_t : public string_t<Config, Align, Pad>
 {
-  long_string_t(std::size_t max_length);
-
   template<action Action>
-  char * handle(char * buffer) const;
+  char * handle(char * buffer, const char * value, std::size_t length) const;
 };
 ```
 

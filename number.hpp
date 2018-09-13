@@ -18,7 +18,7 @@ namespace buffer_handle
   template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits = uint8_t>
   char * integral_number(char * buffer, I i, MaxDigits & max_digits, MaxDigits & previous_digits, const Itoa & itoa);
 
-    template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits = uint8_t>
+  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits = uint8_t>
   char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa);
 
   template<config Config, align Align, char Pad, typename I, typename MaxDigits = uint8_t>

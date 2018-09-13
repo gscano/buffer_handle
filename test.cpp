@@ -2021,9 +2021,9 @@ SCENARIO("String", "[string]")
 	{
 	  typedef string_t<config::dynamic, align::left, ' '> string_type;
 
-	  string_type string = string_type(32);
+	  string_type string = string_type();
 
-	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 0);
+	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
 
 	  REQUIRE(size == 32);
 	}
@@ -2032,9 +2032,9 @@ SCENARIO("String", "[string]")
 	{
 	  typedef long_string_t<config::dynamic, align::left, ' '> string_type;
 
-	  string_type string = string_type(32);
+	  string_type string = string_type();
 
-	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 0);
+	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
 
 	  REQUIRE(size == 32);
 	}
