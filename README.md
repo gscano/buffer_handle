@@ -1,6 +1,6 @@
 # Handle buffer content
 
-When buffers are extensively used to send textual output, their management requires a work to be eased by this **C++ 14** library under [MIT license](LICENSE).
+When buffers are extensively used to send textual output, their management requires a work to be eased by this **C++ 11** library under [MIT license](LICENSE).
 
 * [Concept](#concept)
 * [Example](#example)
