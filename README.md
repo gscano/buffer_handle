@@ -465,6 +465,7 @@ struct long_string_t : public string_t<Config, Align, Pad>
 ```
 
 * `long_string_t::handle` uses the `previous_length` version of `string()`.
+* In this version, the maximum length will be set to `length` for **dynamic** configurations when called as **prepare** or when the **size** is required and the current maximum length has not been set, i.e. is `0`.
 
 ###### Number
 ```cpp
@@ -552,19 +553,19 @@ struct differential_timezone_t
 template<config Config, align Align, char Pad>
 struct container_t
 {
-  container_t(std::size_t max_length);
+  void set_max_length(std::size_t length);
 
   template<action Action, class Iterator, class Element, class Separator>
-  char * handle(char * buffer, Iterator & begin, Iterator & end, Element & element, Separator & separator);
+  char * handle(char * buffer, Iterator & begin, Iterator & end,
+		Element & element, Separator & separator);
 };
 
 template<config Config, align Align, char Pad>
 struct long_container_t : public container_t<Config, Align, Pad>
 {
-  long_container_t(std::size_t max_length);
-
   template<action Action, class Iterator, class Element, class Separator>
-  char * handle(char * buffer, const Iterator & begin, const Iterator & end, Element & element, Separator & separator);
+  char * handle(char * buffer, const Iterator & begin, const Iterator & end,
+		Element & element, Separator & separator);
 };
 ```
 

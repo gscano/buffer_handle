@@ -22,7 +22,10 @@ namespace buffer_handle
   struct container_t
   {
   public:
-    container_t(std::size_t max_length);
+    container_t();
+
+  public:
+    void set_max_length(std::size_t length);
 
   protected:
     std::size_t max_length;
@@ -36,7 +39,7 @@ namespace buffer_handle
   struct long_container_t : public container_t<Config, Align, Pad>
   {
   public:
-    long_container_t(std::size_t max_length);
+    long_container_t();
 
   protected:
     std::size_t previous_length;

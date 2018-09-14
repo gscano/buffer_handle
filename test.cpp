@@ -524,7 +524,9 @@ SCENARIO("Container", "[container]")
 	      typedef element_handler_t<typename list_type::const_iterator> element_handler_type;
 	      typedef container_t<config::dynamic, align::left, ' '> container_type;
 
-	      container_type container = container_type(64);
+	      container_type container = container_type();
+
+	      container.set_max_length(64);
 
 	      std::size_t size = (std::size_t)container.handle<action::size, typename list_type::const_iterator, const element_handler_type, const separator_t>(nullptr, cbegin, cend, element_handler_type(), separator_t());
 
@@ -536,7 +538,9 @@ SCENARIO("Container", "[container]")
 	      typedef element_handler_t<typename list_type::const_iterator> element_handler_type;
 	      typedef long_container_t<config::dynamic, align::left, ' '> container_type;
 
-	      container_type container = container_type(128);
+	      container_type container = container_type();
+
+	      container.set_max_length(128);
 
 	      std::size_t size = (std::size_t)container.handle<action::size, typename list_type::const_iterator, const element_handler_type, const separator_t>(nullptr, cbegin, cend, element_handler_type(), separator_t());
 

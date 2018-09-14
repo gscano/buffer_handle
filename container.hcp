@@ -1,3 +1,5 @@
+#include <buffer_handle/helper.hpp> // pad_left() pad_right()
+
 namespace buffer_handle
 {
   namespace details
@@ -117,10 +119,16 @@ namespace buffer_handle
   }
 
   template<config Config, align Align, char Pad> inline
-  container_t<Config, Align, Pad>::container_t(std::size_t max_length) :
-    max_length(max_length)
+  container_t<Config, Align, Pad>::container_t() :
+    max_length(0)
   {
 
+  }
+
+  template<config Config, align Align, char Pad> inline
+  void container_t<Config, Align, Pad>::set_max_length(std::size_t length)
+  {
+    this->max_length = length;
   }
 
   template<config Config, align Align, char Pad>
@@ -131,8 +139,7 @@ namespace buffer_handle
   }
 
   template<config Config, align Align, char Pad> inline
-  long_container_t<Config, Align, Pad>::long_container_t(std::size_t max_length) :
-    container_t<Config, Align, Pad>(max_length),
+  long_container_t<Config, Align, Pad>::long_container_t() :
     previous_length(0)
   {
 
