@@ -230,7 +230,8 @@ char * character(char * buffer, char c);
 
 template<config Config, action Action>
 char * TOKEN(char * buffer);
-//TOKEN = new_line, carriage_return, space, comma, dot, slash, colon, semicolon, equal
+//TOKEN = new_line, carriage_return, space, plus, comma,
+//        hyphen, minus, dot, slash, colon, semicolon, equal
 ```
 
 ###### Boolean
