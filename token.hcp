@@ -20,6 +20,18 @@ namespace buffer_handle
     return character<Config, Action>(buffer, ' ');
   }
 
+  template<config Config, action Action>
+  char * double_quote(char * buffer)
+  {
+    return character<Config, Action>(buffer, '"');
+  }
+
+  template<config Config, action Action>
+  char * single_quote(char * buffer)
+  {
+    return character<Config, Action>(buffer, '\'');
+  }
+
   template<config Config, action Action> inline
   char * plus(char * buffer)
   {

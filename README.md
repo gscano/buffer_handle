@@ -230,8 +230,8 @@ char * character(char * buffer, char c);
 
 template<config Config, action Action>
 char * TOKEN(char * buffer);
-//TOKEN = new_line, carriage_return, space, plus, comma,
-//        hyphen, minus, dot, slash, colon, semicolon, equal
+//TOKEN = new_line, carriage_return, space, double_quote, single_quote
+//        plus, comma, hyphen, minus, dot, slash, colon, semicolon, equal
 ```
 
 ###### Boolean
@@ -629,4 +629,4 @@ Run `make test` to compile and `make run-test` to execute, or simply `make`.
 
 * [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.3.0](https://github.com/catchorg/Catch2/releases/tag/v2.3.0))
 
-To change the path of these dependencies, create a `config.mk` file and then assign the `CATCH` variable with the appropriate locations (`.` is used by default).
+To change the path of these dependencies, create a `config.mk` file and then assign the `CATCH` variable with the appropriate location (`.` is used by default).

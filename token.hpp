@@ -16,6 +16,12 @@ namespace buffer_handle
   char * space(char * buffer);
 
   template<config Config, action Action>
+  char * double_quote(char * buffer);
+
+  template<config Config, action Action>
+  char * single_quote(char * buffer);
+
+  template<config Config, action Action>
   char * plus(char * buffer);
 
   template<config Config, action Action>
