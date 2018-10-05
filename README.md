@@ -84,7 +84,7 @@ struct functor_t
 
 ## Example
 
-Let's consider as an example a buffer which would hold `At 09:23, the weather is sunny with a temperature of 23°C.` and where the `09:23`, `is`, `sunny`, `23` and `C` parts would be subject to modifications.
+Let's consider as an [example](example.cpp) a buffer which would hold `At 09:23, the weather is sunny with a temperature of 23°C.` and where the `09:23`, `is`, `sunny`, `23` and `C` parts would be subject to modifications.
 
 First, the signature of the function handling such buffer would be as follow:
 

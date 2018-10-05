@@ -1,11 +1,11 @@
 #include <cstdlib> // EXIT_SUCCESS
 #include <iostream> // std::cerr
 
-#include <buffer_handle/character.hpp>
-#include <buffer_handle/number.hpp>
-#include <buffer_handle/string.hpp>
-#include <buffer_handle/time.hpp>
-#include <buffer_handle/token.hpp>
+#include <buffer_handle/character.hpp> // character()
+#include <buffer_handle/number.hpp> // integral_number() two_digits_number()
+#include <buffer_handle/string.hpp> // string()
+#include <buffer_handle/time.hpp> // time_()
+#include <buffer_handle/token.hpp> // dot() space()
 
 using namespace buffer_handle;
 
