@@ -4,6 +4,8 @@ namespace buffer_handle
 {
   namespace adapter
   {
+    namespace itoa
+    {
       template<typename I> inline
       char * itoa_t::fwd(char * buffer, I i) const
       {
