@@ -15,6 +15,13 @@ namespace buffer_handle
 
   template<bool UsePreviousLength, char Pad, typename Size>
   void pad_right(char * begin, char * end, Size max_length, Size & previous_length);
+
+  template<char Separator>
+  struct character_separator_t
+  {
+    template<config Config, action Action>
+    char * handle(char * buffer) const;
+  };
 };
 
 #include <buffer_handle/helper.hcp>
