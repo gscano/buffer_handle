@@ -249,16 +249,7 @@ struct element_handler_t
   }
 };
 
-struct separator_t
-{
-  template<config Config, action Action>
-  char * handle(char * buffer) const
-  {
-    buffer = space<Config, Action>(buffer);
-
-    return buffer;
-  }
-};
+using separator_t = character_separator_t<' '>;
 
 SCENARIO("Container", "[container]")
 {

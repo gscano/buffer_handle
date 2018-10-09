@@ -421,6 +421,7 @@ char * container(char * buffer, const Iterator & begin, const Iterator & end, st
 		 Element & element, Separator & separator, std::size_t & previous_length);
 ```
 
+* The maximum length is determined by the container content when **static**.
 * The `Element` contract must be
   ```cpp
   template<config Config, action Action>
@@ -575,7 +576,6 @@ struct long_container_t : public container_t<Config, Align, Pad>
 ### Adapters
 
 ##### Itoa
-
 ```cpp
 namespace adapter
 {
