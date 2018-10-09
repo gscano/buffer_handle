@@ -22,6 +22,13 @@ namespace buffer_handle
     template<config Config, action Action>
     char * handle(char * buffer) const;
   };
+
+  template<char Separator>
+  struct character_and_space_separator_t
+  {
+    template<config Config, action Action>
+    char * handle(char * buffer) const;
+  };
 };
 
 #include <buffer_handle/helper.hcp>

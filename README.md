@@ -602,20 +602,24 @@ Available implementations are
 
 ###### Must write
 
+The function `must_write` can be used to test whether the given configuration and action template parameters imply to write something to the buffer. It is true
+* for a **dynamic** configuration unless **size** is the action; or
+* for a **static** configuration only if the action is to **prepare** the buffer.
+
 ```cpp
 //Defined in buffer_handle/helper.hpp
 
 template<config Config, action Action>
-constexpr bool must_write()
-{
-  return (Config == config::static_ && Action == action::prepare)
-      || (Config == config::dynamic && Action != action::size);
-}
+constexpr bool must_write();
 ```
 
 ###### Pad
 
+The pad_left` and `pad_right` functions could be used to fill the left, respectively right, side of a buffer. For `pad_left`, the content to pad is between `begin` and `end` while for `pad_right` it is between `end` and `begin + max_length`. If `UsePreviousLength` is false then the `memset` will happen on these regions. However, if it is true, the `previous_length` argument will be compared to the current length. Then, if the previous length is smaller than the current length, no `memset` is required since the new content entirely overwrites the previous content. On the other hand, if the previous length is strictly bigger than the current length, the differential region between the previous and the actual content is reset by `memset`.
+
 ```cpp
+//Defined in buffer_handle/helper.hpp
+
 template<bool UsePreviousLength, char Pad, typename Size>
 void pad_left(char * begin, char * end, Size max_length, Size & previous_length);
 
@@ -623,13 +627,22 @@ template<bool UsePreviousLength, char Pad, typename Size>
 void pad_right(char * begin, char * end, Size max_length, Size & previous_length);
 ```
 
-* `pad_left` and `pad_right` could be used to fill the left, respectively right, side of a buffer. For `pad_left`, the content to pad is between `begin` and `end` while for `pad_right` it is between `end` and `begin + max_length`. If `UsePreviousLength` is false then the `memset` will happen on these regions. However, if it is true, the `previous_length` argument will be compared to the current length. Then, if the previous length is smaller than the current length, no `memset` is required since the new content entirely overwrites the previous content. On the other hand, if the previous length is strictly bigger than the current length, the differential region between the previous and the actual content is reset by `memset`.
-
 ###### Container
 
+Functors `character_separator_t` and `character_and_space_separator_t` can be used as the `Separator` template parameter for containers.
+
 ```cpp
+//Defined in buffer_handle/helper.hpp
+
 template<char Separator>
 struct character_separator_t
+{
+  template<config Config, action Action>
+  char * handle(char * buffer) const;
+};
+
+template<char Separator>
+struct character_and_space_separator_t
 {
   template<config Config, action Action>
   char * handle(char * buffer) const;

@@ -64,4 +64,14 @@ namespace buffer_handle
   {
     return character<Config, Action>(buffer, Separator);
   }
+
+  template<char Separator>
+  template<config Config, action Action> inline
+  char * character_and_space_separator_t<Separator>::handle(char * buffer) const
+  {
+    buffer = character<Config, Action>(buffer, Separator);
+    buffer = character<Config, Action>(buffer, ' ');
+
+    return buffer;
+  }
 };
