@@ -1,5 +1,5 @@
 #include <cassert> // assert()
-#include <cstring> // memcpy() memset()
+#include <cstring> // memcpy() memset() strlen()
 
 #include <buffer_handle/helper.hpp> // must_write()
 
@@ -16,6 +16,12 @@ namespace buffer_handle
     return buffer + length;
   }
 
+  template<config Config, action Action> inline
+  char * string(char * buffer, const char * value)
+  {
+    return string<Config, Action>(buffer, value, std::strlen(value));
+  }
+
   namespace details
   {
     template<config Config, align Align, char Pad, action Action, bool UsePreviousLength> inline
@@ -23,7 +29,14 @@ namespace buffer_handle
     {
       if(Config == config::static_)
 	{
-	  if(Action == action::prepare)
+	  if(Action == action::size)
+	    {
+	      if(value == nullptr)
+		{
+		  length = max_length;
+		}
+	    }
+	  else if(Action == action::prepare)
 	    {
 	      assert(value != nullptr && "A static string requires a non null value initializer.");
 

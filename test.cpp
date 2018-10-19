@@ -1809,13 +1809,14 @@ SCENARIO("String", "[string]")
   GIVEN("A string and a padding character")
     {
       const std::size_t max_length_ = 32;
-      std::size_t max_length = max_length_;
 
       WHEN("Static")
 	{
-	  WHEN("Left-aligned")
+	  std::size_t max_length = length;
+
+	  WHEN("Left or right aligned")
 	    {
-	      std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, data, length, max_length);
+	      std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, nullptr, 0, max_length);
 
 	      REQUIRE(size == length);
 
@@ -1833,31 +1834,11 @@ SCENARIO("String", "[string]")
 		  }
 		}
 	    }
-
-	  WHEN("Right-aligned")
-	    {
-	      std::size_t size = (std::size_t)string<config::static_, align::right, pad, action::size>(nullptr, data, length, max_length);
-
-	      REQUIRE(size == length);
-
-	      GIVEN("Size")
-		{
-		  GIVEN_A_BUFFER(size)
-		  {
-		    THEN("Prepare")
-		      {
-			end = string<config::static_, align::right, pad, action::prepare>(begin, data, length, max_length);
-
-			REQUIRE(end - begin == length);
-			REQUIRE(std::string(begin, end) == data);
-		      }
-		  }
-		}
-	    }
 	}
 
       WHEN("Dynamic")
 	{
+	  std::size_t max_length = max_length_;
 	  std::size_t previous_length = 0;
 
 	  WHEN("Left-aligned")

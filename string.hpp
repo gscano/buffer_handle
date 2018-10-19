@@ -12,6 +12,9 @@ namespace buffer_handle
   template<config Config, action Action>
   char * string(char * buffer, const char * value, std::size_t length);
 
+  template<config Config, action Action>
+  char * string(char * buffer, const char * value);
+
   template<config Config, align Align, char Pad, action Action> inline
   char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length, std::size_t & previous_length);
 
