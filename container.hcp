@@ -18,7 +18,7 @@ namespace buffer_handle
 		  buffer = separator.template handle<Config, Action>(buffer);
 		}
 
-	      buffer = element.template handle<Config, Action>(buffer, current);
+	      buffer = element.template handle<Config, Action>(buffer, *current);
 	    }
 	  else if(Align == align::right)
 	    {
@@ -29,9 +29,9 @@ namespace buffer_handle
 		  separator.template handle<Config, Action>(buffer);
 		}
 
-	      buffer -= (std::size_t)element.template handle<Config, action::size>(nullptr, current);
+	      buffer -= (std::size_t)element.template handle<Config, action::size>(nullptr, *current);
 
-	      element.template handle<Config, Action>(buffer, current);
+	      element.template handle<Config, Action>(buffer, *current);
 	    }
 	}
 

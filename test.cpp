@@ -238,14 +238,14 @@ template<class Iterator>
 struct element_handler_t
 {
   template<config Config, action Action>
-  char * handle(char * buffer, const Iterator & it) const
+  char * handle(char * buffer, std::pair<const char *, std::size_t> element) const
   {
     if(Action != action::size)
       {
-	std::memcpy(buffer, it->first, it->second);
+	std::memcpy(buffer, element.first, element.second);
       }
 
-    return buffer + it->second;
+    return buffer + element.second;
   }
 };
 
