@@ -124,8 +124,8 @@ namespace buffer_handle
   template<action Action> inline
   char * string_t<Config, Align, Pad>::handle(char * buffer, const char * value, std::size_t length)
   {
-    if(Config == config::dynamic && ((this->max_length == 0 && Action == action::size)
-				     || Action == action::prepare))
+    if((this->max_length == 0 && Action == action::size)
+       || Action == action::prepare)
       {
 	this->max_length = length;
       }
