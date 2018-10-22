@@ -21,7 +21,7 @@ namespace buffer_handle
   template<config Config, align Align, char Pad, action Action>
   char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length);
 
-  template<config Config, align Align, char Pad>
+  template<config Config, align Align, char Pad, bool IsLong = false>
   struct string_t
   {
   public:
@@ -36,12 +36,13 @@ namespace buffer_handle
   };
 
   template<config Config, align Align, char Pad>
-  struct long_string_t : public string_t<Config, Align, Pad>
+  struct string_t<Config, Align, Pad, true>
   {
   public:
-    long_string_t();
+    string_t();
 
   protected:
+    std::size_t max_length;
     std::size_t previous_length;
 
   public:

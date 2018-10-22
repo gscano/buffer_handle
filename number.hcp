@@ -126,22 +126,22 @@ namespace buffer_handle
     return details::integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits, false>(buffer, i, max_digits, itoa, max_digits);
   }
 
-  template<config Config, align Align, char Pad, typename I, typename MaxDigits> inline
-  integral_number_t<Config, Align, Pad, I, MaxDigits>::integral_number_t() :
+  template<config Config, align Align, char Pad, typename I, typename MaxDigits, bool IsLong> inline
+  integral_number_t<Config, Align, Pad, I, MaxDigits, IsLong>::integral_number_t() :
     max_digits(0)
   {
 
   }
 
-  template<config Config, align Align, char Pad, typename I, typename MaxDigits>
+  template<config Config, align Align, char Pad, typename I, typename MaxDigits, bool IsLong>
   template<action Action, class Itoa> inline
-  char * integral_number_t<Config, Align, Pad, I, MaxDigits>::handle(char * buffer, I value, const Itoa & itoa /* = Itoa() */)
+  char * integral_number_t<Config, Align, Pad, I, MaxDigits, IsLong>::handle(char * buffer, I value, const Itoa & itoa /* = Itoa() */)
   {
     return integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits>(buffer, value, this->max_digits, itoa);
   }
 
   template<config Config, align Align, char Pad, typename I, typename MaxDigits> inline
-  long_integral_number_t<Config, Align, Pad, I, MaxDigits>::long_integral_number_t() :
+  integral_number_t<Config, Align, Pad, I, MaxDigits, true>::integral_number_t() :
     previous_digits(0)
   {
 
@@ -149,7 +149,7 @@ namespace buffer_handle
 
   template<config Config, align Align, char Pad, typename I, typename MaxDigits>
   template<action Action, class Itoa> inline
-  char * long_integral_number_t<Config, Align, Pad, I, MaxDigits>::handle(char * buffer, I value, const Itoa & itoa /* = Itoa() */)
+  char * integral_number_t<Config, Align, Pad, I, MaxDigits, true>::handle(char * buffer, I value, const Itoa & itoa /* = Itoa() */)
   {
     return integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits>(buffer, value, this->max_digits, this->previous_digits, itoa);
   }

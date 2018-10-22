@@ -18,7 +18,7 @@ namespace buffer_handle
   char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
 		   Element & element, Separator & separator, std::size_t & previous_length);
 
-  template<config Config, align Align, char Pad>
+  template<config Config, align Align, char Pad, bool IsLong = false>
   struct container_t
   {
   public:
@@ -36,12 +36,16 @@ namespace buffer_handle
   };
 
   template<config Config, align Align, char Pad>
-  struct long_container_t : public container_t<Config, Align, Pad>
+  struct container_t<Config, Align, Pad, true>
   {
   public:
-    long_container_t();
+    container_t();
+
+  public:
+    void set_max_length(std::size_t length);
 
   protected:
+    std::size_t max_length;
     std::size_t previous_length;
 
   public:

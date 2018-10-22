@@ -527,7 +527,7 @@ SCENARIO("Container", "[container]")
 	  WHEN("long_container_t")
 	    {
 	      typedef element_handler_t<typename list_type::const_iterator> element_handler_type;
-	      typedef long_container_t<config::dynamic, align::left, ' '> container_type;
+	      typedef container_t<config::dynamic, align::left, ' ', true> container_type;
 
 	      container_type container = container_type();
 
@@ -1493,7 +1493,7 @@ SCENARIO("Number", "[Number]")
     {
       adapter::itoa::to_string_t itoa;
 
-      typedef long_integral_number_t<config::dynamic, align::left, ' ', uint64_t> number_type;
+      typedef integral_number_t<config::dynamic, align::left, ' ', uint64_t, uint8_t, true> number_type;
 
       number_type number = number_type();
 
@@ -2006,7 +2006,7 @@ SCENARIO("String", "[string]")
 
       WHEN("long_string_t")
 	{
-	  typedef long_string_t<config::dynamic, align::left, ' '> string_type;
+	  typedef string_t<config::dynamic, align::left, ' ', true> string_type;
 
 	  string_type string = string_type();
 

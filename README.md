@@ -436,6 +436,8 @@ char * container(char * buffer, const Iterator & begin, const Iterator & end, st
 
 ### Functors
 
+In some functors, the template parameter `bool IsLong` can be set to `true` to indicate that the buffer to handle will be large. It will add an attribute to the functor keeping track of the written size after a call. The next time the functor is called, this size will then be used to limit the portion of the buffer to be padded, hence saving potentially large and unnecessary memory fillings.
+
 ###### Nothing
 ```cpp
 //Defined in buffer_handle/nothing.hpp
@@ -451,15 +453,8 @@ struct nothing_t
 ```cpp
 //Defined in buffer_handle/string.hpp
 
-template<config Config, align Align, char Pad>
+template<config Config, align Align, char Pad, bool IsLong = false>
 struct string_t
-{
-  template<action Action>
-  char * handle(char * buffer, const char * value, std::size_t length) const;
-};
-
-template<config Config, align Align, char Pad>
-struct long_string_t : public string_t<Config, Align, Pad>
 {
   template<action Action>
   char * handle(char * buffer, const char * value, std::size_t length) const;
@@ -473,17 +468,11 @@ struct long_string_t : public string_t<Config, Align, Pad>
 ```cpp
 //Defined in buffer_handle/number.hpp
 
-template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits>
+template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits,
+	 bool IsLong = false>
 struct integral_number_t
 {
   template<action Action>
-  char * handle(char * buffer, I value, const Itoa & itoa = Itoa());
-};
-
-template<config Config, align Align, char Pad, typename I, typename MaxDigits = uint8_t>
-struct long_integral_number_t : public integral_number_t<Config, Align, Pad, I, MaxDigits>
-{
-  template<action Action, class Itoa>
   char * handle(char * buffer, I value, const Itoa & itoa = Itoa());
 };
 ```
@@ -552,21 +541,13 @@ struct differential_timezone_t
 ```cpp
 //Defined in buffer_handle/container.hpp
 
-template<config Config, align Align, char Pad>
+template<config Config, align Align, char Pad, bool IsLong = false>
 struct container_t
 {
   void set_max_length(std::size_t length);
 
   template<action Action, class Iterator, class Element, class Separator>
   char * handle(char * buffer, Iterator & begin, Iterator & end,
-		Element & element, Separator & separator);
-};
-
-template<config Config, align Align, char Pad>
-struct long_container_t : public container_t<Config, Align, Pad>
-{
-  template<action Action, class Iterator, class Element, class Separator>
-  char * handle(char * buffer, const Iterator & begin, const Iterator & end,
 		Element & element, Separator & separator);
 };
 ```
