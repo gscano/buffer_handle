@@ -461,7 +461,6 @@ struct string_t
 };
 ```
 
-* `long_string_t::handle` uses the `previous_length` version of `string()`.
 * In this version, the maximum length will be set to `length` for **dynamic** configurations when called as **prepare** or when the **size** is required and the current maximum length has not been set, i.e. is `0`.
 
 ###### Number
@@ -478,7 +477,6 @@ struct integral_number_t
 ```
 
 * The `itoa` functor must conform to the provided [adapter](#itoa) contract.
-* `long_integral_number_t::handle` uses the `previous_digits` version of `integral_number()`.
 
 ###### Timezone
 ```cpp
@@ -551,8 +549,6 @@ struct container_t
 		Element & element, Separator & separator);
 };
 ```
-
-* `long_container_t::handle` uses the `previous_length` version of `container()`.
 
 ### Adapters
 
