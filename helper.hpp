@@ -10,6 +10,11 @@ namespace buffer_handle
   template<config Config, action Action>
   constexpr bool must_write();
 
+  constexpr action write_when_reset(action action);
+
+  template<align Align, bool UsePreviousLength, char Pad, typename Size>
+  void reset(char * buffer, Size max_length, Size & previous_length);
+
   template<bool UsePreviousLength, char Pad, typename Size>
   void pad_left(char * begin, char * end, Size max_length, Size & previous_length);
 

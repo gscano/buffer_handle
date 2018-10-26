@@ -73,8 +73,13 @@ namespace buffer_handle
 		    previous_length = max_length;
 		  }
 	      }
-	    case action::write:
 	    case action::reset:
+	      {
+		reset<Align, UsePreviousLength, Pad, std::size_t>(buffer, max_length, previous_length);
+
+		break;
+	      }
+	    case action::write:
 	      {
 		std::size_t current_length = 0;
 

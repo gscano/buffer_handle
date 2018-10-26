@@ -82,11 +82,16 @@ namespace buffer_handle
 
 		if(UsePreviousDigits)
 		  {
-		    previous_digits = 0;
+		    previous_digits = max_digits;
 		  }
 	      }
-	    case action::write:
 	    case action::reset:
+	      {
+		reset<Align, UsePreviousDigits, Pad, MaxDigits>(buffer, max_digits, previous_digits);
+
+		break;
+	      }
+	    case action::write:
 	      {
 		assert(previous_digits <= max_digits);
 

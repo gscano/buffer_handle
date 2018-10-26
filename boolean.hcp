@@ -63,6 +63,21 @@ namespace buffer_handle
     return buffer;
   }
 
+  template<config Config, action Action, char False, char True> inline
+  char * boolean(char * buffer, bool value)
+  {
+    if(value)
+      {
+	character<Config, Action>(buffer, True);
+      }
+    else
+      {
+	character<Config, Action>(buffer, False);
+      }
+
+    return buffer + 1;
+  }
+
   template<case_ Case> inline
   char * boolean_true(char * buffer)
   {

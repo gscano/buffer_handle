@@ -231,13 +231,13 @@ namespace buffer_handle
 	{
 	  max_length = std::strlen(details::weekday(weekday));
 
-	  buffer = string<Config, align::right, ' ', Action>(buffer, details::weekday(weekday), max_length, max_length);
+	  buffer = string<Config, align::right, ' ', write_when_reset(Action)>(buffer, details::weekday(weekday), max_length, max_length);
 	}
       else if(Config == config::dynamic)
 	{
 	  max_length = std::strlen(details::weekday(7));//Default is equal to longest
 
-	  string<Config, align::right, ' ', Action>(buffer, details::weekday(weekday), std::strlen(details::weekday(weekday)), max_length);
+	  string<Config, align::right, ' ', write_when_reset(Action)>(buffer, details::weekday(weekday), std::strlen(details::weekday(weekday)), max_length);
 
 	  buffer += max_length;
 	}

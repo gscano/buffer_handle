@@ -1,7 +1,7 @@
 #include <cassert> // assert()
 #include <cstring> // memcpy() memset() strlen()
 
-#include <buffer_handle/helper.hpp> // must_write()
+#include <buffer_handle/helper.hpp> // must_write() reset()
 
 namespace buffer_handle
 {
@@ -60,17 +60,15 @@ namespace buffer_handle
 		    previous_length = max_length;
 		  }
 	      }
-	    case action::write:
 	    case action::reset:
+	      {
+		value = nullptr;
+	      }
+	    case action::write:
 	      {
 		if(value == nullptr)
 		  {
-		    std::memset(buffer, Pad, max_length);
-
-		    if(UsePreviousLength)
-		      {
-			previous_length = 0;
-		      }
+		    reset<Align, UsePreviousLength, Pad, std::size_t>(buffer, max_length, previous_length);
 		  }
 		else
 		  {

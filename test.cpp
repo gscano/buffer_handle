@@ -17,13 +17,9 @@
 
 #include <buffer_handle/adapter/itoa/to_string.hpp>
 
-using namespace buffer_handle;
+#include <buffer_handle/test.hpp>
 
-#define GIVEN_A_BUFFER(size)			\
-  char buffer[size] = {0};			\
-  char * begin = buffer;			\
-  char * end = buffer;				\
-  GIVEN("A buffer")
+using namespace buffer_handle;
 
 SCENARIO("Boolean", "[boolean]")
 {
@@ -184,6 +180,18 @@ SCENARIO("Boolean", "[boolean]")
 		    }
 		}
 	    }
+	}
+    }
+
+  WHEN("Single digit boolean")
+    {
+      WHEN("Static")
+	{
+	  char c;
+	  char * end = boolean<config::static_, action::prepare>(&c, true);
+
+	  REQUIRE(end == &c + 1);
+	  REQUIRE(c == '1');
 	}
     }
 }
@@ -427,7 +435,7 @@ SCENARIO("Container", "[container]")
 				end = container<config::dynamic, align::left, pad, action::prepare>(begin, cbegin, cend, max_length, element_handler, separator);
 
 				REQUIRE(end - begin == size);
-				REQUIRE(std::string(begin, end) == data + std::string(max_length - length, ' '));
+				REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
 
 				THEN("Write")
 				  {
@@ -475,7 +483,7 @@ SCENARIO("Container", "[container]")
 				end = container<config::dynamic, align::right, pad, action::prepare>(begin, crbegin, crend, max_length, reverse_element_handler, separator);
 
 				REQUIRE(end - begin == size);
-				REQUIRE(std::string(begin, end) == std::string(max_length - length, ' ') + data);
+				REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
 
 				THEN("Write")
 				  {
@@ -989,7 +997,7 @@ SCENARIO("Date", "[date]")
 		    end = rfc850::date<config::dynamic, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
 		    REQUIRE(end - begin == size);
-		    REQUIRE(std::string(begin, end) == " Thursday, 03-Jan-01 23:32:57 GMT");
+		    REQUIRE(std::string(begin, end) == "         , 03-Jan-01 23:32:57 GMT");
 
 		    THEN("Write")
 		      {
@@ -1383,8 +1391,8 @@ SCENARIO("Number", "[Number]")
 
 			REQUIRE(end - begin == max_digits_);
 			REQUIRE(max_digits == max_digits_);
-			REQUIRE(previous_digits == max_digits);
-			REQUIRE(std::string(begin, end) == "19237840");
+			REQUIRE(previous_digits == 0);
+			REQUIRE(std::string(begin, end) == "        ");
 
 			THEN("Write")
 			  {
@@ -1401,12 +1409,12 @@ SCENARIO("Number", "[Number]")
 
 				REQUIRE(end - begin == max_digits_);
 				REQUIRE(max_digits == max_digits_);
-				REQUIRE(previous_digits == 2);
-				REQUIRE(std::string(begin, end) == "19" + std::string(max_digits_ - 2, pad));
+				REQUIRE(previous_digits == 0);
+				REQUIRE(std::string(begin, end) == std::string(max_digits_, pad));
 
 				THEN("Write")
 				  {
-				    end = integral_number<config::dynamic, align::left, pad, action::reset>(begin, 7326, max_digits, previous_digits, itoa);
+				    end = integral_number<config::dynamic, align::left, pad, action::write>(begin, 7326, max_digits, previous_digits, itoa);
 
 				    REQUIRE(end - begin == max_digits_);
 				    REQUIRE(max_digits == max_digits_);
@@ -1437,8 +1445,8 @@ SCENARIO("Number", "[Number]")
 
 			REQUIRE(end - begin == max_digits_);
 			REQUIRE(max_digits == max_digits_);
-			REQUIRE(previous_digits == max_digits_);
-			REQUIRE(std::string(begin, end) == "19237840");
+			REQUIRE(previous_digits == 0);
+			REQUIRE(std::string(begin, end) == "        ");
 
 			THEN("Write")
 			  {
@@ -1455,12 +1463,12 @@ SCENARIO("Number", "[Number]")
 
 				REQUIRE(end - begin == max_digits_);
 				REQUIRE(max_digits == max_digits_);
-				REQUIRE(previous_digits == 2);
-				REQUIRE(std::string(begin, end) == std::string(max_digits_ - 2, pad) + "19");
+				REQUIRE(previous_digits == 0);
+				REQUIRE(std::string(begin, end) == std::string(max_digits_, pad));
 
 				THEN("Write")
 				  {
-				    end = integral_number<config::dynamic, align::right, pad, action::reset>(begin, 7236, max_digits, previous_digits, itoa);
+				    end = integral_number<config::dynamic, align::right, pad, action::write>(begin, 7236, max_digits, previous_digits, itoa);
 
 				    REQUIRE(end - begin == max_digits_);
 				    REQUIRE(max_digits == max_digits_);
@@ -1853,45 +1861,14 @@ SCENARIO("String", "[string]")
 		{
 		  GIVEN_A_BUFFER(size)
 		  {
-		    THEN("Prepare with no content")
-		      {
-			end = string<config::dynamic, align::left, pad, action::prepare>(begin, nullptr, 0, max_length, previous_length);
-
-			REQUIRE(end - begin == max_length);
-			REQUIRE(max_length == max_length_);
-			REQUIRE(previous_length == 0);
-			REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-
-			THEN("Write")
-			  {
-			    end = string<config::dynamic, align::left, pad, action::write>(begin, data, length, max_length, previous_length);
-
-			    REQUIRE(end - begin == max_length);
-			    REQUIRE(max_length == max_length_);
-			    REQUIRE(previous_length == length);
-			    REQUIRE(std::string(begin, begin + length) == data);
-			    REQUIRE(std::string(begin + length, end) == std::string(max_length - length, pad));
-
-			    THEN("Reset")
-			      {
-				end = string<config::dynamic, align::left, pad, action::reset>(begin, nullptr, 0, max_length, previous_length);
-
-				REQUIRE(end - begin == max_length);
-				REQUIRE(max_length == max_length_);
-				REQUIRE(previous_length == 0);
-				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-			      }
-			  }
-		      }
-
 		    THEN("Prepare")
 		      {
 			end = string<config::dynamic, align::left, pad, action::prepare>(begin, "world!", 6, max_length, previous_length);
 
 			REQUIRE(end - begin == max_length);
 			REQUIRE(max_length == max_length_);
-			REQUIRE(previous_length == 6);
-			REQUIRE(std::string(begin, end) == std::string("world!") + std::string(max_length - 6, pad));
+			REQUIRE(previous_length == 0);
+			REQUIRE(std::string(begin, end) == std::string(max_length, pad));
 
 			THEN("Write")
 			  {
@@ -1929,44 +1906,14 @@ SCENARIO("String", "[string]")
 		{
 		  GIVEN_A_BUFFER(size)
 		  {
-		    THEN("Prepare with no content")
-		      {
-			end = string<config::dynamic, align::right, pad, action::prepare>(begin, nullptr, length, max_length, previous_length);
-
-			REQUIRE(end - begin == max_length);
-			REQUIRE(max_length == max_length_);
-			REQUIRE(previous_length == 0);
-			REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-
-			THEN("Write")
-			  {
-			    end = string<config::dynamic, align::right, pad, action::write>(begin, data, length, max_length, previous_length);
-
-			    REQUIRE(end - begin == max_length);
-			    REQUIRE(max_length == max_length_);
-			    REQUIRE(previous_length == length);
-			    REQUIRE(std::string(begin, end) == std::string(max_length - length, pad) + data);
-
-			    THEN("Reset")
-			      {
-				end = string<config::dynamic, align::right, pad, action::reset>(begin, nullptr, 0, max_length, previous_length);
-
-				REQUIRE(end - begin == max_length);
-				REQUIRE(max_length == max_length_);
-				REQUIRE(previous_length == 0);
-				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-			      }
-			  }
-		      }
-
 		    THEN("Prepare")
 		      {
 			end = string<config::dynamic, align::right, pad, action::prepare>(begin, "world!", 6, max_length, previous_length);
 
 			REQUIRE(end - begin == max_length);
 			REQUIRE(max_length == max_length_);
-			REQUIRE(previous_length == 6);
-			REQUIRE(std::string(begin, end) == std::string(max_length - 6, pad) + "world!");
+			REQUIRE(previous_length == 0);
+			REQUIRE(std::string(begin, end) == std::string(max_length, pad));
 
 			THEN("Write")
 			  {

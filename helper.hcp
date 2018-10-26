@@ -12,6 +12,34 @@ namespace buffer_handle
       || (Config == config::dynamic && Action != action::size);
   }
 
+  inline
+  constexpr action write_when_reset(action action)
+  {
+    return (action == action::reset) ? action::write : action;
+  }
+
+  template<align Align, bool UsePreviousLength, char Pad, typename Size> inline
+  void reset(char * buffer, Size max_length, Size & previous_length)
+  {
+    if(UsePreviousLength)
+      {
+	if(Align == align::left)
+	  {
+	    std::memset(buffer, Pad, previous_length);
+	  }
+	else if(Align == align::right)
+	  {
+	    std::memset(buffer + max_length - previous_length, Pad, previous_length);
+	  }
+
+	previous_length = 0;
+      }
+    else
+      {
+	std::memset(buffer, Pad, max_length);
+      }
+  }
+
   template<bool UsePreviousLength, char Pad, typename Size> inline
   void pad_left(char * begin, char * end, Size max_length, Size & previous_length)//for align::right content
   {
