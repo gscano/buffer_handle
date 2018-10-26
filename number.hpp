@@ -15,35 +15,35 @@ namespace buffer_handle
   template<config Config, action Action, typename I>
   char * four_digits_number(char * buffer, I i);
 
-  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits = uint8_t>
-  char * integral_number(char * buffer, I i, MaxDigits & max_digits, MaxDigits & previous_digits, const Itoa & itoa);
+  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename Digits = uint8_t>
+  char * integral_number(char * buffer, I i, Digits & max_digits, Digits & previous_digits, const Itoa & itoa);
 
-  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits = uint8_t>
-  char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa);
+  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename Digits = uint8_t>
+  char * integral_number(char * buffer, I i, Digits & max_digits, const Itoa & itoa);
 
-  template<config Config, align Align, char Pad, typename I, typename MaxDigits = uint8_t, bool IsLong = false>
+  template<config Config, align Align, char Pad, typename I, typename Digits = uint8_t, bool IsLong = false>
   struct integral_number_t
   {
   public:
     integral_number_t();
 
   protected:
-    MaxDigits max_digits;
+    Digits max_digits;
 
   public:
     template<action Action, class Itoa>
     char * handle(char * buffer, I value, const Itoa & itoa = Itoa());
   };
 
-  template<config Config, align Align, char Pad, typename I, typename MaxDigits>
-  struct integral_number_t<Config, Align, Pad, I, MaxDigits, true>
+  template<config Config, align Align, char Pad, typename I, typename Digits>
+  struct integral_number_t<Config, Align, Pad, I, Digits, true>
   {
   public:
     integral_number_t();
 
   protected:
-    MaxDigits max_digits;
-    MaxDigits previous_digits;
+    Digits max_digits;
+    Digits previous_digits;
 
   public:
     template<action Action, class Itoa>

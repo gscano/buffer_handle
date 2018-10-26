@@ -53,8 +53,8 @@ namespace buffer_handle
 
   namespace details
   {
-    template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits, bool UsePreviousDigits> inline
-    char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa, MaxDigits & previous_digits)
+    template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename Digits, bool UsePreviousDigits> inline
+    char * integral_number(char * buffer, I i, Digits & max_digits, const Itoa & itoa, Digits & previous_digits)
     {
       static_assert(std::is_integral<I>::value, "Template parameter T must be an integral type.");
 
@@ -87,7 +87,7 @@ namespace buffer_handle
 	      }
 	    case action::reset:
 	      {
-		reset<Align, UsePreviousDigits, Pad, MaxDigits>(buffer, max_digits, previous_digits);
+		reset<Align, UsePreviousDigits, Pad, Digits>(buffer, max_digits, previous_digits);
 
 		break;
 	      }
@@ -95,7 +95,7 @@ namespace buffer_handle
 	      {
 		assert(previous_digits <= max_digits);
 
-		MaxDigits current_digits = 0;
+		Digits current_digits = 0;
 
 		if(Align == align::left)
 		  {
@@ -119,44 +119,44 @@ namespace buffer_handle
     }
   };
 
-  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits = uint8_t>
-  char * integral_number(char * buffer, I i, MaxDigits & max_digits, MaxDigits & previous_digits, const Itoa & itoa)
+  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename Digits = uint8_t>
+  char * integral_number(char * buffer, I i, Digits & max_digits, Digits & previous_digits, const Itoa & itoa)
   {
-    return details::integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits, true>(buffer, i, max_digits, itoa, previous_digits);
+    return details::integral_number<Config, Align, Pad, Action, Itoa, I, Digits, true>(buffer, i, max_digits, itoa, previous_digits);
   }
 
-  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename MaxDigits = uint8_t>
-  char * integral_number(char * buffer, I i, MaxDigits & max_digits, const Itoa & itoa)
+  template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename Digits = uint8_t>
+  char * integral_number(char * buffer, I i, Digits & max_digits, const Itoa & itoa)
   {
-    return details::integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits, false>(buffer, i, max_digits, itoa, max_digits);
+    return details::integral_number<Config, Align, Pad, Action, Itoa, I, Digits, false>(buffer, i, max_digits, itoa, max_digits);
   }
 
-  template<config Config, align Align, char Pad, typename I, typename MaxDigits, bool IsLong> inline
-  integral_number_t<Config, Align, Pad, I, MaxDigits, IsLong>::integral_number_t() :
+  template<config Config, align Align, char Pad, typename I, typename Digits, bool IsLong> inline
+  integral_number_t<Config, Align, Pad, I, Digits, IsLong>::integral_number_t() :
     max_digits(0)
   {
 
   }
 
-  template<config Config, align Align, char Pad, typename I, typename MaxDigits, bool IsLong>
+  template<config Config, align Align, char Pad, typename I, typename Digits, bool IsLong>
   template<action Action, class Itoa> inline
-  char * integral_number_t<Config, Align, Pad, I, MaxDigits, IsLong>::handle(char * buffer, I value, const Itoa & itoa /* = Itoa() */)
+  char * integral_number_t<Config, Align, Pad, I, Digits, IsLong>::handle(char * buffer, I value, const Itoa & itoa /* = Itoa() */)
   {
-    return integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits>(buffer, value, this->max_digits, itoa);
+    return integral_number<Config, Align, Pad, Action, Itoa, I, Digits>(buffer, value, this->max_digits, itoa);
   }
 
-  template<config Config, align Align, char Pad, typename I, typename MaxDigits> inline
-  integral_number_t<Config, Align, Pad, I, MaxDigits, true>::integral_number_t() :
+  template<config Config, align Align, char Pad, typename I, typename Digits> inline
+  integral_number_t<Config, Align, Pad, I, Digits, true>::integral_number_t() :
     previous_digits(0)
   {
 
   }
 
-  template<config Config, align Align, char Pad, typename I, typename MaxDigits>
+  template<config Config, align Align, char Pad, typename I, typename Digits>
   template<action Action, class Itoa> inline
-  char * integral_number_t<Config, Align, Pad, I, MaxDigits, true>::handle(char * buffer, I value, const Itoa & itoa /* = Itoa() */)
+  char * integral_number_t<Config, Align, Pad, I, Digits, true>::handle(char * buffer, I value, const Itoa & itoa /* = Itoa() */)
   {
-    return integral_number<Config, Align, Pad, Action, Itoa, I, MaxDigits>(buffer, value, this->max_digits, this->previous_digits, itoa);
+    return integral_number<Config, Align, Pad, Action, Itoa, I, Digits>(buffer, value, this->max_digits, this->previous_digits, itoa);
   }
 
   namespace details

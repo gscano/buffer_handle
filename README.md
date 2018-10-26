@@ -16,11 +16,11 @@ The purpose of this library is to provide a single [Function](#functions) or [fu
 There are four possible actions:
 
 * Evaluate the **size** a buffer would require for the longest content
-* **Prepare** a buffer with constant content
+* **Prepare** the constant content of a buffer
 * **Write** changing portions of a buffer
 * **Reset** the buffer to its initial state
 
-The **prepare** action must be called only once followed by many **write** or **reset** actions that may not be intertwined, so consecutive **write**s should work.
+The **prepare** action must be called only once followed by many **write** or **reset** actions that may not be intertwined, so consecutive **write**s are possible and **reset** could be used to prevent unwanted disclosure.
 
 ### Configurations
 
@@ -70,13 +70,13 @@ struct functor_t
 
 ### Large buffers
 
-Sometimes, the longest value that could be written to a buffer is much larger than the actual average length. In order to avoid padding a large memory region every time **reset** is called, some functions take `previous_length` as an additional argument. This extra argument is used to keep track of the length of the written data after a call. It will then be reused by the next invocation to limit the portion touched by a **reset**. Similarly, some functors have a template parameter `bool IsLong` which can be set to `true` to indicate that the buffer to handle will be large. The `previous_length` will then be added to the functor and its management will be transparent for the caller.
+Sometimes, the longest value that could be written to a buffer is much larger than the actual average length. In order to avoid padding a large memory region every time **reset** is called, some functions take `previous_length` as an additional argument. This extra argument is used to keep track of the length of the written data after a call. It will then be reused by the next invocation to limit the portion touched by a **reset**. Similarly, some functors have a template parameter `bool IsLong` which can be set to `true` to indicate that the buffer to handle will be large. The `previous_length` will then be added to the functor and its management will be transparent for the caller. This behavior can also be triggered by two consecutive **write**s depending on the size of each content (see #pad).
 
 ## Example
 
 Let's consider as an [example](example.cpp) a buffer which would hold `At 09:23, the weather is sunny with a temperature of 23°C.` and where the `09:23`, `is`, `sunny`, `23` and `C` parts would be subject to modifications.
 
-First, the signature of the function handling such buffer would be as follow:
+First, the signature of the function handling such buffers would be as follow:
 
 ```cpp
 template<config Config, std::size_t MaxDescriptionLength, action Action,
@@ -169,9 +169,9 @@ At 02:00, the weather was cloudy with a temperature of 68°F.
 At 23:58, the weather will be freezing with a temperature of 99°K.
 ```
 
-just like the buffer would have been written by `snprintf`.
+so this configuration mimics `snprintf`.
 
-For a **dynamic** configuration, the buffer would be overwritten as such:
+For a **dynamic** configuration, the buffer would be successively overwritten as such:
 
 ```console
 At 09:23, the weather is           sunny with a temperature of 23°C.
@@ -269,8 +269,8 @@ template<config Config, action Action, typename I>
 char * four_digits_number(char * buffer, I i);
 
 template<config Config, align Align, char Pad, action Action, class Itoa,
-	 typename I, typename MaxDigits = uint8_t>
-char * integral_number(char * buffer, I i, MaxDigits & max_digits, /* MaxDigits & previous_digits, */
+	 typename I, typename Digits = uint8_t>
+char * integral_number(char * buffer, I i, Digits & max_digits, /* Digits & previous_digits, */
 		       const Itoa & itoa);
 ```
 
@@ -285,8 +285,8 @@ char * integral_number(char * buffer, I i, MaxDigits & max_digits, /* MaxDigits 
 ```cpp
 //Defined in buffer_handle/time.hpp
 
-template<config Config, align Align, char Pad, action Action, class Itoa, typename MaxDigits = uint8_t>
-char * time_(char * buffer, time_t time, MaxDigits & max_digits, const Itoa & itoa = Itoa());
+template<config Config, align Align, char Pad, action Action, class Itoa, typename Digits = uint8_t>
+char * time_(char * buffer, time_t time, Digits & max_digits, const Itoa & itoa = Itoa());
 
 template<config Config, action Action, typename Hours, typename Minutes>
 char * time_(char * buffer, Hours hours, Minutes minutes);
@@ -426,6 +426,7 @@ char * container(char * buffer, const Iterator & begin, const Iterator & end, st
 ### Functors
 
 ###### Nothing
+
 ```cpp
 //Defined in buffer_handle/nothing.hpp
 
@@ -437,6 +438,7 @@ struct nothing_t
 ```
 
 ###### String
+
 ```cpp
 //Defined in buffer_handle/string.hpp
 
@@ -448,13 +450,14 @@ struct string_t
 };
 ```
 
-* In this version, the maximum length will be set to `length` for **dynamic** configurations when called as **prepare** or when the **size** is required and the current maximum length has not been set, i.e. is `0`.
+* The maximum length will be set to `length` for **dynamic** configurations when called as **prepare** or when the **size** is required and the current maximum length has not been set, i.e. **prepare** has not been called yet.
 
 ###### Number
+
 ```cpp
 //Defined in buffer_handle/number.hpp
 
-template<config Config, align Align, char Pad, class Itoa, typename I, typename MaxDigits,
+template<config Config, align Align, char Pad, class Itoa, typename I, typename Digits,
 	 bool IsLong = false>
 struct integral_number_t
 {
@@ -466,6 +469,7 @@ struct integral_number_t
 * The `itoa` functor must conform to the provided [adapter](#itoa) contract.
 
 ###### Timezone
+
 ```cpp
 //Defined in buffer_handle/timezone.hpp
 
@@ -523,6 +527,7 @@ struct differential_timezone_t
 ```
 
 ###### Container
+
 ```cpp
 //Defined in buffer_handle/container.hpp
 
@@ -540,6 +545,7 @@ struct container_t
 ### Adapters
 
 ##### Itoa
+
 ```cpp
 namespace adapter
 {
@@ -587,14 +593,14 @@ The function `write_when_reset` can be used to force a **write** to happen when 
 constexpr action write_when_reset(action action);
 ```
 
-It is usually directly called in template parameters (see [date](date.hcp#L234)):
+It is usually directly called in template parameters (see [date.hcp](date.hcp#L234) as an example):
 ```cpp
 FUNCTION<Config, write_when_reset(Action)>(buffer, ...);
 ```
 
 ###### Reset
 
-The `reset` function is used to reset a buffer depending on alignment and usage of the previous length.
+The `reset` function is used to **reset** a buffer depending on alignment and usage of the previous length.
 
 ```cpp
 template<align Align, bool UsePreviousLength, char Pad, typename Size>
@@ -643,6 +649,6 @@ Run `make test` to compile and `make run-test` to execute, or simply `make`.
 
 ### Dependencies
 
-* [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.3.0](https://github.com/catchorg/Catch2/releases/tag/v2.3.0))
+* [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.4.1](https://github.com/catchorg/Catch2/releases/tag/v2.4.1))
 
 To change the path of these dependencies, create a `config.mk` file and then assign the `CATCH` variable with the appropriate location (`.` is used by default).
