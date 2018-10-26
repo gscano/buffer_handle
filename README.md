@@ -20,7 +20,7 @@ There are four possible actions:
 * **Write** changing portions of a buffer
 * **Reset** the buffer to its initial state
 
-The **prepare** action must be called only once followed by many **write** or **reset** actions.
+The **prepare** action must be called only once followed by many **write** or **reset** actions that may not be intertwined, so consecutive **write**s should work.
 
 ### Configurations
 
@@ -70,7 +70,7 @@ struct functor_t
 
 ### Large buffers
 
-Sometimes, the longest value that could be written to a buffer is long but the actual average value length is much smaller. In order to avoid padding a large memory region every time **reset** is called, some functions take `previous_length` as an additional argument. This extra argument is used to keep track of the length of the written data after a call. It will then be reused by the next invocation to limit the portion touched by a **reset**. Similarly, some functors have a template parameter `bool IsLong` which can be set to `true` to indicate that the buffer to handle will be large. The `previous_length` will then be added to the functor and its management will be transparent for the caller.
+Sometimes, the longest value that could be written to a buffer is much larger than the actual average length. In order to avoid padding a large memory region every time **reset** is called, some functions take `previous_length` as an additional argument. This extra argument is used to keep track of the length of the written data after a call. It will then be reused by the next invocation to limit the portion touched by a **reset**. Similarly, some functors have a template parameter `bool IsLong` which can be set to `true` to indicate that the buffer to handle will be large. The `previous_length` will then be added to the functor and its management will be transparent for the caller.
 
 ## Example
 
@@ -594,7 +594,7 @@ FUNCTION<Config, write_when_reset(Action)>(buffer, ...);
 
 ###### Reset
 
-The `reset` function can be called when
+The `reset` function is used to reset a buffer depending on alignment and usage of the previous length.
 
 ```cpp
 template<align Align, bool UsePreviousLength, char Pad, typename Size>
