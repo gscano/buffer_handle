@@ -13,9 +13,9 @@ namespace buffer_handle
   }
 
   inline
-  constexpr action write_when_reset(action action)
+  constexpr action write_when_reset(action value)
   {
-    return (action == action::reset) ? action::write : action;
+    return (value == action::reset) ? action::write : value;
   }
 
   template<align Align, bool UsePreviousLength, char Pad, typename Size> inline

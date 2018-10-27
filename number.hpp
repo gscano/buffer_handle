@@ -16,10 +16,10 @@ namespace buffer_handle
   char * four_digits_number(char * buffer, I i);
 
   template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename Digits = uint8_t>
-  char * integral_number(char * buffer, I i, Digits & max_digits, Digits & previous_digits, const Itoa & itoa);
+  char * integral_number(char * buffer, I i, Digits & max_digits, Digits & previous_digits, const Itoa & itoa = Itoa());
 
   template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename Digits = uint8_t>
-  char * integral_number(char * buffer, I i, Digits & max_digits, const Itoa & itoa);
+  char * integral_number(char * buffer, I i, Digits & max_digits, const Itoa & itoa = Itoa());
 
   template<config Config, align Align, char Pad, typename I, typename Digits = uint8_t, bool IsLong = false>
   struct integral_number_t

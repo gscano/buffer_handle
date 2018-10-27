@@ -9,7 +9,7 @@ When buffers are extensively used to send textual output, their management requi
 
 ## Concept
 
-The purpose of this library is to provide a single [Function](#functions) or [functor](#functors) to perform different [**actions**](#actions) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configurations).
+The purpose of this library is to provide a single [function](#functions) or [functor](#functors) to perform different [**actions**](#actions) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configurations).
 
 ### Actions
 
@@ -20,7 +20,7 @@ There are four possible actions:
 * **Write** changing portions of a buffer
 * **Reset** the buffer to its initial state
 
-The **prepare** action must be called only once followed by many **write** or **reset** actions that may not be intertwined, so consecutive **write**s are possible and **reset** could be used to prevent unwanted disclosure.
+The **prepare** action must be called only once followed by many **write** or **reset** actions that may not be intertwined, so consecutive **write**s are possible and **reset** could be used when unwanted disclosure of the buffer content is to be prevented.
 
 ### Configurations
 
@@ -57,7 +57,7 @@ char * handle(char * buffer, ...);
 
 #### Structure layout
 
-Similarly to functions, the functor is defined by configuration and functor template parameters. The function `handle` is templated on the action and function argument types.
+Similarly to functions, a functor is defined by configuration and inner functor template parameters. The function `handle` is templated on the action and function argument types.
 
 ```cpp
 template<config Config, ...>
@@ -70,7 +70,7 @@ struct functor_t
 
 ### Large buffers
 
-Sometimes, the longest value that could be written to a buffer is much larger than the actual average length. In order to avoid padding a large memory region every time **reset** is called, some functions take `previous_length` as an additional argument. This extra argument is used to keep track of the length of the written data after a call. It will then be reused by the next invocation to limit the portion touched by a **reset**. Similarly, some functors have a template parameter `bool IsLong` which can be set to `true` to indicate that the buffer to handle will be large. The `previous_length` will then be added to the functor and its management will be transparent for the caller. This behavior can also be triggered by two consecutive **write**s depending on the size of each content (see #pad).
+Sometimes, the longest value that could be written to a buffer is much larger than the actual average length. In order to avoid padding a large memory region every time **reset** is called, some functions take `previous_length` as an additional argument. This extra argument is used to keep track of the length of the written data after a call. It will then be reused by the next invocation to limit the portion touched by a **reset**. Similarly, some functors have a template parameter `bool IsLong` which can be set to `true` to indicate that the buffer to handle will be large. The `previous_length` will then be added to the functor and its management will be transparent for the caller. This behavior can also be triggered by two consecutive **write**s depending on the size of each content (see [padding](#pad) functions).
 
 ## Example
 
@@ -251,7 +251,7 @@ char * string(char * buffer, const char * value, std::size_t length);
 
 template<config Config, align Align, char Pad, action Action>
 char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length
-	      /* , std::size_t  & previous_length */);
+	      /* , std::size_t & previous_length */);
 ```
 
 * If ```value == nullptr``` then the buffer will be padded with ```max_length``` characters.
@@ -271,14 +271,14 @@ char * four_digits_number(char * buffer, I i);
 template<config Config, align Align, char Pad, action Action, class Itoa,
 	 typename I, typename Digits = uint8_t>
 char * integral_number(char * buffer, I i, Digits & max_digits, /* Digits & previous_digits, */
-		       const Itoa & itoa);
+		       const Itoa & itoa = Itoa());
 ```
 
 * The template parameter `InsteadOfALeadingZero` can be `'\0'` in order to have a leading zero.
 * Type `I` must be integral and `i`must be positive.
-* The `max_digits` argument is a reference because the function will assign it when **prepare** is called based on the value passed in `i`. This value should not be modified in later invocations.
+* The `max_digits` argument is a reference because the function will assign it when **prepare** is called based on the value passed in `i`. It must not be modified.
 * `uint8_t` should be enough to encode the number of digits for most applications.
-* The `itoa` functor must conform to the provided [adapter](#itoa) contract.
+* The `Itoa` functor must conform to the provided [adapter](#itoa) contract.
 
 ###### Time
 
@@ -298,7 +298,7 @@ template<config Config, action Action>
 char * time_(char * buffer, std::tm time);
 ```
 
-* The `itoa` functor must conform to the provided [adapter](#itoa) contract.
+* The `Itoa` functor must conform to the provided [adapter](#itoa) contract.
 
 ###### Timezone
 
@@ -332,10 +332,10 @@ char * differential_timezone(char * buffer, bool sign, Hours hours, Minutes minu
 
 template<config Config, char InsteadOfALeadingZeroForDay, char Separator, bool YearOn4Digits,
 	 action Action, typename Day, typename Month, typename Year>
-char * day_month_year(char * buffer, Day day, Month month, Year year);
+char * day_month_year(char * buffer, Day day, Month month, Year year);//dd Mon YYYY
 
 template<config Config, action Action, typename Month, typename Day>
-char * month_day(char * buffer, Month month, Day day);
+char * month_day(char * buffer, Month month, Day day);//Mon dd
 
 namespace asc
 {
@@ -412,12 +412,12 @@ char * container(char * buffer, const Iterator & begin, const Iterator & end, st
 ```
 
 * The maximum length is determined by the container content when **static**.
-* The `Element` contract must be
+* The `Element` contract is
   ```cpp
   template<config Config, action Action>
   char * handle(char * buffer, const Iterator & it) /* const */;
   ```
-* The `Separator` contract must be
+* The `Separator` contract is
   ```cpp
   template<config Config, action Action>
   char * handle(char * buffer) /* const */;
@@ -466,7 +466,7 @@ struct integral_number_t
 };
 ```
 
-* The `itoa` functor must conform to the provided [adapter](#itoa) contract.
+* The `Itoa` functor must conform to the provided [adapter](#itoa) contract.
 
 ###### Timezone
 
@@ -563,10 +563,10 @@ namespace adapter
 };
 ```
 
-Available implementations are
+Available implementations are:
 
-* `std::to_string`: `struct to_string_t` defined in `buffer_handle/adapter/itoa/to_string.hpp`
-* [Itoa](https://github.com/amdn/itoa): `struct itoa_t` defined in `buffer_handle/adapter/itoa/itoa.hpp`
+* `struct to_string_t` using `std::to_string` and defined in `buffer_handle/adapter/itoa/to_string.hpp`
+* `struct itoa_t` using [itoa](https://github.com/amdn/itoa) and defined in `buffer_handle/adapter/itoa/itoa.hpp`
 
 ### Helpers
 
@@ -590,7 +590,7 @@ The function `write_when_reset` can be used to force a **write** to happen when 
 ```cpp
 //Defined in buffer_handle/helper.hpp
 
-constexpr action write_when_reset(action action);
+constexpr action write_when_reset(action value);
 ```
 
 It is usually directly called in template parameters (see [date.hcp](date.hcp#L234) as an example):

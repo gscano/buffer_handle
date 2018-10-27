@@ -120,13 +120,13 @@ namespace buffer_handle
   };
 
   template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename Digits = uint8_t>
-  char * integral_number(char * buffer, I i, Digits & max_digits, Digits & previous_digits, const Itoa & itoa)
+  char * integral_number(char * buffer, I i, Digits & max_digits, Digits & previous_digits, const Itoa & itoa /* = Itoa() */)
   {
     return details::integral_number<Config, Align, Pad, Action, Itoa, I, Digits, true>(buffer, i, max_digits, itoa, previous_digits);
   }
 
   template<config Config, align Align, char Pad, action Action, class Itoa, typename I, typename Digits = uint8_t>
-  char * integral_number(char * buffer, I i, Digits & max_digits, const Itoa & itoa)
+  char * integral_number(char * buffer, I i, Digits & max_digits, const Itoa & itoa /* = Itoa() */)
   {
     return details::integral_number<Config, Align, Pad, Action, Itoa, I, Digits, false>(buffer, i, max_digits, itoa, max_digits);
   }
