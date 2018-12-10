@@ -47,6 +47,12 @@ namespace buffer_handle
 
   template<config Config, action Action>
   char * equal(char * buffer);
+
+  template<config Config, action Action>
+  char * opening_bracket(char * buffer);
+
+  template<config Config, action Action>
+  char * closing_bracket(char * buffer);
 };
 
 #include <buffer_handle/token.hcp>
