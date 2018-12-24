@@ -516,7 +516,7 @@ SCENARIO("Container", "[container]")
 		}
 	    }
 
-	  WHEN("container_t")
+	  WHEN("container_t<config::dynamic>")
 	    {
 	      typedef container_t<config::dynamic, align::left, ' '> container_type;
 
@@ -529,7 +529,7 @@ SCENARIO("Container", "[container]")
 	      REQUIRE(size == 64);
 	    }
 
-	  WHEN("long_container_t")
+	  WHEN("container_t<config::dynamic, ..., true>")
 	    {
 	      typedef container_t<config::dynamic, align::left, ' ', true> container_type;
 
@@ -1480,10 +1480,21 @@ SCENARIO("Number", "[Number]")
 	}
     }
 
-  WHEN("integral_number_t")
-    {
-      adapter::itoa::to_string_t itoa;
+  adapter::itoa::to_string_t itoa;
 
+  WHEN("integral_number_t<config::static_>")
+    {
+      typedef integral_number_t<config::static_, align::left, ' ', uint8_t> number_type;
+
+      number_type number = number_type();
+
+      std::size_t size = (std::size_t)number.handle<action::size>(nullptr, 11, itoa);
+
+      REQUIRE(size == 2);
+    }
+
+  WHEN("integral_number_t<config::dynamic>")
+    {
       typedef integral_number_t<config::dynamic, align::left, ' ', uint8_t> number_type;
 
       number_type number = number_type();
@@ -1493,10 +1504,8 @@ SCENARIO("Number", "[Number]")
       REQUIRE(size == 3);
     }
 
-  WHEN("long_integral_number_t")
+  WHEN("integral_number_t<config::dynamic, ..., true>")
     {
-      adapter::itoa::to_string_t itoa;
-
       typedef integral_number_t<config::dynamic, align::left, ' ', uint64_t, uint8_t, true> number_type;
 
       number_type number = number_type();
@@ -1936,7 +1945,38 @@ SCENARIO("String", "[string]")
 	    }
 	}
 
-      WHEN("string_t")
+      WHEN("Manual fill")
+	{
+	  WHEN("Dynamic")
+	    {
+	      std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, 0, length);
+
+	      GIVEN_A_BUFFER(size)
+	      {
+		THEN("Prepare")
+		  {
+		    char * value = nullptr;
+		    end = string<config::dynamic, align::left, pad, action::prepare>(buffer, value, length, length);
+		    REQUIRE(value != nullptr);
+		    REQUIRE(end - begin == size);
+		    std::memcpy(value, data, length);
+		    REQUIRE(std::string(begin, end) == data);
+		  }
+	      }
+	    }
+	}
+
+      WHEN("string_t<config::static_>")
+	{
+	  typedef string_t<config::static_, align::left, ' '> string_type;
+
+	  string_type string = string_type();
+	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
+
+	  REQUIRE(size == 32);
+	}
+
+      WHEN("string_t<config::dynamic>")
 	{
 	  typedef string_t<config::dynamic, align::left, ' '> string_type;
 
@@ -1947,7 +1987,7 @@ SCENARIO("String", "[string]")
 	  REQUIRE(size == 32);
 	}
 
-      WHEN("long_string_t")
+      WHEN("string_t<config::dynamic, ..., true>")
 	{
 	  typedef string_t<config::dynamic, align::left, ' ', true> string_type;
 

@@ -27,13 +27,6 @@ namespace buffer_handle
   template<config Config, align Align, char Pad, typename I, typename Digits = uint8_t, bool IsLong = false>
   struct integral_number_t
   {
-  public:
-    integral_number_t();
-
-  protected:
-    Digits max_digits;
-
-  public:
     template<action Action, class Itoa>
     char * handle(char * buffer, I value, const Itoa & itoa = Itoa());
   };

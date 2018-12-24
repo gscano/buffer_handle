@@ -21,34 +21,8 @@ namespace buffer_handle
   template<config Config, align Align, char Pad, bool IsLong = false>
   struct container_t
   {
-  public:
-    container_t();
-
-  public:
     void set_max_length(std::size_t length);
 
-  protected:
-    std::size_t max_length;
-
-  public:
-    template<action Action, class Iterator, class Handler, class Separator>
-    char * handle(char * buffer, const Iterator & begin, const Iterator & end, Handler & handler, Separator & separator);
-  };
-
-  template<config Config, align Align, char Pad>
-  struct container_t<Config, Align, Pad, true>
-  {
-  public:
-    container_t();
-
-  public:
-    void set_max_length(std::size_t length);
-
-  protected:
-    std::size_t max_length;
-    std::size_t previous_length;
-
-  public:
     template<action Action, class Iterator, class Handler, class Separator>
     char * handle(char * buffer, const Iterator & begin, const Iterator & end, Handler & handler, Separator & separator);
   };
