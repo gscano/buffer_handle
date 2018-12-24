@@ -407,16 +407,17 @@ namespace rfc1123//§5.2.14
 //Defined in buffer_handle/container.hpp
 
 template<config Config, align Align, char Pad, action Action,
-	   class Element, class Separator, class Iterator>
+	   class Handler, class Separator, class Iterator>
 char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
-		 Element & element, Separator & separator /* , std::size_t & previous_length */);
+		 Handler & handler, Separator & separator /* , std::size_t & previous_length */);
 ```
 
 * The maximum length is determined by the container content when **static**.
-* The `Element` contract is
+* The `Handler` contract is
   ```cpp
+  template<typename Element>
   template<config Config, action Action>
-  char * handle(char * buffer, const Iterator & it) /* const */;
+  char * handle(char * buffer, Element element) /* const */;
   ```
 * The `Separator` contract is
   ```cpp
@@ -537,9 +538,9 @@ struct container_t
 {
   void set_max_length(std::size_t length);
 
-  template<action Action, class Iterator, class Element, class Separator>
+  template<action Action, class Iterator, class Handler, class Separator>
   char * handle(char * buffer, Iterator & begin, Iterator & end,
-		Element & element, Separator & separator);
+		Handler & handler, Separator & separator);
 };
 ```
 

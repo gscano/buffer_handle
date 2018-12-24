@@ -9,14 +9,14 @@
 namespace buffer_handle
 {
   template<config Config, align Align, char Pad, action Action,
-	   class Element, class Separator, class Iterator>
+	   class Handler, class Separator, class Iterator>
   char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
-		   Element & element, Separator & separator);
+		   Handler & handler, Separator & separator);
 
   template<config Config, align Align, char Pad, action Action,
-	   class Element, class Separator, class Iterator>
+	   class Handler, class Separator, class Iterator>
   char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
-		   Element & element, Separator & separator, std::size_t & previous_length);
+		   Handler & handler, Separator & separator, std::size_t & previous_length);
 
   template<config Config, align Align, char Pad, bool IsLong = false>
   struct container_t
@@ -31,8 +31,8 @@ namespace buffer_handle
     std::size_t max_length;
 
   public:
-    template<action Action, class Iterator, class Element, class Separator>
-    char * handle(char * buffer, const Iterator & begin, const Iterator & end, Element & element, Separator & separator);
+    template<action Action, class Iterator, class Handler, class Separator>
+    char * handle(char * buffer, const Iterator & begin, const Iterator & end, Handler & handler, Separator & separator);
   };
 
   template<config Config, align Align, char Pad>
@@ -49,8 +49,8 @@ namespace buffer_handle
     std::size_t previous_length;
 
   public:
-    template<action Action, class Iterator, class Element, class Separator>
-    char * handle(char * buffer, const Iterator & begin, const Iterator & end, Element & element, Separator & separator);
+    template<action Action, class Iterator, class Handler, class Separator>
+    char * handle(char * buffer, const Iterator & begin, const Iterator & end, Handler & handler, Separator & separator);
   };
 };
 
