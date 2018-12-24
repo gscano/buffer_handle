@@ -131,25 +131,43 @@ namespace buffer_handle
     return string<Config, Align, Pad, Action>(buffer, value, length, this->max_length);
   }
 
-  template<config Config, align Align, char Pad> inline
-  string_t<Config, Align, Pad, true>::string_t() :
-    max_length(0),
-    previous_length(0)
-  {
-
-  }
-
   template<config Config, align Align, char Pad>
-  template<action Action> inline
-  char * string_t<Config, Align, Pad, true>::handle(char * buffer, const char * value, std::size_t length)
+  struct string_t<Config, Align, Pad, true>
   {
-    if(Config == config::dynamic
-       && ((this->max_length == 0 && Action == action::size)
-	   || Action == action::prepare))
-      {
-	this->max_length = length;
-      }
+  public:
+    string_t() :
+      max_length(0),
+      previous_length(0)
+    {
 
-    return string<Config, Align, Pad, Action>(buffer, value, length, this->max_length, this->previous_length);
-  }
+    }
+
+  protected:
+    std::size_t max_length;
+    std::size_t previous_length;
+
+  public:
+    template<action Action>
+    char * handle(char * buffer, const char * value, std::size_t length)
+    {
+      if(Config == config::dynamic
+	 && ((this->max_length == 0 && Action == action::size)
+	     || Action == action::prepare))
+	{
+	  this->max_length = length;
+	}
+
+      return string<Config, Align, Pad, Action>(buffer, value, length, this->max_length, this->previous_length);
+    }
+  };
+
+  template<bool IsLong>
+  struct string_t<config::static_, align::left, ' ', IsLong>
+  {
+    template<action Action>
+    char * handle(char * buffer, const char * value, std::size_t length)
+    {
+      return string<config::static_, Action>(buffer, value, length);
+    }
+  };
 };

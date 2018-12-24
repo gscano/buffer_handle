@@ -20,7 +20,7 @@ There are four possible actions:
 * **Write** changing portions of a buffer
 * **Reset** the buffer to its initial state
 
-The **prepare** action must be called only once followed by many **write** or **reset** actions that may not be intertwined, so consecutive **write**s are possible and **reset** could be used when unwanted disclosure of the buffer content is to be prevented.
+The **prepare** action must be called only once followed by many **write** or **reset** actions that could be intertwined, so consecutive **write**s are possible and **reset** could be used when unwanted disclosure of the buffer content is to be prevented.
 
 ### Configurations
 

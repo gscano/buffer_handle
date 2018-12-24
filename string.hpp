@@ -2,6 +2,7 @@
 #define BUFFER_HANDLE_STRING_HPP
 
 #include <cstddef> // size_t
+#include <type_traits> // enable_if
 
 #include <buffer_handle/action.hpp> // action
 #include <buffer_handle/align.hpp> //align
@@ -29,21 +30,6 @@ namespace buffer_handle
 
   protected:
     std::size_t max_length;
-
-  public:
-    template<action Action>
-    char * handle(char * buffer, const char * value, std::size_t length);
-  };
-
-  template<config Config, align Align, char Pad>
-  struct string_t<Config, Align, Pad, true>
-  {
-  public:
-    string_t();
-
-  protected:
-    std::size_t max_length;
-    std::size_t previous_length;
 
   public:
     template<action Action>
