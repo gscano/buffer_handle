@@ -142,6 +142,16 @@ namespace buffer_handle
     return details::integral_number<Config, Align, Pad, Action, Itoa, I, Digits, false>(buffer, i, max_digits, itoa, max_digits);
   }
 
+  template<align Align, char Pad, typename I, bool IsLong>
+  struct integral_number_t<config::static_, Align, Pad, I, uint8_t, IsLong>
+  {
+    template<action Action, class Itoa>
+    char * handle(char * buffer, I value, const Itoa & itoa = Itoa())
+    {
+      return integral_number<Action, Itoa, I>(buffer, value, itoa);
+    }
+  };
+
   template<align Align, char Pad, typename I, typename Digits>
   struct integral_number_t<config::dynamic, Align, Pad, I, Digits, false>
   {
@@ -182,16 +192,6 @@ namespace buffer_handle
     char * handle(char * buffer, I value, const Itoa & itoa = Itoa())
     {
       return integral_number<config::dynamic, Align, Pad, Action, Itoa, I, Digits>(buffer, value, this->max_digits, this->previous_digits, itoa);
-    }
-  };
-
-  template<align Align, char Pad, typename I, bool IsLong>
-  struct integral_number_t<config::static_, Align, Pad, I, uint8_t, IsLong>
-  {
-    template<action Action, class Itoa>
-    char * handle(char * buffer, I value, const Itoa & itoa = Itoa())
-    {
-      return integral_number<Action, Itoa, I>(buffer, value, itoa);
     }
   };
 

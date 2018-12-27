@@ -1947,6 +1947,25 @@ SCENARIO("String", "[string]")
 
       WHEN("Manual fill")
 	{
+	  WHEN("Static")
+	    {
+	      std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, nullptr, 0, length);
+
+	      GIVEN_A_BUFFER(size)
+		{
+		  THEN("Prepare")
+		    {
+		      char * value = nullptr;
+		      end = string<config::static_, align::left, pad, action::prepare>(buffer, &value, length, length);
+
+		      REQUIRE(value != nullptr);
+		      REQUIRE(end - begin == size);
+		      std::memcpy(value, data, length);
+		      REQUIRE(std::string(begin, end) == data);
+		    }
+		}
+	    }
+
 	  WHEN("Dynamic")
 	    {
 	      std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, 0, length);
@@ -1956,7 +1975,7 @@ SCENARIO("String", "[string]")
 		THEN("Prepare")
 		  {
 		    char * value = nullptr;
-		    end = string<config::dynamic, align::left, pad, action::prepare>(buffer, value, length, length);
+		    end = string<config::dynamic, align::left, pad, action::prepare>(buffer, &value, length, length);
 		    REQUIRE(value != nullptr);
 		    REQUIRE(end - begin == size);
 		    std::memcpy(value, data, length);

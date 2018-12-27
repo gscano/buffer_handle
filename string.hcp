@@ -1,4 +1,5 @@
 #include <cassert> // assert()
+#include <cstddef> // nullptr_t
 #include <cstring> // memcpy() memset() strlen()
 
 #include <buffer_handle/helper.hpp> // must_write() reset()
@@ -112,7 +113,7 @@ namespace buffer_handle
   }
 
   template<config Config, align Align, char Pad, action Action> inline
-  char * string(char * buffer, char * & value, std::size_t length, std::size_t max_length)
+  char * string(char * buffer, char ** value, std::size_t length, std::size_t max_length)
   {
     switch(Action)
       {
@@ -120,21 +121,37 @@ namespace buffer_handle
 	{
 	  return buffer + max_length;
 	}
-      case action::prepare:
+      default:
 	{
 	  if(Align == align::left)
 	    {
-	      value = buffer;
+	      *value = buffer;
 	    }
 	  else if(Align == align::right)
 	    {
-	      value = buffer + max_length;
+	      *value = buffer + max_length;
 	    }
 	}
       }
 
     return buffer + max_length;
   }
+
+  template<config Config, align Align, char Pad, action Action> inline
+  char * string(char * buffer, std::nullptr_t value, std::size_t length, std::size_t max_length)
+  {
+    return string<Config, Align, Pad, Action>(buffer, (char *)value, length, max_length);
+  }
+
+  template<align Align, char Pad, bool IsLong>
+  struct string_t<config::static_, Align, Pad, IsLong>
+  {
+    template<action Action>
+    char * handle(char * buffer, const char * value, std::size_t length)
+    {
+      return string<config::static_, Action>(buffer, value, length);
+    }
+  };
 
   template<align Align, char Pad>
   struct string_t<config::dynamic, Align, Pad, false>
@@ -189,16 +206,6 @@ namespace buffer_handle
 	}
 
       return string<config::dynamic, Align, Pad, Action>(buffer, value, length, this->max_length, this->previous_length);
-    }
-  };
-
-  template<align Align, char Pad, bool IsLong>
-  struct string_t<config::static_, Align, Pad, IsLong>
-  {
-    template<action Action>
-    char * handle(char * buffer, const char * value, std::size_t length)
-    {
-      return string<config::static_, Action>(buffer, value, length);
     }
   };
 };

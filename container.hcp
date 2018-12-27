@@ -123,6 +123,23 @@ namespace buffer_handle
       (buffer, begin, end, max_length, handler, separator, max_length);
   }
 
+  template<align Align, char Pad, bool IsLong>
+  struct container_t<config::static_, Align, Pad, IsLong>
+  {
+    void set_max_length(std::size_t length)
+    {
+
+    }
+
+    template<action Action, class Iterator, class Handler, class Separator>
+    char * handle(char * buffer, const Iterator & begin, const Iterator & end, Handler & handler, Separator & separator)
+    {
+      std::size_t dummy_max_length;
+
+      return container<config::static_, Align, Pad, Action, Handler, Separator, Iterator>(buffer, begin, end, dummy_max_length, handler, separator);
+    }
+  };
+
   template<align Align, char Pad>
   struct container_t<config::dynamic, Align, Pad, false>
   {
@@ -175,23 +192,6 @@ namespace buffer_handle
     char * handle(char * buffer, const Iterator & begin, const Iterator & end, Handler & handler, Separator & separator)
     {
       return container<config::dynamic, Align, Pad, Action, Handler, Separator, Iterator>(buffer, begin, end, this->max_length, handler, separator, this->previous_length);
-    }
-  };
-
-  template<align Align, char Pad, bool IsLong>
-  struct container_t<config::static_, Align, Pad, IsLong>
-  {
-    void set_max_length(std::size_t length)
-    {
-
-    }
-
-    template<action Action, class Iterator, class Handler, class Separator>
-    char * handle(char * buffer, const Iterator & begin, const Iterator & end, Handler & handler, Separator & separator)
-    {
-      std::size_t dummy_max_length;
-
-      return container<config::static_, Align, Pad, Action, Handler, Separator, Iterator>(buffer, begin, end, dummy_max_length, handler, separator);
     }
   };
 };

@@ -23,7 +23,7 @@ namespace buffer_handle
   char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length);
 
   template<config Config, align Align, char Pad, action Action>
-  char * string(char * buffer, char * & value, std::size_t length, std::size_t max_length);
+  char * string(char * buffer, char ** value, std::size_t length, std::size_t max_length);
 
   template<config Config, align Align, char Pad, bool IsLong = false>
   struct string_t
