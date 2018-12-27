@@ -257,6 +257,7 @@ char * string(char * buffer, const char * value, std::size_t length, std::size_t
 
 * If ```value == nullptr``` then the buffer will be padded with ```max_length``` characters.
 * If ```value != nullptr``` then its ```length``` must be ```<=``` to ```max_length```.
+* There is a version where ```value``` is a ```char * &``` instead of a ```const char *``` and in which no action is taken except setting the value of the pointer either to the left or to the right depending on the alignment. The ```length``` is ignored but ```max_length``` is used for the return value. **write** and **reset** actions should then be handled at a higher level.
 
 ###### Number
 
