@@ -25,7 +25,7 @@ namespace buffer_handle
 	   typename Day, typename Month, typename Year> inline
   char * day_month_year(char * buffer, Day day, Month month, Year year)
   {
-    if(must_write<Config, Action>())
+    if(must_write(Config, Action))
       {
 	switch(Action)
 	  {
@@ -64,7 +64,7 @@ namespace buffer_handle
 	   typename Month, typename Day> inline
   char * month_day(char * buffer, Month month, Day day)
   {
-    if(must_write<Config, Action>())
+    if(must_write(Config, Action))
       {
 	switch(Action)
 	  {

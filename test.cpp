@@ -1047,6 +1047,9 @@ SCENARIO("Date", "[date]")
 
 SCENARIO("Helper", "[helper]")
 {
+  static_assert(must_write(config::static_, action::prepare));
+  static_assert(write_when_reset(action::reset) == action::write);
+
   const char pad = ' ';
 
   const char reference[] = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";

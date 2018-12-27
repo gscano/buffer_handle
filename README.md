@@ -1,6 +1,6 @@
 # Handle buffer content
 
-When buffers are extensively used to send textual output, their management requires a work to be eased by this **C++ 11** library under [MIT license](LICENSE).
+When buffers are extensively used to send textual output, their management requires a work to be eased by this **C++ 11** header-only library under [MIT license](LICENSE).
 
 * [Concept](#concept)
 * [Example](#example)
@@ -9,7 +9,7 @@ When buffers are extensively used to send textual output, their management requi
 
 ## Concept
 
-The purpose of this library is to provide a single [function](#functions) or [functor](#functors) to perform different [**actions**](#actions) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configurations).
+The purpose of this library is to provide a single [function](#function-signature) or [functor](#structure-layout) to perform different [**actions**](#actions) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configurations).
 
 ### Actions
 
@@ -57,7 +57,7 @@ char * handle(char * buffer, ...);
 
 #### Structure layout
 
-Similarly to functions, a functor is defined by configuration and inner functor template parameters. The function `handle` is templated on the action and function argument types.
+Similarly to functions, a functor is defined by configuration and function template parameters. The function `handle` is templated on the action and function argument types.
 
 ```cpp
 template<config Config, ...>
@@ -86,7 +86,7 @@ char * handle(char * buffer, Hours hours, Minutes minutes, int when,
 ```
 
 In this case, the description `sunny` may be replaced by a string which length must be bounded. So the `MaxDescriptionLength` template parameter is part of the configuration of the object and comes before the action parameter. `Hours`, `Minutes` and `Temperature` are here to be more convenient for a user who may give any type of integral type with positive values. The compiler will deduce them from the arguments.
-The `when` parameter is positive for future, negative for past and null for present.
+The `when` parameter is positive for future, negative for past and zero for present times.
 
 Moving to the implementation, the first thing is to write constant strings:
 
@@ -179,7 +179,7 @@ At 02:00, the weather was         cloudy with a temperature of 68°F.
 At 23:58, the weather will be   freezing with a temperature of 99°K.
 ```
 
-after a maximum size is obtained with:
+after obtaining the maximal size with:
 
 ```cpp
 (std::size_t)handle<config::dynamic, 10, action::size>(nullptr, 0, 0, 0, nullptr, 0, 'K');
@@ -225,9 +225,11 @@ char * character(char * buffer, char c);
 
 template<config Config, action Action>
 char * TOKEN(char * buffer);
-//TOKEN = new_line, carriage_return, space, double_quote, single_quote
-//        plus, comma, hyphen = minus, dot, slash, colon, semicolon, equal,
-//        opening_bracket, closing_bracket
+//TOKEN = new_line, carriage_return, space, exclamation_mark, double_quote,
+//        single_quote, opening_parenthesis, closing_parenthesis, plus,
+//        comma, hyphen = minus, dot, slash, colon, semicolon, less_than,
+//        equal, greater_than, question_mark, opening_bracket, closing_bracket,
+//        underscore, backquote, opening_brace, pipe, closing_brace
 ```
 
 ###### Boolean
@@ -582,23 +584,17 @@ The function `must_write` can be used to test whether the given configuration an
 ```cpp
 //Defined in buffer_handle/helper.hpp
 
-template<config Config, action Action>
-constexpr bool must_write();
+constexpr bool must_write(config Config, action Action);
 ```
 
 ###### Write when reset
 
-The function `write_when_reset` can be used to force a **write** to happen when **reset** is given as an argument.
+The function `write_when_reset` can be used to force a **write** to happen when **reset** is given as an argument (see [date.hcp](date.hcp#L234) for an example).
 
 ```cpp
 //Defined in buffer_handle/helper.hpp
 
 constexpr action write_when_reset(action value);
-```
-
-It is usually directly called in template parameters (see [date.hcp](date.hcp#L234) as an example):
-```cpp
-FUNCTION<Config, write_when_reset(Action)>(buffer, ...);
 ```
 
 ###### Reset
@@ -654,4 +650,4 @@ Run `make test` to compile and `make run-test` to execute, or simply `make`.
 
 * [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.4.1](https://github.com/catchorg/Catch2/releases/tag/v2.4.1))
 
-To change the path of these dependencies, create a `config.mk` file and then assign the `CATCH` variable with the appropriate location (`.` is used by default).
+To change the path of this dependency, create a `config.mk` file and then assign the `CATCH` variable with the appropriate location (`.` is used by default).

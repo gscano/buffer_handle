@@ -5,8 +5,7 @@
 
 namespace buffer_handle
 {
-  template<config Config, action Action> inline
-  constexpr bool must_write()
+  constexpr bool must_write(config Config, action Action)
   {
     return (Config == config::static_ && Action == action::prepare)
       || (Config == config::dynamic && Action != action::size);

@@ -9,7 +9,7 @@ namespace buffer_handle
   template<config Config, action Action> inline
   char * string(char * buffer, const char * value, std::size_t length)
   {
-    if(must_write<Config, Action>())
+    if(must_write(Config, Action))
       {
 	std::memcpy(buffer, value, length);
       }

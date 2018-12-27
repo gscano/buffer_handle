@@ -7,8 +7,7 @@
 
 namespace buffer_handle
 {
-  template<config Config, action Action>
-  constexpr bool must_write();
+  constexpr bool must_write(config Config, action Action);
 
   constexpr action write_when_reset(action value);
 

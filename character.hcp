@@ -5,7 +5,7 @@ namespace buffer_handle
   template<config Config, action Action> inline
   char * character(char * buffer, char c)
   {
-    if(must_write<Config, Action>())
+    if(must_write(Config, Action))
       {
 	buffer[0] = c;
       }

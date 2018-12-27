@@ -107,7 +107,7 @@ namespace buffer_handle
   template<config Config, action Action> inline
   char * north_american_timezone(char * buffer, enum north_american_timezone value)
   {
-    if(must_write<Config, Action>())
+    if(must_write(Config, Action))
       {
 	std::memcpy(buffer, north_american_timezone(value), 3);
       }

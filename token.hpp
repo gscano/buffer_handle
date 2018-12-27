@@ -16,10 +16,19 @@ namespace buffer_handle
   char * space(char * buffer);
 
   template<config Config, action Action>
+  char * exclamation_mark(char * buffer);
+
+  template<config Config, action Action>
   char * double_quote(char * buffer);
 
   template<config Config, action Action>
   char * single_quote(char * buffer);
+
+  template<config Config, action Action>
+  char * opening_parenthesis(char * buffer);
+
+  template<config Config, action Action>
+  char * closing_parenthesis(char * buffer);
 
   template<config Config, action Action>
   char * plus(char * buffer);
@@ -46,13 +55,40 @@ namespace buffer_handle
   char * semicolon(char * buffer);
 
   template<config Config, action Action>
+  char * less_than(char * buffer);
+
+  template<config Config, action Action>
   char * equal(char * buffer);
+
+  template<config Config, action Action>
+  char * greater_than(char * buffer);
+
+  template<config Config, action Action>
+  char * question_mark(char * buffer);
 
   template<config Config, action Action>
   char * opening_bracket(char * buffer);
 
   template<config Config, action Action>
+  char * backslash(char * buffer);
+
+  template<config Config, action Action>
   char * closing_bracket(char * buffer);
+
+  template<config Config, action Action>
+  char * underscore(char * buffer);
+
+  template<config Config, action Action>
+  char * backquote(char * buffer);
+
+  template<config Config, action Action>
+  char * opening_brace(char * buffer);
+
+  template<config Config, action Action>
+  char * pipe(char * buffer);
+
+  template<config Config, action Action>
+  char * closing_brace(char * buffer);
 };
 
 #include <buffer_handle/token.hcp>

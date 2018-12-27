@@ -21,6 +21,12 @@ namespace buffer_handle
   }
 
   template<config Config, action Action>
+  char * exclamation_mark(char * buffer)
+  {
+    return character<Config, Action>(buffer, '!');
+  }
+
+  template<config Config, action Action>
   char * double_quote(char * buffer)
   {
     return character<Config, Action>(buffer, '"');
@@ -30,6 +36,18 @@ namespace buffer_handle
   char * single_quote(char * buffer)
   {
     return character<Config, Action>(buffer, '\'');
+  }
+
+  template<config Config, action Action>
+  char * opening_parenthesis(char * buffer)
+  {
+    return character<Config, Action>(buffer, '(');
+  }
+
+  template<config Config, action Action>
+  char * closing_parenthesis(char * buffer)
+  {
+    return character<Config, Action>(buffer, ')');
   }
 
   template<config Config, action Action> inline
@@ -81,19 +99,73 @@ namespace buffer_handle
   }
 
   template<config Config, action Action> inline
+  char * less_than(char * buffer)
+  {
+    return character<Config, Action>(buffer, '<');
+  }
+
+  template<config Config, action Action> inline
   char * equal(char * buffer)
   {
     return character<Config, Action>(buffer, '=');
   }
 
-  template<config Config, action Action>
+  template<config Config, action Action> inline
+  char * greater_than(char * buffer)
+  {
+    return character<Config, Action>(buffer, '>');
+  }
+
+  template<config Config, action Action> inline
+  char * question_mark(char * buffer)
+  {
+    return character<Config, Action>(buffer, '?');
+  }
+
+  template<config Config, action Action> inline
   char * opening_bracket(char * buffer)
   {
     return character<Config, Action>(buffer, '[');
   }
 
-  template<config Config, action Action>
+  template<config Config, action Action> inline
+  char * backslash(char * buffer)
+  {
+    return character<Config, Action>(buffer, '\\');
+  }
+
+  template<config Config, action Action> inline
   char * closing_bracket(char * buffer)
+  {
+    return character<Config, Action>(buffer, ']');
+  }
+
+  template<config Config, action Action> inline
+  char * underscore(char * buffer)
+  {
+    return character<Config, Action>(buffer, '_');
+  }
+
+  template<config Config, action Action> inline
+  char * backquote(char * buffer)
+  {
+    return character<Config, Action>(buffer, '`');
+  }
+
+  template<config Config, action Action> inline
+  char * opening_brace(char * buffer)
+  {
+    return character<Config, Action>(buffer, '[');
+  }
+
+  template<config Config, action Action> inline
+  char * pipe(char * buffer)
+  {
+    return character<Config, Action>(buffer, '|');
+  }
+
+  template<config Config, action Action> inline
+  char * closing_brace(char * buffer)
   {
     return character<Config, Action>(buffer, ']');
   }
