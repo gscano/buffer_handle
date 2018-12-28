@@ -18,6 +18,11 @@ namespace buffer_handle
   char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
 		   Handler & handler, Separator & separator, std::size_t & previous_length);
 
+  template<align Align, char Pad, action Action,
+	   class Handler, class Separator, typename Iterator>
+  char * container(char * buffer, const Iterator & begin, Iterator & current, const Iterator & end,
+		   std::size_t max_length, Handler & handler, Separator & separator);
+
   template<config Config, align Align, char Pad, bool IsLong = false>
   struct container_t
   {

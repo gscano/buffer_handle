@@ -214,7 +214,7 @@ enum class config { static_, dynamic };
 ```cpp
 //Defined in buffer_handle/character.hpp
 
-template <config Config, action Action>
+template<config Config, action Action>
 char * character(char * buffer, char c);
 ```
 
@@ -251,15 +251,20 @@ char * boolean(char * buffer, bool value);
 
 template<config Config, action Action>
 char * string(char * buffer, const char * value, std::size_t length);
+template<config Config, action Action>
+char * string(char * buffer, char ** value, std::size_t length);
 
 template<config Config, align Align, char Pad, action Action>
 char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length
 	      /* , std::size_t & previous_length */);
+template<config Config, align Align, char Pad, action Action>
+char * string(char * buffer, char ** value, std::size_t length, std::size_t max_length);
 ```
 
-* If ```value == nullptr``` then the buffer will be padded with ```max_length``` characters.
-* If ```value != nullptr``` then its ```length``` must be ```<=``` to ```max_length```.
-* There is a version where ```value``` is a ```char **``` instead of a ```const char *``` and in which no action is taken except setting the value of the pointer either to the left or to the right of the underlying buffer depending on the alignment for all actions except when calculating the **size**. The ```length``` is ignored but ```max_length``` is used for the return value.
+* Functions of the first set write or set `value` in a buffer of size `length`.
+* For the function with a `const char *` argument in the second set of functions, passing a `nullptr` for a **write** is equivalent to a **reset**.
+* The function with a `char **` argument sets `value` to either the left or to the right of the underlying buffer of size `max_length` (`length` being ignored). When **prepare**d, the buffer is padded but no action occurs for a **write** or a **reset**.
+* There is an overload with `std::nullptr_t` to resolve a `nullptr` parameter.
 
 ###### Number
 
@@ -272,6 +277,9 @@ char * two_digits_number(char * buffer, I i);
 template<config Config, action Action, typename I>
 char * four_digits_number(char * buffer, I i);
 
+template<config Action, class Itoa, typename I>
+char * integral_number(char * buffer, I i, const Itoa & itoa = Itoa());
+
 template<config Config, align Align, char Pad, action Action, class Itoa,
 	 typename I, typename Digits = uint8_t>
 char * integral_number(char * buffer, I i, Digits & max_digits, /* Digits & previous_digits, */
@@ -283,6 +291,7 @@ char * integral_number(char * buffer, I i, Digits & max_digits, /* Digits & prev
 * The `max_digits` argument is a reference because the function will assign it when **prepare** is called based on the value passed in `i`. It must not be modified.
 * `uint8_t` should be enough to encode the number of digits for most applications.
 * The `Itoa` functor must conform to the provided [adapter](#itoa) contract.
+* The function `integral_number` without the `max_digits` argument is equivalent to calling its counterpart as **static**.
 
 ###### Time
 
@@ -413,9 +422,15 @@ template<config Config, align Align, char Pad, action Action,
 	   class Handler, class Separator, class Iterator>
 char * container(char * buffer, const Iterator & begin, const Iterator & end, std::size_t max_length,
 		 Handler & handler, Separator & separator /* , std::size_t & previous_length */);
+
+template<align Align, char Pad, action Action,
+	   class Handler, class Separator, typename Iterator>
+char * container(char * buffer, const Iterator & begin, Iterator & current, const Iterator & end,
+		 std::size_t max_length, Handler & handler, Separator & separator);
 ```
 
 * The maximum length is determined by the container content when **static**.
+* When **dynamic**, the `max_length` is not used unless the method with the `current` argument is used and stops iterating before the `end`.
 * The `Handler` contract is
   ```cpp
   template<typename Element>

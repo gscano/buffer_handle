@@ -23,6 +23,23 @@ namespace buffer_handle
     return string<Config, Action>(buffer, value, std::strlen(value));
   }
 
+  template<config Config, action Action> inline
+  char * string(char * buffer, char ** value, std::size_t length)
+  {
+    if(must_write(Config, Action))
+      {
+	*value = buffer;
+      }
+
+    return buffer + length;
+  }
+
+  template<config Config, action Action> inline
+  char * string(char * buffer, std::nullptr_t value, std::size_t length)
+  {
+    return buffer + length;
+  }
+
   namespace details
   {
     template<config Config, align Align, char Pad, action Action, bool UsePreviousLength> inline
@@ -121,17 +138,19 @@ namespace buffer_handle
 	{
 	  return buffer + max_length;
 	}
-      default:
+      case action::prepare:
 	{
-	  if(Align == align::left)
-	    {
-	      *value = buffer;
-	    }
-	  else if(Align == align::right)
-	    {
-	      *value = buffer + max_length;
-	    }
+	  std::memset(buffer, Pad, max_length);
 	}
+      }
+
+    if(Align == align::left)
+      {
+	*value = buffer;
+      }
+    else if(Align == align::right)
+      {
+	*value = buffer + max_length;
       }
 
     return buffer + max_length;

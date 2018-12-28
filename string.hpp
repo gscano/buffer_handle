@@ -14,6 +14,9 @@ namespace buffer_handle
   char * string(char * buffer, const char * value, std::size_t length);
 
   template<config Config, action Action>
+  char * string(char * buffer, char ** value, std::size_t length);
+
+  template<config Config, action Action>
   char * string(char * buffer, const char * value);
 
   template<config Config, align Align, char Pad, action Action>

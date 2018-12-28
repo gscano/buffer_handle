@@ -123,6 +123,59 @@ namespace buffer_handle
       (buffer, begin, end, max_length, handler, separator, max_length);
   }
 
+  template<align Align, char Pad, action Action,
+	   class Handler, class Separator, typename Iterator> inline
+  char * container(char * buffer, const Iterator & begin, Iterator & current, const Iterator & end,
+		   std::size_t max_length, Handler & handler, Separator & separator)
+  {
+    switch(Action)
+      {
+      case action::size:
+	{
+	  return buffer + max_length;
+	}
+      case action::prepare:
+      case action::reset:
+	{
+	  std::memset(buffer, Pad, max_length);
+
+	  buffer += max_length;
+
+	  break;
+	}
+      case action::write:
+	{
+	  const std::size_t element_size = (std::size_t)handler.template handle<config::static_, action::size>(nullptr, *begin);
+	  const std::size_t separator_size = (std::size_t)separator.template handle<config::static_, action::size>(nullptr);
+	  const std::size_t size = element_size + separator_size;
+
+	  char * buffer_origin = buffer;
+	  std::size_t left = max_length;
+
+	  while(current < end && size <= left)
+	    {
+	      std::size_t number_to_print = left / size;
+
+	      Iterator last = current;
+	      std::advance(last, std::min((std::size_t)std::distance(current, end), number_to_print));
+
+	      if(current != begin)
+		{
+		  buffer = separator.template handle<config::static_, action::prepare>(buffer);
+		}
+
+	      buffer = container<config::static_, Align, Pad, action::prepare>
+		(buffer, current, last, max_length, handler, separator);
+
+	      current = last;
+	      left = max_length - (buffer - buffer_origin);
+	    }
+	}
+      }
+
+    return buffer;
+  }
+
   template<align Align, char Pad, bool IsLong>
   struct container_t<config::static_, Align, Pad, IsLong>
   {

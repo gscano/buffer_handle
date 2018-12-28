@@ -256,6 +256,24 @@ struct element_handler_t
   }
 };
 
+template<std::size_t Size>
+struct element_handler_with_max_size_t
+{
+  template<config Config, action Action>
+  char * handle(char * buffer, std::pair<const char *, std::size_t> element) const
+  {
+    assert(element.second <= Size);
+
+    switch(Action)
+      {
+      case action::size: return buffer + Size;
+      default: std::memcpy(buffer, element.first, element.second);
+      }
+
+    return buffer + element.second;
+  }
+};
+
 using separator_t = character_separator_t<' '>;
 
 SCENARIO("Container", "[container]")
@@ -513,6 +531,77 @@ SCENARIO("Container", "[container]")
 			  }
 			}
 		    }
+		}
+	    }
+
+	  WHEN("Dynamic container")
+	    {
+	      typename list_type::const_iterator current = cbegin;
+
+	      element_handler_with_max_size_t<6> element_handler;
+
+	      WHEN("Every thing can fit")
+		{
+		  std::size_t max_length = 32;
+
+		  GIVEN_A_BUFFER(max_length)
+		  {
+		    THEN("Prepare")
+		      {
+			end = container<align::left, ' ', action::prepare>(begin, cbegin, current, cend, max_length, element_handler, separator);
+
+			REQUIRE(end - begin == max_length);
+			REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
+
+			THEN("Write")
+			  {
+			    end = container<align::left, ' ', action::write>(begin, cbegin, current, cend, max_length, element_handler, separator);
+
+			    REQUIRE(end - begin == length);
+			    REQUIRE(std::string(begin, end) == data);
+			  }
+		      }
+		  }
+		}
+
+	      WHEN("Some can fit")
+		{
+		  std::size_t max_length = 8;
+
+		  GIVEN_A_BUFFER(max_length)
+		  {
+		    THEN("Prepare")
+		      {
+			end = container<align::left, ' ', action::prepare>(begin, cbegin, current, cend, max_length, element_handler, separator);
+
+			REQUIRE(end - begin == max_length);
+			REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
+
+			THEN("Write")
+			  {
+			    end = container<align::left, ' ', action::write>(begin, cbegin, current, cend, max_length, element_handler, separator);
+
+			    REQUIRE(end - begin == 5);
+			    REQUIRE(std::string(begin, end) == "Hello");
+
+			    THEN("Write")
+			      {
+				end = container<align::left, ' ', action::write>(begin, cbegin, current, cend, max_length, element_handler, separator);
+
+				REQUIRE(end - begin == 6);
+				REQUIRE(std::string(begin, end) == " world");
+
+				THEN("Write")
+				  {
+				    end = container<align::left, ' ', action::write>(begin, cbegin, current, cend, max_length, element_handler, separator);
+
+				    REQUIRE(end - begin == 2);
+				    REQUIRE(std::string(begin, end) == " !");
+				  }
+			      }
+			  }
+		      }
+		  }
 		}
 	    }
 

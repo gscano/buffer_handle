@@ -5,6 +5,7 @@
 
 namespace buffer_handle
 {
+  inline
   constexpr bool must_write(config Config, action Action)
   {
     return (Config == config::static_ && Action == action::prepare)

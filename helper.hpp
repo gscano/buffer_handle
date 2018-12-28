@@ -8,7 +8,6 @@
 namespace buffer_handle
 {
   constexpr bool must_write(config Config, action Action);
-
   constexpr action write_when_reset(action value);
 
   template<align Align, bool UsePreviousLength, char Pad, typename Size>
