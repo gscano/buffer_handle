@@ -33,12 +33,20 @@ SCENARIO("Boolean", "[boolean]")
 	{
 	  GIVEN_A_BUFFER(4)
 	    {
-	      THEN("Prepare")
+	      THEN("Prepare true")
 		{
 		  end = boolean<config::static_, case_::lower, align::left, pad, action::prepare>(begin, true);
 
 		  REQUIRE(end - begin == 4);
 		  REQUIRE(std::string(begin, end) == "true");
+		}
+
+	      THEN("Prepare false")
+		{
+		  end = boolean<config::static_, case_::lower, align::left, pad, action::prepare>(begin, false);
+
+		  REQUIRE(end - begin == 5);
+		  REQUIRE(std::string(begin, end) == "false");
 		}
 	    }
 	}
@@ -185,13 +193,24 @@ SCENARIO("Boolean", "[boolean]")
 
   WHEN("Single digit boolean")
     {
-      WHEN("Static")
+      char c;
+      const char t = 'a';
+      const char f = 'b';
+
+      WHEN("Static true")
 	{
-	  char c;
-	  char * end = boolean<config::static_, action::prepare>(&c, true);
+	  char * end = boolean<config::static_, action::prepare, f, t>(&c, true);
 
 	  REQUIRE(end == &c + 1);
-	  REQUIRE(c == '1');
+	  REQUIRE(c == t);
+	}
+
+      WHEN("Static false")
+	{
+	  char * end = boolean<config::static_, action::prepare, f, t>(&c, false);
+
+	  REQUIRE(end == &c + 1);
+	  REQUIRE(c == f);
 	}
     }
 }
@@ -247,12 +266,7 @@ struct element_handler_t
   template<config Config, action Action>
   char * handle(char * buffer, std::pair<const char *, std::size_t> element) const
   {
-    if(Action != action::size)
-      {
-	std::memcpy(buffer, element.first, element.second);
-      }
-
-    return buffer + element.second;
+    return string<Config, Action>(buffer, element.first, element.second);
   }
 };
 
@@ -1746,12 +1760,20 @@ SCENARIO("Timezone", "[timezone]")
 		{
 		  GIVEN_A_BUFFER(size)
 		  {
-		    THEN("Prepare")
+		    THEN("Prepare GMT")
 		      {
 			end = universal_timezone<config::static_, align::left, pad, action::prepare>(begin, universal_timezone::GMT);
 
 			REQUIRE(end - begin == 3);
 			REQUIRE(std::string(begin, end) == "GMT");
+		      }
+
+		    THEN("Prepare UT")
+		      {
+			end = universal_timezone<config::static_, align::left, pad, action::prepare>(begin, universal_timezone::UT);
+
+			REQUIRE(end - begin == 2);
+			REQUIRE(std::string(begin, end) == "UT");
 		      }
 		  }
 		}
@@ -1760,15 +1782,15 @@ SCENARIO("Timezone", "[timezone]")
 
       WHEN("Dynamic")
 	{
-	  WHEN("Left-aligned")
+	  std::size_t size = (std::size_t)universal_timezone<config::dynamic, align::left, pad, action::size>(nullptr, universal_timezone::UT);
+
+	  REQUIRE(size == 3);
+
+	  GIVEN("Size")
 	    {
-	      std::size_t size = (std::size_t)universal_timezone<config::dynamic, align::left, pad, action::size>(nullptr, universal_timezone::UT);
-
-	      REQUIRE(size == 3);
-
-	      GIVEN("Size")
+	      GIVEN_A_BUFFER(3)
 		{
-		  GIVEN_A_BUFFER(3)
+		  WHEN("Left-aligned")
 		    {
 		      THEN("Prepare, write or reset")
 			{
@@ -1778,18 +1800,8 @@ SCENARIO("Timezone", "[timezone]")
 			  REQUIRE(std::string(begin, end) == "UT ");
 			}
 		    }
-		}
-	    }
 
-	  WHEN("Right-aligned")
-	    {
-	      std::size_t size = (std::size_t)universal_timezone<config::dynamic, align::right, pad, action::size>(nullptr, universal_timezone::GMT);
-
-	      REQUIRE(size == 3);
-
-	      GIVEN("Size")
-		{
-		  GIVEN_A_BUFFER(3)
+		  WHEN("Right-aligned")
 		    {
 		      THEN("Prepare, write or reset")
 			{
@@ -1798,6 +1810,14 @@ SCENARIO("Timezone", "[timezone]")
 			  REQUIRE(end - begin == 3);
 			  REQUIRE(std::string(begin, end) == " UT");
 			}
+		    }
+
+		  WHEN("GMT")
+		    {
+		      end = universal_timezone<config::dynamic, align::right, pad, action::prepare>(begin, universal_timezone::GMT);
+
+		      REQUIRE(end - begin == 3);
+		      REQUIRE(std::string(begin, end) == "GMT");
 		    }
 		}
 	    }

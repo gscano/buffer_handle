@@ -4,6 +4,10 @@ test.d
 test.o
 test
 
+coverage*
+test.gcda
+test.gcno
+
 example
 
 *~

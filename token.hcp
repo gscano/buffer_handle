@@ -1,7 +1,7 @@
 #include <buffer_handle/character.hpp> // character()
 
 namespace buffer_handle
-{
+{//LCOV_EXCL_START
   template<config Config, action Action> inline
   char * new_line(char * buffer)
   {
@@ -169,4 +169,5 @@ namespace buffer_handle
   {
     return character<Config, Action>(buffer, ']');
   }
+//LCOV_EXCL_STOP
 };

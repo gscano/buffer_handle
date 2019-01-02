@@ -306,7 +306,7 @@ namespace buffer_handle
   {
     template<typename Day> inline
     const char * wkday(Day day)
-    {
+    {//LCOV_EXCL_START
       switch(day)
 	{
 	case  0: return "Sun";
@@ -317,12 +317,12 @@ namespace buffer_handle
 	case  5: return "Fri";
 	case  6: return "Sat";
 	default: return "   ";
-	}
+	}//LCOV_EXCL_STOP
     }
 
     template<typename Day> inline
     const char * weekday(Day day)
-    {
+    {//LCOV_EXCL_START
       switch(day)
 	{
 	case  0: return "Sunday";
@@ -333,12 +333,12 @@ namespace buffer_handle
 	case  5: return "Friday";
 	case  6: return "Saturday";
 	default: return "         ";
-	}
+	}//LCOV_EXCL_STOP
     }
 
     template<typename Month> inline
     const char * month(Month month)
-    {
+    {//LCOV_EXCL_START
       switch(month)
 	{
 	case  0: return "Jan";
@@ -354,7 +354,7 @@ namespace buffer_handle
 	case 10: return "Nov";
 	case 11: return "Dec";
 	default: return "   ";
-	}
+	}//LCOV_EXCL_STOP
     }
   };
 };

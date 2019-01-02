@@ -89,7 +89,7 @@ namespace buffer_handle
 
   inline
   const char * north_american_timezone(enum north_american_timezone value)
-  {
+  {//LCOV_EXCL_START
     switch(value)
       {
       case north_american_timezone::EST: return "EST";
@@ -101,7 +101,7 @@ namespace buffer_handle
       case north_american_timezone::PST: return "PST";
       case north_american_timezone::PDT: return "PDT";
       default: return "   ";
-      }
+      }//LCOV_EXCL_STOP
   }
 
   template<config Config, action Action> inline
