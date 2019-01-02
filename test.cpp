@@ -603,6 +603,29 @@ SCENARIO("Container", "[container]")
 		      }
 		  }
 		}
+
+	      WHEN("None can fit")
+		{
+		  std::size_t max_length = 2;
+
+		  GIVEN_A_BUFFER(max_length)
+		  {
+		    THEN("Prepare")
+		      {
+			end = container<align::left, ' ', action::prepare>(begin, cbegin, current, cend, max_length, element_handler, separator);
+
+			REQUIRE(end - begin == max_length);
+			REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
+
+			THEN("Write")
+			  {
+			    end = container<align::left, ' ', action::write>(begin, cbegin, current, cend, max_length, element_handler, separator);
+
+			    REQUIRE(end - begin == 0);
+			  }
+		      }
+		  }
+		}
 	    }
 
 	  WHEN("container_t<config::dynamic>")

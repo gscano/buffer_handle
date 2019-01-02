@@ -430,7 +430,7 @@ char * container(char * buffer, const Iterator & begin, Iterator & current, cons
 ```
 
 * The maximum length is determined by the container content when **static**.
-* When **dynamic**, the `max_length` is not used unless the method with the `current` argument is used and stops iterating before the `end`.
+* When **dynamic**, the `max_length` is not used unless the function with the `current` argument is used and which stops iterating before the `end`.
 * The `Handler` contract is
   ```cpp
   template<typename Element>

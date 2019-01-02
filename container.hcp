@@ -1,3 +1,5 @@
+#include <iterator> // advance() distance()
+
 #include <buffer_handle/helper.hpp> // pad_left() pad_right()
 
 namespace buffer_handle
