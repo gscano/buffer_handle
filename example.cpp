@@ -72,13 +72,18 @@ void dynamic()
 
   char buffer[size] = {0};
 
-  handle<config::dynamic, 10, action::prepare>(buffer, 9, 23, 0, "sunny", 23, 'C');
+  handle<config::dynamic, 10, action::prepare>(buffer, 0, 0, 0, "", 0, 'C');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 
-  handle<config::dynamic, 10, action::write>(buffer, 2, 0, -1, "cloudy", 68, 'F');
+  handle<config::dynamic, 10, action::write>(buffer, 9, 23, 0, "sunny", 23, 'C');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 
-  handle<config::dynamic, 10, action::reset>(buffer, 23, 58, 1, "freezing", 9, 'K');
+  handle<config::dynamic, 10, action::reset>(buffer, 2, 0, -1, "", 68, 'F');
+  handle<config::dynamic, 10, action::write>(buffer, 23, 58, -1, "cloudy", 9, 'K');
+  std::cerr << "\t" << std::string(buffer, size) << std::endl;
+
+  handle<config::dynamic, 10, action::reset>(buffer, 2, 0, -1, "", 68, 'F');
+  handle<config::dynamic, 10, action::write>(buffer, 23, 58, 1, "freezing", 9, 'K');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 }
 

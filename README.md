@@ -174,6 +174,7 @@ so this configuration mimics `snprintf`.
 For a **dynamic** configuration, the buffer would be successively overwritten as such:
 
 ```console
+At 00:00, the weather                    with a temperature of  0°C.
 At 09:23, the weather is           sunny with a temperature of 23°C.
 At 02:00, the weather was         cloudy with a temperature of 68°F.
 At 23:58, the weather will be   freezing with a temperature of 99°K.
