@@ -48,7 +48,7 @@ namespace buffer_handle
   namespace details
   {
     template<class T>
-    constexpr uint8_t digits(T number, bool no_digits = true);
+    constexpr std::size_t digits(T number, bool no_digits = true);
   }
 
   template<action Action, class Itoa, typename I> inline
@@ -90,6 +90,8 @@ namespace buffer_handle
 	    case action::prepare:
 	      {
 		max_digits = details::digits(i);
+
+		assert(max_digits <= std::numeric_limits<Digits>::max() && "Not enough digits to store the maximum I value.");
 
 		if(UsePreviousDigits)
 		  {
@@ -198,7 +200,7 @@ namespace buffer_handle
   namespace details
   {
     template<class T> inline
-    constexpr uint8_t digits(T number, bool no_digits)
+    constexpr std::size_t digits(T number, bool no_digits)
     {
       static_assert(std::is_integral<T>::value, "Template parameter T must be an integral type.");
 
