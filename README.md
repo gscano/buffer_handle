@@ -465,6 +465,12 @@ char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & ma
   static const char * get(value_type value);
   ```
 
+* The `Separator` contract is
+  ```cpp
+  template<config Config, action Action>
+  char * handle(char * buffer) /* const */;
+  ```
+
 ### Functors
 
 ###### Nothing
