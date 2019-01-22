@@ -68,6 +68,10 @@ namespace buffer_handle
 	{
 	  switch(Action)
 	    {
+	    case action::size:
+	      {
+		break;
+	      }
 	    case action::prepare:
 	      {
 		if(UsePreviousLength)

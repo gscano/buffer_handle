@@ -38,6 +38,10 @@ namespace buffer_handle
       {
 	switch(Action)
 	  {
+	  case action::size:
+	    {
+	      break;
+	    }
 	  case action::prepare:
 	  case action::write:
 	  case action::reset:
@@ -136,7 +140,7 @@ namespace buffer_handle
     {
       static_assert(std::is_signed<T>::value, "T must be signed.");
 
-      assert(-12 <= offset <= 12);
+      assert(-12 <= offset && offset <= 12);
 
       if(offset < 0)
 	{

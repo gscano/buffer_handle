@@ -10,7 +10,7 @@ namespace buffer_handle
   char * time_(char * buffer, time_t time, MaxDigits & max_digits, const Itoa & itoa /* = Itoa() */)
   {
     return integral_number<Config, Align, Pad, Action, Itoa, time_t, MaxDigits>
-      (nullptr, time, max_digits, itoa);
+      (buffer, time, max_digits, itoa);
   }
 
   template<config Config, action Action, typename Hours, typename Minutes> inline
@@ -20,6 +20,10 @@ namespace buffer_handle
       {
 	switch(Action)
 	  {
+	  case action::size:
+	    {
+	      break;
+	    }
 	  case action::prepare:
 	    {
 	      colon<config::static_, action::prepare>(buffer + 2);
@@ -48,6 +52,10 @@ namespace buffer_handle
       {
 	switch(Action)
 	  {
+	  case action::size:
+	    {
+	      break;
+	    }
 	  case action::prepare:
 	    {
 	      colon<config::static_, action::prepare>(buffer);

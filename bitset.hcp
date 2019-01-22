@@ -1,4 +1,4 @@
-#include <cstring> // memcpy
+#include <cstring> // memcpy() strlen()
 
 #include <buffer_handle/helper.hpp> // pad_left() pad_right()
 

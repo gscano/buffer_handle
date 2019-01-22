@@ -109,8 +109,6 @@ namespace buffer_handle
 	      {
 		assert(previous_digits <= max_digits);
 
-		Digits current_digits = 0;
-
 		if(Align == align::left)
 		  {
 		    char * local = itoa.template fwd<I>(buffer, i);

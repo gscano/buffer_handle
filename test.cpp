@@ -2192,6 +2192,7 @@ SCENARIO("String", "[string]")
 		      char * value = nullptr;
 		      end = string<config::static_, align::left, pad, action::prepare>(buffer, &value, length, length);
 
+		      (void)length;
 		      REQUIRE(value != nullptr);
 		      REQUIRE(end - begin == size);
 		      std::memcpy(value, data, length);

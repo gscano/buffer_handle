@@ -8,7 +8,7 @@ run-test: test Makefile
 	./$<
 
 test: test.cpp Makefile
-	g++ $< -std=c++11 -MD -O0 -g --coverage -fno-inline -I $(CATCH) -I ../ -o $@
+	g++ $< -std=c++11 -Wall -Wextra -Werror -MD -O0 -g --coverage -fno-inline -I $(CATCH) -I ../ -o $@
 
 -include test.d
 

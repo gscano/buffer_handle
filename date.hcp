@@ -29,6 +29,10 @@ namespace buffer_handle
       {
 	switch(Action)
 	  {
+	  case action::size:
+	    {
+	      break;
+	    }
 	  case action::prepare:
 	    {
 	      character<config::static_, action::prepare>(buffer + 2, Separator);
@@ -68,6 +72,10 @@ namespace buffer_handle
       {
 	switch(Action)
 	  {
+	  case action::size:
+	    {
+	      break;
+	    }
 	  case action::prepare:
 	    {
 	      space<config::static_, action::prepare>(buffer + 3);
@@ -97,6 +105,10 @@ namespace buffer_handle
     {
       switch(Action)
 	{
+	case action::size:
+	  {
+	    break;
+	  }
 	case action::prepare:
 	  {
 	    space<config::static_, action::prepare>(buffer + 3);
@@ -146,6 +158,10 @@ namespace buffer_handle
 	  {
 	    switch(Action)
 	      {
+	      case action::size:
+		{
+		  break;
+		}
 	      case action::prepare:
 		{
 		  comma<config::static_, action::prepare>(buffer + 3);
