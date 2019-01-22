@@ -1653,12 +1653,13 @@ struct set_t
   static const char * get(value_type value)
   {
     switch(value)
-      {
+      {//LCOV_EXCL_START
       case value_type::Alice: return "Alice";
       case value_type::Bob: return "Bob";
       case value_type::Charlie: return "Charlie";
       case value_type::David: return "David";
       default: return "";
+      //LCOV_EXCL_STOP
       }
   }
 };
@@ -1720,23 +1721,23 @@ SCENARIO("Bitset", "[bitset]")
 
       WHEN("Right-aligned")
 	{
-	  std::size_t size = (std::size_t)bitset<config::dynamic, align::right, ' ', set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
+	  std::size_t size = (std::size_t)bitset<config::dynamic, align::right, ' ', set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Bob | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
 
 	  GIVEN_A_BUFFER(size)
 	  {
 	    THEN("Prepare")
 	      {
-		end = bitset<config::dynamic, align::right, ' ', set_t, action::prepare>(begin, set_t::value_type::Alice | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
+		end = bitset<config::dynamic, align::right, ' ', set_t, action::prepare>(begin, set_t::value_type::Alice | set_t::value_type::Bob | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
 
 		REQUIRE(end - begin == size);
 		REQUIRE(std::string(begin, end) == std::string(size, ' '));
 
 		THEN("Write")
 		  {
-		    end = bitset<config::dynamic, align::right, ' ', set_t, action::write>(begin, set_t::value_type::Charlie, max_length, separator);
+		    end = bitset<config::dynamic, align::right, ' ', set_t, action::write>(begin, set_t::value_type::Bob | set_t::value_type::Charlie, max_length, separator);
 
 		    REQUIRE(end - begin == size);
-		    REQUIRE(std::string(begin, end) == std::string(max_length - std::strlen("Charlie"), ' ') + "Charlie");
+		    REQUIRE(std::string(begin, end) == std::string(max_length - std::strlen("Bob") - 1 - std::strlen("Charlie"), ' ') + "Bob,Charlie");
 		  }
 	      }
 	  }

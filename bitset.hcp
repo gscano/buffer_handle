@@ -62,7 +62,7 @@ namespace buffer_handle
 		}
 	      else if(Align == align::right)
 		{
-		  buffer -= (std::size_t)separator.template handle<config::static_, action::size>(buffer);
+		  buffer -= (std::size_t)separator.template handle<config::static_, action::size>(nullptr);
 		  separator.template handle<config::static_, Action>(buffer);
 		}
 	    }

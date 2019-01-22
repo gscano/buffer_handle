@@ -31,7 +31,9 @@ namespace buffer_handle
 	  {
 	  case action::size:
 	    {
+	      //LCOV_EXCL_START
 	      break;
+	      //LCOV_EXCL_STOP
 	    }
 	  case action::prepare:
 	    {
@@ -74,7 +76,9 @@ namespace buffer_handle
 	  {
 	  case action::size:
 	    {
+	      //LCOV_EXCL_START
 	      break;
+	      //LCOV_EXCL_STOP
 	    }
 	  case action::prepare:
 	    {
