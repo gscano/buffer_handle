@@ -1,0 +1,201 @@
+#include <cstring> // memcpy
+
+#include <buffer_handle/helper.hpp> // pad_left() pad_right()
+
+namespace buffer_handle
+{
+  namespace details
+  {
+    template<typename T, bool IsIntegral = std::is_integral<T>::value>
+    struct underlying_t
+    {
+      typedef T value_type;
+    };
+
+    template<typename T>
+    struct underlying_t<T, false>
+    {
+      typedef typename std::underlying_type<T>::type value_type;
+    };
+
+    template<align Align, class Bitset, action Action, class Separator> inline
+    char * bitset(char * buffer, typename Bitset::value_type value_, Separator & separator)
+    {
+      static_assert(std::is_integral<typename Bitset::value_type>::value || std::is_enum<typename Bitset::value_type>::value, "");
+
+      typedef typename underlying_t<typename Bitset::value_type>::value_type value_type;
+
+      const value_type value = (value_type)value_;
+      value_type mask = (value_type)1;
+
+      if(Align == align::right)
+	{
+	  mask <<= Bitset::count - 1;
+	}
+
+      std::size_t count = Bitset::count;
+      bool is_first = true;
+
+      while(0 < count)
+	{
+	  while(!(value & mask))
+	    {
+	      --count;
+
+	      if(Align == align::left)
+		{
+		  mask <<= 1;
+		}
+	      else if(Align == align::right)
+		{
+		  mask >>= 1;
+		}
+
+	      if(count == 0) return buffer;
+	    }
+
+	  if(!is_first)
+	    {
+	      if(Align == align::left)
+		{
+		  buffer = separator.template handle<config::static_, Action>(buffer);
+		}
+	      else if(Align == align::right)
+		{
+		  buffer -= (std::size_t)separator.template handle<config::static_, action::size>(buffer);
+		  separator.template handle<config::static_, Action>(buffer);
+		}
+	    }
+
+	  std::size_t size = std::strlen(Bitset::get((typename Bitset::value_type)mask));
+
+	  if(Align == align::left)
+	    {
+	      if(Action == action::prepare)
+		{
+		  std::memcpy(buffer, Bitset::get((typename Bitset::value_type)mask), size);
+		}
+
+	      buffer += size;
+	    }
+	  else if(Align == align::right)
+	    {
+	      buffer -= size;
+
+	      if(Action == action::prepare)
+		{
+		  std::memcpy(buffer, Bitset::get((typename Bitset::value_type)mask), size);
+		}
+	    }
+
+	  if(Align == align::left)
+	    {
+	      mask <<= 1;
+	    }
+	  else if(Align == align::right)
+	    {
+	      mask >>= 1;
+	    }
+
+	  --count;
+	  is_first = false;
+	}
+
+      return buffer;
+    }
+  };
+
+  template<class Bitset, action Action, class Separator> inline
+  char * bitset(char * buffer, typename Bitset::value_type value, Separator & separator)
+  {
+    return details::bitset<align::left, Bitset, Action, Separator>(buffer, value, separator);
+  }
+
+  template<config Config, align Align, char Pad, class Bitset, action Action, class Separator, bool UsePreviousLength> inline
+  char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator, std::size_t & previous_length)
+  {
+    if(Config == config::static_)
+      {
+	buffer = bitset<Bitset, Action, Separator>(buffer, value, separator);
+      }
+    else if(Config == config::dynamic)
+      {
+	switch(Action)
+	  {
+	  case action::size:
+	    {
+	      return buffer + (std::size_t)bitset<Bitset, action::size, Separator>(nullptr, value, separator);
+	    }
+	  case action::prepare:
+	    {
+	      max_length = (std::size_t)bitset<Bitset, action::size, Separator>(nullptr, value, separator);
+	      if(UsePreviousLength)
+		{
+		  previous_length = max_length;
+		}
+	    }
+	  case action::reset:
+	    {
+	      reset<Align, UsePreviousLength, Pad, std::size_t>(buffer, max_length, previous_length);
+
+	      break;
+	    }
+	  case action::write:
+	    {
+	      if(Align == align::left)
+		{
+		  char * local = details::bitset<Align, Bitset, action::prepare, Separator>(buffer, value, separator);
+
+		  pad_right<UsePreviousLength, Pad>(buffer, local, max_length, previous_length);
+		}
+	      else if(Align == align::right)
+		{
+		  char * local = details::bitset<Align, Bitset, action::prepare, Separator>(buffer + max_length, value, separator);
+
+		  pad_left<UsePreviousLength, Pad>(buffer, local, max_length, previous_length);
+		}
+	    }
+	  }
+
+	buffer += max_length;
+      }
+
+    return buffer;
+  }
+
+  template<config Config, align Align, char Pad, class Bitset, action Action, class Separator> inline
+  char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator)
+  {
+    std::size_t previous_length;
+    return bitset<Config, Align, Pad, Bitset, Action, Separator, false>(buffer, value, max_length, separator, previous_length);
+  }
+
+  template<config Config, align Align, char Pad, class Bitset>
+  struct bitset_t<Config, Align, Pad, Bitset, false>
+  {
+  protected:
+    std::size_t max_length;
+
+  public:
+    template<action Action, class Separator>
+    char * handle(char * buffer, typename Bitset::value_type value, Separator & separator)
+    {
+      return bitset<Config, Align, Pad, Bitset, Action, Separator>(buffer, value, this->max_length, separator);
+    }
+  };
+
+  template<config Config, align Align, char Pad, class Bitset>
+  struct bitset_t<Config, Align, Pad, Bitset, true>
+  {
+  protected:
+    std::size_t max_length;
+    std::size_t previous_length;
+
+  public:
+    template<action Action, class Separator>
+    char * handle(char * buffer, typename Bitset::value_type value, Separator & separator)
+    {
+      return bitset<Config, Align, Pad, Bitset, Action, Separator>(buffer, value, this->max_length, separator, previous_length);
+    }
+  };
+};

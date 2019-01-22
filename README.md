@@ -444,6 +444,27 @@ char * container(char * buffer, const Iterator & begin, Iterator & current, cons
   char * handle(char * buffer) /* const */;
   ```
 
+###### Bitset
+
+```cpp
+//Defined in buffer_handle/bitset.hpp
+
+template<class Bitset, action Action, class Separator>
+char * bitset(char * buffer, typename Bitset::value_type value, Separator & separator);
+
+template<config Config, align Align, char Pad, class Bitset, action Action, class Separator>
+char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator);
+
+template<config Config, align Align, char Pad, class Bitset, action Action, class Separator>
+char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator, std::size_t & previous_length);
+```
+
+* The `Bitset` contract is
+  ```cpp
+  static const std::size_t count;//Number of different elements
+  static const char * get(value_type value);
+  ```
+
 ### Functors
 
 ###### Nothing
@@ -560,6 +581,19 @@ struct container_t
   template<action Action, class Iterator, class Handler, class Separator>
   char * handle(char * buffer, Iterator & begin, Iterator & end,
 		Handler & handler, Separator & separator);
+};
+```
+
+###### Bitset
+
+```cpp
+//Defined in buffer_handle/bitset.hpp
+
+template<config Config, align Align, char Pad, class Bitset, bool IsLong = false>
+struct bitset_t
+{
+  template<action Action, class Separator>
+  char * handle(char * buffer, typename Bitset::value_type value, Separator & separator);
 };
 ```
 

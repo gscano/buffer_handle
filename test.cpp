@@ -8,6 +8,7 @@
 #include <buffer_handle/date.hpp>
 #include <buffer_handle/nothing.hpp>
 #include <buffer_handle/number.hpp>
+#include <buffer_handle/bitset.hpp>
 #include <buffer_handle/string.hpp>
 #include <buffer_handle/time.hpp>
 #include <buffer_handle/timezone.hpp>
@@ -1642,6 +1643,104 @@ SCENARIO("Number", "[Number]")
       std::size_t size = (std::size_t)number.handle<action::size>(nullptr, 34378367, itoa);
 
       REQUIRE(size == 8);
+    }
+}
+
+struct set_t
+{
+  enum class value_type {None, Alice = 1, Bob = 2, Charlie = 4, David = 8};
+  static const std::size_t count = 4;
+  static const char * get(value_type value)
+  {
+    switch(value)
+      {
+      case value_type::Alice: return "Alice";
+      case value_type::Bob: return "Bob";
+      case value_type::Charlie: return "Charlie";
+      case value_type::David: return "David";
+      default: return "";
+      }
+  }
+};
+
+set_t::value_type operator | (set_t::value_type lhs, set_t::value_type rhs)
+{
+  return (set_t::value_type)
+    (((typename std::underlying_type<set_t::value_type>::type)lhs)
+     | ((typename std::underlying_type<set_t::value_type>::type)rhs));
+}
+
+SCENARIO("Bitset", "[bitset]")
+{
+  character_separator_t<','> separator;
+
+  WHEN("Static")
+    {
+      std::size_t size = (std::size_t)bitset<set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Bob, separator);
+
+      GIVEN_A_BUFFER(size)
+      {
+	THEN("Prepare")
+	  {
+	    end = bitset<set_t, action::prepare>(begin, set_t::value_type::Alice | set_t::value_type::Bob, separator);
+
+	    REQUIRE(end - begin == size);
+	    REQUIRE(std::string(begin, end) == "Alice,Bob");
+	  }
+      }
+    }
+
+  WHEN("Dynamic")
+    {
+      std::size_t max_length;
+
+      WHEN("Left-aligned")
+	{
+	  std::size_t size = (std::size_t)bitset<config::dynamic, align::left, ' ', set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
+
+	  GIVEN_A_BUFFER(size)
+	  {
+	    THEN("Prepare")
+	      {
+		end = bitset<config::dynamic, align::left, ' ', set_t, action::prepare>(begin, set_t::value_type::Alice | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
+
+		REQUIRE(end - begin == size);
+		REQUIRE(std::string(begin, end) == std::string(size, ' '));
+
+		THEN("Write")
+		  {
+		    end = bitset<config::dynamic, align::left, ' ', set_t, action::write>(begin, set_t::value_type::Charlie, max_length, separator);
+
+		    REQUIRE(end - begin == size);
+		    REQUIRE(std::string(begin, end) == std::string("Charlie") + std::string(max_length - std::strlen("Charlie"), ' '));
+		  }
+	      }
+	  }
+	}
+
+      WHEN("Right-aligned")
+	{
+	  std::size_t size = (std::size_t)bitset<config::dynamic, align::right, ' ', set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
+
+	  GIVEN_A_BUFFER(size)
+	  {
+	    THEN("Prepare")
+	      {
+		end = bitset<config::dynamic, align::right, ' ', set_t, action::prepare>(begin, set_t::value_type::Alice | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
+
+		REQUIRE(end - begin == size);
+		REQUIRE(std::string(begin, end) == std::string(size, ' '));
+
+		THEN("Write")
+		  {
+		    end = bitset<config::dynamic, align::right, ' ', set_t, action::write>(begin, set_t::value_type::Charlie, max_length, separator);
+
+		    REQUIRE(end - begin == size);
+		    REQUIRE(std::string(begin, end) == std::string(max_length - std::strlen("Charlie"), ' ') + "Charlie");
+		  }
+	      }
+	  }
+	}
     }
 }
 

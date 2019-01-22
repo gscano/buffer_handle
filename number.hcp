@@ -1,4 +1,5 @@
 #include <cassert> // assert()
+#include <limits> // numeric_limits
 #include <type_traits> // is_integral is_signed
 
 #include <buffer_handle/helper.hpp> // must_write()

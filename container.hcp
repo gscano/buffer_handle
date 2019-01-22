@@ -83,8 +83,6 @@ namespace buffer_handle
 	      }
 	    case action::write:
 	      {
-		std::size_t current_length = 0;
-
 		if(Align == align::left)
 		  {
 		    char * local = details::container_process<Config, Align, Action, Handler, Separator, Iterator>(buffer, begin, end, handler, separator);

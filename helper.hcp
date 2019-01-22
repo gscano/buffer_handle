@@ -46,10 +46,11 @@ namespace buffer_handle
     Size current_length = (begin + max_length) - end;
 
     assert(current_length <= max_length);
-    assert(previous_length <= max_length);
 
     if(UsePreviousLength)
       {
+	assert(previous_length <= max_length);
+
 	if(current_length < previous_length)
 	  {
 	    std::memset(begin + max_length - previous_length, Pad, previous_length - current_length);
@@ -69,10 +70,11 @@ namespace buffer_handle
     Size current_length = end - begin;
 
     assert(current_length <= max_length);
-    assert(previous_length <= max_length);
 
     if(UsePreviousLength)
       {
+	assert(previous_length <= max_length);
+
 	if(current_length < previous_length)
 	  {
 	    std::memset(end, Pad, previous_length - current_length);
