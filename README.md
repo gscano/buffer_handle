@@ -704,6 +704,6 @@ Run `make test` to compile and `make run-test` to execute, or simply `make`.
 
 ### Dependencies
 
-* [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.5.0](https://github.com/catchorg/Catch2/releases/tag/v2.5.0))
+* [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.9.1](https://github.com/catchorg/Catch2/releases/tag/v2.9.1))
 
 To change the path of this dependency, create a `config.mk` file and then assign the `CATCH` variable with the appropriate location (`.` is used by default).

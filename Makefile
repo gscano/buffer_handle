@@ -2,7 +2,7 @@
 
 CATCH ?= .
 
-all: test run-test Makefile
+all: test run-test coverage example Makefile
 
 run-test: test Makefile
 	./$<
