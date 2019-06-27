@@ -12,11 +12,10 @@ using namespace buffer_handle;
 template<config Config, std::size_t MaxDescriptionLength, action Action, typename Hours, typename Minutes, typename Temperature>
 char * handle(char * buffer, Hours hours, Minutes minutes, int when, const char * description, Temperature temperature, char scale)
 {
-  buffer = string<config::static_, Action>(buffer, "At ", 3);
+  buffer = string<config::static_, Action>(buffer, "At ");
   buffer = time_<Config, Action>(buffer, hours, minutes);
 
-  const char * tmp1 = ", the weather ";
-  buffer = string<config::static_, Action>(buffer, tmp1, std::strlen(tmp1));
+  buffer = string<config::static_, Action>(buffer, ", the weather ");
 
   if(when < 0)
     {
@@ -36,11 +35,10 @@ char * handle(char * buffer, Hours hours, Minutes minutes, int when, const char 
   int length = description == nullptr ? 0 : std::strlen(description);
   buffer = string<Config, align::right, ' ', Action>(buffer, description, length, MaxDescriptionLength);
 
-  const char * tmp2 = " with a temperature of ";
-  buffer = string<config::static_, Action>(buffer, tmp2, std::strlen(tmp2));
+  buffer = string<config::static_, Action>(buffer, " with a temperature of ");
 
   buffer = two_digits_number<Config, ' ', Action>(buffer, temperature);
-  buffer = string<config::static_, Action>(buffer, "°", std::strlen("°"));
+  buffer = string<config::static_, Action>(buffer, "°");
   buffer = character<Config, Action>(buffer, scale);
   buffer = dot<config::static_, Action>(buffer);
 
@@ -75,7 +73,7 @@ void dynamic()
   handle<config::dynamic, 10, action::prepare>(buffer, 0, 0, 0, "", 0, 'C');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 
-  handle<config::dynamic, 10, action::write>(buffer, 9, 23, 0, "sunny", 23, 'C');
+  handle<config::dynamic, 10, action::write>(buffer, 9, 23, 0, "sunny", 30, 'C');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 
   handle<config::dynamic, 10, action::reset>(buffer, 2, 0, -1, "", 68, 'F');
@@ -89,7 +87,7 @@ void dynamic()
 
 int main()
 {
-  static_<10>(9, 23, 0, "sunny", 23, 'C');
+  static_<10>(9, 23, 0, "sunny", 30, 'C');
   static_<10>(2, 0, -1, "cloudy", 68, 'F');
   static_<10>(23, 58, 1, "freezing", 9, 'K');
 

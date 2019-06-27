@@ -9,55 +9,54 @@ When buffers are extensively used to send textual output, their management requi
 
 ## Concept
 
-The purpose of this library is to provide a single [function](#function-signature) or [functor](#structure-layout) to perform different [**actions**](#actions) on buffers. These actions are determined by function arguments and template parameters. The former will determine what to print in the buffer while the latter specify behavior and content [**configurations**](#configurations).
+The purpose of this library is to provide a single [function](#function-signature) to perform 4 basic *actions* on a buffer to
 
-### Actions
+* evaluate the **size** it would require for its longest content;
+* **prepare** its constant parts;
+* **write** its non-constant sections; or to
+* **reset** it to its **prepare**d state.
 
-There are four possible actions:
+In addition, the function can handle both a **static** and a **dynamic** *configuration* which is to be choosen at the calling site via a template parameter.
 
-* Evaluate the **size** a buffer would require for the longest content
-* **Prepare** the constant content of a buffer
-* **Write** changing portions of a buffer
-* **Reset** the buffer to its initial state
+When a **static** *configuration* is selected, the behavior of the function is similar to that of `snprintf` when either **size** (`snprintf(NULL)`) or **prepare** (`snprintf(buffer)`) *actions* are executed; whereas **write** or **reset** *actions* would have no effect.
 
-The **prepare** action must be called only once followed by many **write** or **reset** actions that could be intertwined, so consecutive **write**s are possible and **reset** could be used when unwanted disclosure of the buffer content is to be prevented.
+When the *configuration* is **dynamic**, the **prepare** *action* must be executed only once, followed by as many **write** or **reset** *actions* one would want. Those need not be intertwined as **reset** only clears the **dynamic** content of the buffer which is not always wanted.
 
-### Configurations
 
-There are two available configurations:
+The *action* is also a template parameter so that a specific set of functions would be generated depending on the combination of *actions* and *configurations*.
 
-* **static** to set a buffer based on arguments and parameters
-* **dynamic** to edit a buffer using arguments
+For some functions, more specific *configurations* can be achieved regarding [alignment](#alignment), [padding](#padding) and [case](#case).
+Even more *configurations* can be used to cope with the specificities of a function.
 
-For the **static** configuration, only **size** and **prepare** actions modify the buffer, while **write** and **reset** actions are silently ignored.
-For some functions, more *specific* configurations can be achieved regarding [alignment](#alignment), [padding](#padding) and [case](#case).
-
-#### Alignment
+###### Alignment
 
 When values could be shorter than the buffer capacity, the content can be **left** or **right** justified.
 
-#### Padding
+###### Padding
 
-When resetting a buffer or when alignment leaves some portions untouched, a default character is used to fill the corresponding memory regions.
+When **reset**ting a buffer or when alignment leaves some portions untouched, a default character is used to fill the corresponding memory regions.
 
-#### Case
+###### Case
 
 When localization does not apply, constant strings could be written with either a **lower**, **upper** or **lower with a first upper letter** case.
 
-### Coding style
+##### Coding style
 
-#### Function signature
+The following coding style has been adopted for template parameters and arguments.
+As their number can be quite important and also because some functions take references to variables in order to store some of its configuration, it is often convenient to define an associated [functor](#structure-layout).
 
-The configuration comes as the first template parameter. It is then followed by other configuration template parameters, such as *alignment*, *padding*, *case*, and functors. Then the action parameter is supplied, followed by template parameters for which argument deduction would happen frequently. For clarity, the first argument is the buffer.
+###### Function signature
+
+The *configuration* comes as the first template parameter. It is then followed by other *configuration* template parameters, such as *alignment*, *padding*, *case*, and functors. Then the *action* parameter is supplied, followed by template parameters for which argument deduction would happen frequently. For clarity, the first argument is the buffer.
 
 ```cpp
 template<config Config, ..., action Action, ...>
 char * handle(char * buffer, ...);
 ```
 
-#### Structure layout
+###### Structure layout
 
-Similarly to functions, a functor is defined by configuration and function template parameters. The function `handle` is templated on the action and function argument types.
+Similarly to functions, a functor is defined by *configuration* and function template parameters. The member function `handle` is templated on the *action* and some argument types.
 
 ```cpp
 template<config Config, ...>
@@ -68,9 +67,10 @@ struct functor_t
 };
 ```
 
-### Large buffers
+##### Large buffers
 
-Sometimes, the longest value that could be written to a buffer is much larger than the actual average length. In order to avoid padding a large memory region every time **reset** is called, some functions take `previous_length` as an additional argument. This extra argument is used to keep track of the length of the written data after a call. It will then be reused by the next invocation to limit the portion touched by a **reset**. Similarly, some functors have a template parameter `bool IsLong` which can be set to `true` to indicate that the buffer to handle will be large. The `previous_length` will then be added to the functor and its management will be transparent for the caller. This behavior can also be triggered by two consecutive **write**s depending on the size of each content (see [padding](#pad) functions).
+Sometimes, the longest value that could be written to a buffer is much larger than the actual average length. In order to avoid padding a large memory region every time **reset** is called, some functions take `previous_length` as an additional argument passed by reference. This extra argument is used to keep track of the length of the written data after a call. It will then be reused by the next invocation to limit the portion touched by a **reset**. This behavior can also be triggered by two consecutive **write**s depending on the size of each content (see [padding](#pad) functions).
+Similarly, some functors have a template parameter `bool IsLong` which can be set to `true` to indicate that the buffer to handle will be large. The `previous_length` will then be a data member of the functor and its management will be transparent for the caller.
 
 ## Example
 
@@ -85,7 +85,7 @@ char * handle(char * buffer, Hours hours, Minutes minutes, int when,
 	      const char * description, Temperature temperature, char scale);
 ```
 
-In this case, the description `sunny` may be replaced by a string which length must be bounded. So the `MaxDescriptionLength` template parameter is part of the configuration of the object and comes before the action parameter. `Hours`, `Minutes` and `Temperature` are here to be more convenient for a user who may give any type of integral type with positive values. The compiler will deduce them from the arguments.
+In this case, the description `sunny` may be replaced by a string which length must be bounded. So the `MaxDescriptionLength` template parameter is part of the configuration of the object and comes before the action parameter. `Hours`, `Minutes` and `Temperature` are here to be more convenient for a user who may give any integral type holding positive values. The compiler will deduce them from the arguments.
 The `when` parameter is positive for future, negative for past and zero for present times.
 
 Moving to the implementation, the first thing is to write constant strings:
@@ -93,15 +93,13 @@ Moving to the implementation, the first thing is to write constant strings:
 ```cpp
   buffer = string<config::static_, Action>(buffer, "At ", 3);
   //time
-  const char * tmp1 = ", the weather ";
-  buffer = string<config::static_, Action>(buffer, tmp1, std::strlen(tmp1));
+  buffer = string<config::static_, Action>(buffer, ", the weather ");
   //when
   buffer = space<config::static_, Action>(buffer);
   //description
-  const char * tmp2 = " with a temperature of ";
-  buffer = string<config::static_, Action>(buffer, tmp2, std::strlen(tmp2));
+  buffer = string<config::static_, Action>(buffer, " with a temperature of ");
   //temperature
-  buffer = string<config::static_, Action>(buffer, "°", std::strlen("°"));
+  buffer = string<config::static_, Action>(buffer, "°");
   //scale
   buffer = dot<config::static_, Action>(buffer);
 ```
@@ -161,21 +159,36 @@ For **static** configurations, the required buffer size would be obtained for ea
 	     (nullptr, hours, minutes, when, description, temperature, scale);
 ```
 
-Note that `nullptr` is passed so that a cast to `std::size_t` of the return value yields the size the buffer would require if really written. The output would be:
+Note that `nullptr` is passed so that a cast to `std::size_t` of the return value yields the size the buffer would require if really written. For the following calls:
+
+```cpp
+handle<config::static_, 10, action::prepare>(buffer, 9, 23, 0, "sunny", 30, 'C');
+handle<config::static_, 10, action::prepare>(buffer, 23, 58, -1, "cloudy", 9, 'K');
+handle<config::static_, 10, action::prepare>(buffer, 23, 58, 1, "freezing", 9, 'K');
+```
+
+the output would be:
 
 ```console
-At 09:23, the weather is sunny with a temperature of 23°C.
+At 09:23, the weather is sunny with a temperature of 30°C.
 At 02:00, the weather was cloudy with a temperature of 68°F.
 At 23:58, the weather will be freezing with a temperature of 99°K.
 ```
 
-so this configuration mimics `snprintf`.
+so this configuration mimics `snprintf` but the same code can also by used with a **dynamic** configuration:
 
-For a **dynamic** configuration, the buffer would be successively overwritten as such:
+```cpp
+handle<config::dynamic, 10, action::prepare>(buffer, 0, 0, 0, "", 0, 'C');
+handle<config::dynamic, 10, action::write>(buffer, 9, 23, 0, "sunny", 30, 'C');
+handle<config::dynamic, 10, action::write>(buffer, 23, 58, -1, "cloudy", 9, 'K');
+handle<config::dynamic, 10, action::write>(buffer, 23, 58, 1, "freezing", 9, 'K');
+```
+
+for which the buffer would be successively overwritten as such:
 
 ```console
 At 00:00, the weather                    with a temperature of  0°C.
-At 09:23, the weather is           sunny with a temperature of 23°C.
+At 09:23, the weather is           sunny with a temperature of 30°C.
 At 02:00, the weather was         cloudy with a temperature of 68°F.
 At 23:58, the weather will be   freezing with a temperature of 99°K.
 ```
@@ -226,11 +239,10 @@ char * character(char * buffer, char c);
 
 template<config Config, action Action>
 char * TOKEN(char * buffer);
-//TOKEN = new_line, carriage_return, space, exclamation_mark, double_quote,
-//        single_quote, opening_parenthesis, closing_parenthesis, plus,
-//        comma, hyphen = minus, dot, slash, colon, semicolon, less_than,
-//        equal, greater_than, question_mark, opening_bracket, closing_bracket,
-//        underscore, backquote, opening_brace, pipe, closing_brace
+//TOKEN = new_line, carriage_return, space, exclamation_mark, double_quote, single_quote,
+//        opening_parenthesis, closing_parenthesis, plus, comma, hyphen = minus, dot, slash,
+//        colon, semicolon, less_than, equal, greater_than, question_mark, opening_bracket,
+//        backslash, closing_bracket, underscore, backquote, opening_brace, pipe, closing_brace
 ```
 
 ###### Boolean
@@ -645,7 +657,7 @@ constexpr bool must_write(config Config, action Action);
 
 ###### Write when reset
 
-The function `write_when_reset` can be used to force a **write** to happen when **reset** is given as an argument (see [date.hcp](date.hcp#L234) for an example).
+The function `write_when_reset` can be used to force a **write** to happen when **reset** is given as an argument (see [date.hcp](date.hcp#L254) for an example).
 
 ```cpp
 //Defined in buffer_handle/helper.hpp
