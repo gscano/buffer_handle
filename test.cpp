@@ -319,17 +319,13 @@ SCENARIO("Container", "[container]")
 	{
 	  WHEN("Container process")
 	    {
-	      char buffer[64] = {0};
-	      char * begin = buffer;
-	      char * end = buffer + 64;
-
-	      GIVEN("A buffer and a handler with a separator")
+	      GIVEN_A_BUFFER(64)
 		{
 		  WHEN("Static")
 		    {
 		      WHEN("Left-aligned")
 			{
-			  std::size_t size = (std::size_t)details::container_process<config::static_, align::left, action::size>(nullptr, cbegin, cend, element_handler, separator);
+			  const std::size_t size = (std::size_t)details::container_process<config::static_, align::left, action::size>(nullptr, cbegin, cend, element_handler, separator);
 
 			  REQUIRE(size == std::strlen(data));
 
@@ -347,7 +343,7 @@ SCENARIO("Container", "[container]")
 
 		      WHEN("Right-aligned")
 			{
-			  std::size_t size = -(std::size_t)details::container_process<config::static_, align::right, action::size>(nullptr, crbegin, crend, element_handler, separator);
+			  const std::size_t size = -(std::size_t)details::container_process<config::static_, align::right, action::size>(nullptr, crbegin, crend, element_handler, separator);
 
 			  REQUIRE(size == std::strlen(data));
 
@@ -361,38 +357,38 @@ SCENARIO("Container", "[container]")
 				}
 			    }
 			}
-		    }
 
-		  WHEN("Dynamic")
-		    {
-		      WHEN("Left-aligned")
+		      WHEN("Dynamic")
 			{
-			  std::size_t size = (std::size_t)details::container_process<config::dynamic, align::left, action::size>(nullptr, cbegin, cend, element_handler, separator);
-
-			  REQUIRE(size == std::strlen(data));
-
-			  THEN("Prepare, write or reset")
+			  WHEN("Left-aligned")
 			    {
-			      end = details::container_process<config::dynamic, align::left, action::write>(begin, cbegin, cend, element_handler, separator);
+			      const std::size_t size = (std::size_t)details::container_process<config::dynamic, align::left, action::size>(nullptr, cbegin, cend, element_handler, separator);
 
-			      REQUIRE(end - begin == std::strlen(data));
-			      REQUIRE(std::string(begin, end) == data);
-			    }
-			}
+			      REQUIRE(size == std::strlen(data));
 
-		      WHEN("Right-aligned")
-			{
-			  std::size_t size = (std::size_t)details::container_process<config::dynamic, align::right, action::size>(nullptr, crbegin, crend, element_handler, separator);
-
-			  REQUIRE(size == -std::strlen(data));
-
-			  GIVEN("Size")
-			    {
 			      THEN("Prepare, write or reset")
 				{
-				  begin = details::container_process<config::dynamic, align::right, action::write>(begin + std::strlen(data), crbegin, crend, element_handler, separator);
+				  end = details::container_process<config::dynamic, align::left, action::write>(begin, cbegin, cend, element_handler, separator);
 
-				  REQUIRE(std::string(begin, begin + std::strlen(data)) == data);
+				  REQUIRE(end - begin == std::strlen(data));
+				  REQUIRE(std::string(begin, end) == data);
+				}
+			    }
+
+			  WHEN("Right-aligned")
+			    {
+			      const std::size_t size = (std::size_t)details::container_process<config::dynamic, align::right, action::size>(nullptr, crbegin, crend, element_handler, separator);
+
+			      REQUIRE(size == -std::strlen(data));
+
+			      GIVEN("Size")
+				{
+				  THEN("Prepare, write or reset")
+				    {
+				      begin = details::container_process<config::dynamic, align::right, action::write>(begin + std::strlen(data), crbegin, crend, element_handler, separator);
+
+				      REQUIRE(std::string(begin, begin + std::strlen(data)) == data);
+				    }
 				}
 			    }
 			}
@@ -410,7 +406,7 @@ SCENARIO("Container", "[container]")
 
 		  WHEN("Left-aligned")
 		    {
-		      std::size_t size = (std::size_t)container<config::static_, align::left, pad, action::size>(nullptr, cbegin, cend, max_length, element_handler, separator);
+		      const std::size_t size = (std::size_t)container<config::static_, align::left, pad, action::size>(nullptr, cbegin, cend, max_length, element_handler, separator);
 
 		      GIVEN("Size")
 			{
@@ -429,7 +425,7 @@ SCENARIO("Container", "[container]")
 
 		  WHEN("Right-aligned")
 		    {
-		      std::size_t size = (std::size_t)container<config::static_, align::right, pad, action::size>(nullptr, crbegin, crend, max_length, element_handler, separator);
+		      const std::size_t size = (std::size_t)container<config::static_, align::right, pad, action::size>(nullptr, crbegin, crend, max_length, element_handler, separator);
 
 		      GIVEN("Size")
 			{
@@ -557,7 +553,7 @@ SCENARIO("Container", "[container]")
 
 	      WHEN("Every thing can fit")
 		{
-		  std::size_t max_length = 32;
+		  const std::size_t max_length = 32;
 
 		  GIVEN_A_BUFFER(max_length)
 		  {
@@ -581,7 +577,7 @@ SCENARIO("Container", "[container]")
 
 	      WHEN("Some can fit")
 		{
-		  std::size_t max_length = 8;
+		  const std::size_t max_length = 8;
 
 		  GIVEN_A_BUFFER(max_length)
 		  {
@@ -621,7 +617,7 @@ SCENARIO("Container", "[container]")
 
 	      WHEN("None can fit")
 		{
-		  std::size_t max_length = 2;
+		  const std::size_t max_length = 2;
 
 		  GIVEN_A_BUFFER(max_length)
 		  {
@@ -651,7 +647,7 @@ SCENARIO("Container", "[container]")
 
 	      container.set_max_length(64);
 
-	      std::size_t size = (std::size_t)container.handle<action::size, typename list_type::const_iterator, const element_handler_t, const separator_t>(nullptr, cbegin, cend, element_handler_t(), separator_t());
+	      const std::size_t size = (std::size_t)container.handle<action::size, typename list_type::const_iterator, const element_handler_t, const separator_t>(nullptr, cbegin, cend, element_handler_t(), separator_t());
 
 	      REQUIRE(size == 64);
 	    }
@@ -664,7 +660,7 @@ SCENARIO("Container", "[container]")
 
 	      container.set_max_length(128);
 
-	      std::size_t size = (std::size_t)container.handle<action::size, typename list_type::const_iterator, const element_handler_t, const separator_t>(nullptr, cbegin, cend, element_handler_t(), separator_t());
+	      const std::size_t size = (std::size_t)container.handle<action::size, typename list_type::const_iterator, const element_handler_t, const separator_t>(nullptr, cbegin, cend, element_handler_t(), separator_t());
 
 	      REQUIRE(size == 128);
 	    }
@@ -680,7 +676,7 @@ SCENARIO("Date", "[date]")
 	{
 	  WHEN("Leading space and 4 digits year")
 	    {
-	      std::size_t size = (std::size_t)day_month_year<config::dynamic, '\0', ' ', true, action::size>(nullptr, 0, 0, 0);
+	      const std::size_t size = (std::size_t)day_month_year<config::dynamic, '\0', ' ', true, action::size>(nullptr, 0, 0, 0);
 
 	      REQUIRE(size == 11);
 
@@ -709,7 +705,7 @@ SCENARIO("Date", "[date]")
 
 	  WHEN("Leading space and 2 digits year")
 	    {
-	      std::size_t size = (std::size_t)day_month_year<config::dynamic, ' ', ' ', false, action::size>(nullptr, 0, 0, 0);
+	      const std::size_t size = (std::size_t)day_month_year<config::dynamic, ' ', ' ', false, action::size>(nullptr, 0, 0, 0);
 
 	      REQUIRE(size == 9);
 
@@ -742,7 +738,7 @@ SCENARIO("Date", "[date]")
     {
       WHEN("Static or dynamic")
 	{
-	  std::size_t size = (std::size_t)month_day<config::dynamic, action::size>(nullptr, 0, 0);
+	  const std::size_t size = (std::size_t)month_day<config::dynamic, action::size>(nullptr, 0, 0);
 
 	  REQUIRE(size == 6);
 
@@ -782,7 +778,7 @@ SCENARIO("Date", "[date]")
 
   WHEN("asc")
     {
-      std::size_t size = (std::size_t)asc::date<config::static_, action::size>(nullptr, std::tm());
+      const std::size_t size = (std::size_t)asc::date<config::static_, action::size>(nullptr, std::tm());
 
       REQUIRE(size == 24);
 
@@ -809,7 +805,7 @@ SCENARIO("Date", "[date]")
 	{
 	  WHEN("Handle weekday and seconds")
 	    {
-	      std::size_t size = (std::size_t)rfc822::date<config::static_, true, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	      const std::size_t size = (std::size_t)rfc822::date<config::static_, true, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	      GIVEN("Size")
 		{
@@ -838,7 +834,7 @@ SCENARIO("Date", "[date]")
 
 	  WHEN("Handle weekday but not seconds")
 	    {
-	      std::size_t size = (std::size_t)rfc822::date<config::static_, true, false, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	      const std::size_t size = (std::size_t)rfc822::date<config::static_, true, false, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	      GIVEN("Size")
 		{
@@ -867,7 +863,7 @@ SCENARIO("Date", "[date]")
 
 	  WHEN("Handle seconds but not weekday")
 	    {
-	      std::size_t size = (std::size_t)rfc822::date<config::static_, false, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	      const std::size_t size = (std::size_t)rfc822::date<config::static_, false, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	      GIVEN("Size")
 		{
@@ -896,7 +892,7 @@ SCENARIO("Date", "[date]")
 
 	  WHEN("Do not handle weekday nor seconds")
 	    {
-	      std::size_t size = (std::size_t)rfc822::date<config::static_, false, false, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	      const std::size_t size = (std::size_t)rfc822::date<config::static_, false, false, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	      GIVEN("Size")
 		{
@@ -928,7 +924,7 @@ SCENARIO("Date", "[date]")
 	{
 	  WHEN("Handle weekday and seconds")
 	    {
-	      std::size_t size = (std::size_t)rfc822::date<config::dynamic, true, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	      const std::size_t size = (std::size_t)rfc822::date<config::dynamic, true, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	      GIVEN("Size")
 		{
@@ -967,7 +963,7 @@ SCENARIO("Date", "[date]")
 
 	  WHEN("Handle weekday but not seconds")
 	    {
-	      std::size_t size = (std::size_t)rfc822::date<config::dynamic, true, false, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	      const std::size_t size = (std::size_t)rfc822::date<config::dynamic, true, false, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	      GIVEN("Size")
 		{
@@ -1006,7 +1002,7 @@ SCENARIO("Date", "[date]")
 
 	  WHEN("Handle seconds but not weekdays")
 	    {
-	      std::size_t size = (std::size_t)rfc822::date<config::dynamic, false, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	      const std::size_t size = (std::size_t)rfc822::date<config::dynamic, false, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	      GIVEN("Size")
 		{
@@ -1045,7 +1041,7 @@ SCENARIO("Date", "[date]")
 
 	  WHEN("Do not handle seconds nor weekdays")
 	    {
-	      std::size_t size = (std::size_t)rfc822::date<config::dynamic, false, false, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	      const std::size_t size = (std::size_t)rfc822::date<config::dynamic, false, false, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	      GIVEN("Size")
 		{
@@ -1090,7 +1086,7 @@ SCENARIO("Date", "[date]")
 
       WHEN("Static")
 	{
-	  std::size_t size = (std::size_t)rfc850::date<config::static_, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	  const std::size_t size = (std::size_t)rfc850::date<config::static_, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	  GIVEN("Size")
 	    {
@@ -1109,7 +1105,7 @@ SCENARIO("Date", "[date]")
 
       WHEN("Dynamic")
 	{
-	  std::size_t size = (std::size_t)rfc850::date<config::dynamic, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	  const std::size_t size = (std::size_t)rfc850::date<config::dynamic, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	  GIVEN("Size")
 	    {
@@ -1153,7 +1149,7 @@ SCENARIO("Date", "[date]")
 
       WHEN("Static")
 	{
-	  std::size_t size = (std::size_t)rfc1123::date<config::static_, true, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
+	  const std::size_t size = (std::size_t)rfc1123::date<config::static_, true, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
 	  GIVEN("Size")
 	    {
@@ -1259,52 +1255,51 @@ SCENARIO("Helper", "[helper]")
 
 SCENARIO("Itoa adapter", "[itoa, adapter]")
 {
-  char buffer[64] = {0};
-  char * begin = buffer;
-  char * end = buffer;
-
-  WHEN("To string")
+  GIVEN_A_BUFFER(64)
     {
-      adapter::itoa::to_string_t to_string;
-
-      WHEN("Forward")
+      WHEN("To string")
 	{
-#define TEST(I, L)					\
-	  THEN(#I)					\
-	    {						\
-	      char * end = to_string.fwd(begin, I);	\
-							\
-	      REQUIRE(end - begin == L);		\
-	      REQUIRE(std::string(begin, end) == #I);	\
-	    }
+	  adapter::itoa::to_string_t to_string;
 
-	  TEST(0, 1);
-	  TEST(1, 1);
-	  TEST(10, 2);
-	  TEST(99, 2);
-	  TEST(3993, 4);
+	  WHEN("Forward")
+	    {
+#define TEST(I, L)					\
+	      THEN(#I)					\
+		{					\
+		  char * end = to_string.fwd(begin, I);	\
+							\
+		  REQUIRE(end - begin == L);		\
+		  REQUIRE(std::string(begin, end) == #I);	\
+		}
+
+	      TEST(0, 1);
+	      TEST(1, 1);
+	      TEST(10, 2);
+	      TEST(99, 2);
+	      TEST(3993, 4);
 
 #undef TEST
-	}
-
-      WHEN("Backward")
-	{
-#define TEST(I, L)					\
-	  THEN(#I)					\
-	    {						\
-	      char * begin = to_string.bwd(end, I);	\
-							\
-	      REQUIRE(end - begin == L);		\
-	      REQUIRE(std::string(begin, end) == #I);	\
 	    }
 
-	  TEST(0, 1);
-	  TEST(1, 1);
-	  TEST(10, 2);
-	  TEST(99, 2);
-	  TEST(3993, 4);
+	  WHEN("Backward")
+	    {
+#define TEST(I, L)					\
+	      THEN(#I)					\
+		{					\
+		  char * begin = to_string.bwd(end, I);	\
+							\
+		  REQUIRE(end - begin == L);		\
+		  REQUIRE(std::string(begin, end) == #I);	\
+		}
+
+	      TEST(0, 1);
+	      TEST(1, 1);
+	      TEST(10, 2);
+	      TEST(99, 2);
+	      TEST(3993, 4);
 
 #undef TEST
+	    }
 	}
     }
 }
@@ -1467,8 +1462,8 @@ SCENARIO("Number", "[Number]")
 
   WHEN("Integral number")
     {
-      uint8_t max_digits = 0;
       const char pad = ' ';
+      uint8_t max_digits = 0;
 
       adapter::itoa::to_string_t itoa;
 
@@ -1476,7 +1471,7 @@ SCENARIO("Number", "[Number]")
 	{
 	  WHEN("Left or right aligned, any padding")
 	    {
-	      std::size_t size = (std::size_t)integral_number<config::static_, align::left, pad, action::size>(nullptr, 1998, max_digits, itoa);
+	      const std::size_t size = (std::size_t)integral_number<config::static_, align::left, pad, action::size>(nullptr, 1998, max_digits, itoa);
 
 	      GIVEN("Size")
 		{
@@ -1502,7 +1497,7 @@ SCENARIO("Number", "[Number]")
 
 	  WHEN("Left-aligned")
 	    {
-	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::left, pad, action::size>(nullptr, 19237840, max_digits, previous_digits, itoa);
+	      const std::size_t size = (std::size_t)integral_number<config::dynamic, align::left, pad, action::size>(nullptr, 19237840, max_digits, previous_digits, itoa);
 
 	      REQUIRE(size == max_digits_);
 	      REQUIRE(previous_digits == 0);
@@ -1556,7 +1551,7 @@ SCENARIO("Number", "[Number]")
 
 	  WHEN("Right-aligned")
 	    {
-	      std::size_t size = (std::size_t)integral_number<config::dynamic, align::right, pad, action::size>(nullptr, 19237840, max_digits, previous_digits, itoa);
+	      const std::size_t size = (std::size_t)integral_number<config::dynamic, align::right, pad, action::size>(nullptr, 19237840, max_digits, previous_digits, itoa);
 
 	      REQUIRE(size == max_digits_);
 	      REQUIRE(previous_digits == 0);
@@ -1618,7 +1613,7 @@ SCENARIO("Number", "[Number]")
 
       number_type number = number_type();
 
-      std::size_t size = (std::size_t)number.handle<action::size>(nullptr, 11, itoa);
+      const std::size_t size = (std::size_t)number.handle<action::size>(nullptr, 11, itoa);
 
       REQUIRE(size == 2);
     }
@@ -1629,7 +1624,7 @@ SCENARIO("Number", "[Number]")
 
       number_type number = number_type();
 
-      std::size_t size = (std::size_t)number.handle<action::size>(nullptr, 183, itoa);
+      const std::size_t size = (std::size_t)number.handle<action::size>(nullptr, 183, itoa);
 
       REQUIRE(size == 3);
     }
@@ -1640,7 +1635,7 @@ SCENARIO("Number", "[Number]")
 
       number_type number = number_type();
 
-      std::size_t size = (std::size_t)number.handle<action::size>(nullptr, 34378367, itoa);
+      const std::size_t size = (std::size_t)number.handle<action::size>(nullptr, 34378367, itoa);
 
       REQUIRE(size == 8);
     }
@@ -1677,7 +1672,7 @@ SCENARIO("Bitset", "[bitset]")
 
   WHEN("Static")
     {
-      std::size_t size = (std::size_t)bitset<set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Bob, separator);
+      const std::size_t size = (std::size_t)bitset<set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Bob, separator);
 
       GIVEN_A_BUFFER(size)
       {
@@ -1697,7 +1692,7 @@ SCENARIO("Bitset", "[bitset]")
 
       WHEN("Left-aligned")
 	{
-	  std::size_t size = (std::size_t)bitset<config::dynamic, align::left, ' ', set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
+	  const std::size_t size = (std::size_t)bitset<config::dynamic, align::left, ' ', set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
 
 	  GIVEN_A_BUFFER(size)
 	  {
@@ -1721,7 +1716,7 @@ SCENARIO("Bitset", "[bitset]")
 
       WHEN("Right-aligned")
 	{
-	  std::size_t size = (std::size_t)bitset<config::dynamic, align::right, ' ', set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Bob | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
+	  const std::size_t size = (std::size_t)bitset<config::dynamic, align::right, ' ', set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Bob | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
 
 	  GIVEN_A_BUFFER(size)
 	  {
@@ -1755,21 +1750,21 @@ SCENARIO("Time", "[time]")
       uint8_t max_digits;
       adapter::itoa::to_string_t itoa;
 
-      time_t time = 8939;
+      const time_t time = 8939;
 
-      std::size_t size = (std::size_t)time_<config::static_, align::left, pad, action::size>(nullptr, time, max_digits, itoa);
+      const std::size_t size = (std::size_t)time_<config::static_, align::left, pad, action::size>(nullptr, time, max_digits, itoa);
 
       REQUIRE(size == 4);
     }
 
   WHEN("Hours and minutes")
     {
-      uint8_t hours = 5;
-      uint8_t minutes = 23;
+      const uint8_t hours = 5;
+      const uint8_t minutes = 23;
 
       WHEN("Static or dynamic")
 	{
-	  std::size_t size = (std::size_t)time_<config::static_, action::size>(nullptr, hours, minutes);
+	  const std::size_t size = (std::size_t)time_<config::static_, action::size>(nullptr, hours, minutes);
 
 	  REQUIRE(size == 5);
 
@@ -1791,13 +1786,13 @@ SCENARIO("Time", "[time]")
 
   WHEN("Hours, minutes and seconds")
     {
-      uint8_t hours = 5;
-      uint8_t minutes = 23;
-      uint8_t seconds = 59;
+      const uint8_t hours = 5;
+      const uint8_t minutes = 23;
+      const uint8_t seconds = 59;
 
       WHEN("Static or dynamic")
 	{
-	  std::size_t size = (std::size_t)time_<config::static_, action::size>(nullptr, hours, minutes, seconds);
+	  const std::size_t size = (std::size_t)time_<config::static_, action::size>(nullptr, hours, minutes, seconds);
 
 	  REQUIRE(size == 8);
 
@@ -1824,7 +1819,7 @@ SCENARIO("Time", "[time]")
       time.tm_min = 34;
       time.tm_sec = 0;
 
-      std::size_t size = (std::size_t)time_<config::static_, action::size>(nullptr, time);
+      const std::size_t size = (std::size_t)time_<config::static_, action::size>(nullptr, time);
 
       GIVEN("Size")
 	{
@@ -1852,7 +1847,7 @@ SCENARIO("Timezone", "[timezone]")
 	{
 	  WHEN("Left or right aligned")
 	    {
-	      std::size_t size = (std::size_t)universal_timezone<config::static_, align::left, pad, action::size>(nullptr, universal_timezone::GMT);
+	      const std::size_t size = (std::size_t)universal_timezone<config::static_, align::left, pad, action::size>(nullptr, universal_timezone::GMT);
 
 	      REQUIRE(size == 3);
 
@@ -1882,7 +1877,7 @@ SCENARIO("Timezone", "[timezone]")
 
       WHEN("Dynamic")
 	{
-	  std::size_t size = (std::size_t)universal_timezone<config::dynamic, align::left, pad, action::size>(nullptr, universal_timezone::UT);
+	  const std::size_t size = (std::size_t)universal_timezone<config::dynamic, align::left, pad, action::size>(nullptr, universal_timezone::UT);
 
 	  REQUIRE(size == 3);
 
@@ -1930,7 +1925,7 @@ SCENARIO("Timezone", "[timezone]")
 
       universal_timezone_type timezone;
 
-      std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
+      const std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
 
       REQUIRE(size == 3);
     }
@@ -1939,7 +1934,7 @@ SCENARIO("Timezone", "[timezone]")
     {
       WHEN("Static or dynamic")
 	{
-	  std::size_t size = (std::size_t)north_american_timezone<config::static_, action::size>(nullptr, north_american_timezone::CST);
+	  const std::size_t size = (std::size_t)north_american_timezone<config::static_, action::size>(nullptr, north_american_timezone::CST);
 
 	  REQUIRE(size == 3);
 
@@ -1962,7 +1957,7 @@ SCENARIO("Timezone", "[timezone]")
 
       north_american_timezone_type timezone;
 
-      std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
+      const std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
 
       REQUIRE(size == 3);
     }
@@ -1999,7 +1994,7 @@ SCENARIO("Timezone", "[timezone]")
 
     military_timezone_type timezone;
 
-    std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
+    const std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
 
     REQUIRE(size == 1);
   }
@@ -2008,7 +2003,7 @@ SCENARIO("Timezone", "[timezone]")
     {
       WHEN("Static or dynamic")
 	{
-	  std::size_t size = (std::size_t)differential_timezone<config::static_, action::size>(nullptr, true, 12, 54);
+	  const std::size_t size = (std::size_t)differential_timezone<config::static_, action::size>(nullptr, true, 12, 54);
 
 	  REQUIRE(size == 5);
 
@@ -2042,7 +2037,7 @@ SCENARIO("Timezone", "[timezone]")
 
       differential_timezone_type timezone;
 
-      std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
+      const std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
 
       REQUIRE(size == 5);
     }
@@ -2064,7 +2059,7 @@ SCENARIO("String", "[string]")
 
 	  WHEN("Left or right aligned")
 	    {
-	      std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, nullptr, 0, max_length);
+	      const std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, nullptr, 0, max_length);
 
 	      REQUIRE(size == length);
 
@@ -2086,12 +2081,12 @@ SCENARIO("String", "[string]")
 
       WHEN("Dynamic")
 	{
-	  std::size_t max_length = max_length_;
+	  const std::size_t max_length = max_length_;
 	  std::size_t previous_length = 0;
 
 	  WHEN("Left-aligned")
 	    {
-	      std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, length, max_length, previous_length);
+	      const std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, length, max_length, previous_length);
 
 	      REQUIRE(size == max_length);
 	      REQUIRE(max_length == max_length_);
@@ -2136,7 +2131,7 @@ SCENARIO("String", "[string]")
 
 	  WHEN("Right-aligned")
 	    {
-	      std::size_t size = (std::size_t)string<config::dynamic, align::right, pad, action::size>(nullptr, nullptr, 0, max_length, previous_length);
+	      const std::size_t size = (std::size_t)string<config::dynamic, align::right, pad, action::size>(nullptr, nullptr, 0, max_length, previous_length);
 
 	      REQUIRE(size == max_length);
 	      REQUIRE(max_length == max_length_);
@@ -2184,7 +2179,7 @@ SCENARIO("String", "[string]")
 	{
 	  WHEN("Static")
 	    {
-	      std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, nullptr, 0, length);
+	      const std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, nullptr, 0, length);
 
 	      GIVEN_A_BUFFER(size)
 		{
@@ -2204,7 +2199,7 @@ SCENARIO("String", "[string]")
 
 	  WHEN("Dynamic")
 	    {
-	      std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, 0, length);
+	      const std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, 0, length);
 
 	      GIVEN_A_BUFFER(size)
 	      {
@@ -2226,7 +2221,7 @@ SCENARIO("String", "[string]")
 	  typedef string_t<config::static_, align::left, ' '> string_type;
 
 	  string_type string = string_type();
-	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
+	  const std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
 
 	  REQUIRE(size == 32);
 	}
@@ -2237,7 +2232,7 @@ SCENARIO("String", "[string]")
 
 	  string_type string = string_type();
 
-	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
+	  const std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
 
 	  REQUIRE(size == 32);
 	}
@@ -2248,7 +2243,7 @@ SCENARIO("String", "[string]")
 
 	  string_type string = string_type();
 
-	  std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
+	  const std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
 
 	  REQUIRE(size == 32);
 	}
