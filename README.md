@@ -9,11 +9,11 @@ When buffers are extensively used to send textual output, their management requi
 
 ## Concept
 
-The purpose of this library is to provide a single [function](#function-signature) to perform 4 basic *actions* on a buffer to
+The purpose of this library is to provide a single [function](#function-signature) to perform 4 basic *actions* on a buffer,
 
 * evaluate the **size** it would require for its longest content;
 * **prepare** its constant parts;
-* **write** its non-constant sections; or to
+* **write** its non-constant sections; or
 * **reset** it to its **prepare**d state.
 
 In addition, the function can handle both a **static** and a **dynamic** *configuration* which is to be choosen at the calling site via a template parameter.
@@ -25,7 +25,7 @@ When the *configuration* is **dynamic**, the **prepare** *action* must be execut
 
 The *action* is also a template parameter so that a specific set of functions would be generated depending on the combination of *actions* and *configurations*.
 
-For some functions, more specific *configurations* can be achieved regarding [alignment](#alignment), [padding](#padding) and [case](#case).
+For some functions, more specific *configurations* can be toggled regarding [alignment](#alignment), [padding](#padding) and [case](#case).
 Even more *configurations* can be used to cope with the specificities of a function.
 
 ###### Alignment
@@ -43,7 +43,7 @@ When localization does not apply, constant strings could be written with either 
 ##### Coding style
 
 The following coding style has been adopted for template parameters and arguments.
-As their number can be quite important and also because some functions take references to variables in order to store some of its configuration, it is often convenient to define an associated [functor](#structure-layout).
+As their number can be quite important and also because some functions take references to variables in order to store some of its *configuration*, it is often convenient to define an associated [functor](#structure-layout).
 
 ###### Function signature
 
@@ -66,6 +66,8 @@ struct functor_t
   char * handle(char * buffer, ...) /* const */;
 };
 ```
+
+#####
 
 ##### Large buffers
 
@@ -91,7 +93,7 @@ The `when` parameter is positive for future, negative for past and zero for pres
 Moving to the implementation, the first thing is to write constant strings:
 
 ```cpp
-  buffer = string<config::static_, Action>(buffer, "At ", 3);
+  buffer = string<config::static_, Action>(buffer, "At ");
   //time
   buffer = string<config::static_, Action>(buffer, ", the weather ");
   //when
@@ -104,7 +106,7 @@ Moving to the implementation, the first thing is to write constant strings:
   buffer = dot<config::static_, Action>(buffer);
 ```
 
-Note that `<config::static_, Action>` is used and not `<config::static_, action::prepare>` because in the second case the content would be rewritten every time the function is called may it be with **write** or **reset**.
+Note that `<config::static_, Action>` is used and not `<config::static_, action::prepare>` because in the second case the content would be rewritten every time the function is called may it be with **write** or **reset** (see [`must_write`](#must-write) and [`write_on_reset`](#write-on-reset) to modify this behavior).
 
 Then the varying strings could be introduced:
 
@@ -205,6 +207,12 @@ where dummy arguments are passed.
 
 All code is scoped in `namespace buffer_handle`.
 
+| Documentation             | Example                    |
+|---------------------------|----------------------------|
+| [Character](#character)   | [test.cpp](test.cpp#L152)  |
+| [Boolean](#boolean)       | [test.cpp](test.cpp#L25)   |
+| [String](#string)         | [test.cpp](test.cpp#L1975) |
+
 ### Types
 
 ```cpp
@@ -221,7 +229,10 @@ enum class case_ { lower, first_upper, upper };
 enum class config { static_, dynamic };
 ```
 
-### Functions
+### Character
+
+Handle a single character or a given token.
+The content is written whenever [`must_write`](#must-write) is `true`.
 
 ###### Character
 
@@ -245,7 +256,10 @@ char * TOKEN(char * buffer);
 //        backslash, closing_bracket, underscore, backquote, opening_brace, pipe, closing_brace
 ```
 
-###### Boolean
+### Boolean
+
+Handle a boolean as a string or as a single character.
+The content is written whenever [`must_write`](#must-write) is `true`.
 
 ```cpp
 //Defined in buffer_handle/boolean.hpp
@@ -257,27 +271,54 @@ template<config Config, action Action, char False = '0', char True = '1'>
 char * boolean(char * buffer, bool value);
 ```
 
-###### String
+### String
 
 ```cpp
 //Defined in buffer_handle/string.hpp
+```
 
+```cpp
 template<config Config, action Action>
-char * string(char * buffer, const char * value, std::size_t length);
+char * string(char * buffer, const char * value, std::size_t length = std::strlen(value));
+```
+
+Handles a string in the most basic way by copying it to the buffer when [must-write](#must-write) is `true`.
+The `length` argument conveniently defaults to the length of the string pointed to by `value`. However, a verification against a `nullptr` is only performed, as an `ASSERT`, for a **static** *configuration*. In a **dynamic** *configuration*, `nullptr` can be passed during a **size** or **prepare** (for instance if the actual string is not known yet) as long as the same length is supplied for every *action*. Also note that the **reset** *action* uses the value passed at that time. To **reset** a buffer to a specific value can be achieved with the function below.
+
+```cpp
+template<config Config, align Align, char Pad, action Action>
+char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length
+	      /* , std::size_t & previous_length */);
+```
+
+In this overload, the `max_length` argument sets the maximum size of the buffer. It must remain the same for every *action*.
+For simplification, passing a `nullptr` for a **write** is equivalent to a **reset**.
+When **reset**, the string is filled with `Pad` characters.
+For an explanation on the optional `previous_length` argument, refer to the [large buffer](#large-buffers) section.
+
+###### Manual management
+
+In order to avoid copying the `value` to the buffer everytime `must_write` is `true`, the overloads below can be used to assign `value` to the location in the buffer when **prepar**ed. The `value` is assigned either to the left or to the right of the underlying buffer depending on the *case*.
+If `nullptr` is passed then the call defaults to the previous functions with `nullptr` as the `value`.
+
+```cpp
 template<config Config, action Action>
 char * string(char * buffer, char ** value, std::size_t length);
 
 template<config Config, align Align, char Pad, action Action>
-char * string(char * buffer, const char * value, std::size_t length, std::size_t max_length
-	      /* , std::size_t & previous_length */);
-template<config Config, align Align, char Pad, action Action>
 char * string(char * buffer, char ** value, std::size_t length, std::size_t max_length);
 ```
 
-* Functions of the first set write or set `value` in a buffer of size `length`.
-* For the function with a `const char *` argument in the second set of functions, passing a `nullptr` for a **write** is equivalent to a **reset**.
-* The function with a `char **` argument sets `value` to either the left or to the right of the underlying buffer of size `max_length` (`length` being ignored). When **prepare**d, the buffer is padded but no action occurs for a **write** or a **reset**.
-* There is an overload with `std::nullptr_t` to resolve a `nullptr` parameter.
+###### Functor
+
+```cpp
+template<config Config, align Align, char Pad, bool IsLong = false>
+struct string_t
+{
+  template<action Action>
+  char * handle(char * buffer, const char * value, std::size_t length) const;
+};
+```
 
 ###### Number
 
@@ -483,7 +524,7 @@ char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & ma
   char * handle(char * buffer) /* const */;
   ```
 
-### Functors
+### Special functors
 
 ###### Nothing
 
@@ -496,21 +537,6 @@ struct nothing_t
   char * handle(char * buffer) const;
 };
 ```
-
-###### String
-
-```cpp
-//Defined in buffer_handle/string.hpp
-
-template<config Config, align Align, char Pad, bool IsLong = false>
-struct string_t
-{
-  template<action Action>
-  char * handle(char * buffer, const char * value, std::size_t length) const;
-};
-```
-
-* The maximum length will be set to `length` for **dynamic** configurations when called as **prepare** or when the **size** is required and the current maximum length has not been set, i.e. **prepare** has not been called yet.
 
 ###### Number
 
@@ -712,7 +738,7 @@ struct character_and_space_separator_t
 
 ## Tests
 
-Run `make test` to compile and `make run-test` to execute, or simply `make`.
+Run `make test` to compile and `make run-test` to execute.
 
 ### Dependencies
 

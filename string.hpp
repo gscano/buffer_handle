@@ -2,7 +2,6 @@
 #define BUFFER_HANDLE_STRING_HPP
 
 #include <cstddef> // size_t
-#include <type_traits> // enable_if
 
 #include <buffer_handle/action.hpp> // action
 #include <buffer_handle/align.hpp> //align

@@ -24,96 +24,31 @@ using namespace buffer_handle;
 
 SCENARIO("Boolean", "[boolean]")
 {
-  const char pad = ' ';
-
-  WHEN("Static, any case, left or right aligned, any pad")
+  FOR("A textual boolean")
     {
-      REQUIRE(((std::size_t)boolean<config::static_, case_::lower, align::left, pad, action::size>(nullptr, true) == 4));
+      const char pad = ' ';
 
-      GIVEN("Size")
+      GIVEN("A padding character")
 	{
-	  GIVEN_A_BUFFER(4)
+	  FOR("A static, any case, left or right aligned, any pad configuration")
 	    {
-	      THEN("Prepare true")
+	      FIRST("Get the size")
 		{
-		  end = boolean<config::static_, case_::lower, align::left, pad, action::prepare>(begin, true);
+		  REQUIRE(((std::size_t)boolean<config::static_, case_::lower, align::left, pad, action::size>(nullptr, true) == 4));
 
-		  REQUIRE(end - begin == 4);
-		  REQUIRE(std::string(begin, end) == "true");
-		}
-
-	      THEN("Prepare false")
-		{
-		  end = boolean<config::static_, case_::lower, align::left, pad, action::prepare>(begin, false);
-
-		  REQUIRE(end - begin == 5);
-		  REQUIRE(std::string(begin, end) == "false");
-		}
-	    }
-	}
-    }
-
-  WHEN("Dynamic")
-    {
-      WHEN("Left-aligned")
-	{
-	  REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::left, pad, action::size>(nullptr, true) == 5));
-
-	  GIVEN("Size")
-	    {
-	      GIVEN_A_BUFFER(5)
-		{
-		  THEN("Prepare")
+		  GIVEN_A_BUFFER(4)
 		    {
-		      WHEN("True")
+		      THEN("Prepare true")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::prepare>(begin, true);
+			  end = boolean<config::static_, case_::lower, align::left, pad, action::prepare>(begin, true);
 
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == "true ");
+			  REQUIRE(end - begin == 4);
+			  REQUIRE(std::string(begin, end) == "true");
 			}
 
-		      WHEN("False")
+		      THEN("Prepare false")
 			{
-			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::prepare>(begin, false);
-
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == "false");
-			}
-		    }
-
-		  THEN("Write")
-		    {
-		      WHEN("True")
-			{
-			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::write>(begin, true);
-
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == "true ");
-			}
-
-		      WHEN("False")
-			{
-			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::write>(begin, false);
-
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == "false");
-			}
-		    }
-
-		  THEN("Reset")
-		    {
-		      WHEN("True")
-			{
-			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::reset>(begin, true);
-
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == "true ");
-			}
-
-		      WHEN("False")
-			{
-			  end = boolean<config::dynamic, case_::lower, align::left, pad, action::reset>(begin, false);
+			  end = boolean<config::static_, case_::lower, align::left, pad, action::prepare>(begin, false);
 
 			  REQUIRE(end - begin == 5);
 			  REQUIRE(std::string(begin, end) == "false");
@@ -121,70 +56,65 @@ SCENARIO("Boolean", "[boolean]")
 		    }
 		}
 	    }
-	}
 
-      WHEN("Right-aligned")
-	{
-	  REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::right, pad, action::size>(nullptr, true) == 5));
-
-	  GIVEN("Size")
+	  FOR("A dynamic configuration")
 	    {
-	      GIVEN_A_BUFFER(5)
+	      WHEN("Left-aligned")
 		{
-		  THEN("Prepare")
+		  FIRST("Get the size")
 		    {
-		      WHEN("True")
+		      REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::left, pad, action::size>(nullptr, true) == 5));
+
+		      GIVEN_A_BUFFER(5)
 			{
-			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::prepare>(begin, true);
+			  THEN("Prepare, write or reset")
+			    {
+			      WHEN("True")
+				{
+				  end = boolean<config::dynamic, case_::lower, align::left, pad, action::prepare>(begin, true);
 
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == " true");
-			}
+				  REQUIRE(end - begin == 5);
+				  REQUIRE(std::string(begin, end) == "true ");
+				}
 
-		      WHEN("False")
-			{
-			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::prepare>(begin, false);
+			      WHEN("False")
+				{
+				  end = boolean<config::dynamic, case_::lower, align::left, pad, action::prepare>(begin, false);
 
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == "false");
+				  REQUIRE(end - begin == 5);
+				  REQUIRE(std::string(begin, end) == "false");
+				}
+			    }
 			}
 		    }
+		}
 
-		  THEN("Write")
+	      WHEN("Right-aligned")
+		{
+		  FIRST("Get the size")
 		    {
-		      WHEN("True")
+		      REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::right, pad, action::size>(nullptr, true) == 5));
+
+		      GIVEN_A_BUFFER(5)
 			{
-			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::write>(begin, true);
+			  THEN("Prepare, write or reset")
+			    {
+			      WHEN("True")
+				{
+				  end = boolean<config::dynamic, case_::lower, align::right, pad, action::prepare>(begin, true);
 
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == " true");
-			}
+				  REQUIRE(end - begin == 5);
+				  REQUIRE(std::string(begin, end) == " true");
+				}
 
-		      WHEN("False")
-			{
-			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::write>(begin, false);
+			      WHEN("False")
+				{
+				  end = boolean<config::dynamic, case_::lower, align::right, pad, action::prepare>(begin, false);
 
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == "false");
-			}
-		    }
-
-		  THEN("Reset")
-		    {
-		      WHEN("True")
-			{
-			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::reset>(begin, true);
-
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == " true");
-			}
-
-		      WHEN("False")
-			{
-			  end = boolean<config::dynamic, case_::lower, align::right, pad, action::reset>(begin, false);
-
-			  REQUIRE(end - begin == 5);
-			  REQUIRE(std::string(begin, end) == "false");
+				  REQUIRE(end - begin == 5);
+				  REQUIRE(std::string(begin, end) == "false");
+				}
+			    }
 			}
 		    }
 		}
@@ -192,26 +122,29 @@ SCENARIO("Boolean", "[boolean]")
 	}
     }
 
-  WHEN("Single digit boolean")
+  FOR("A single digit boolean")
     {
       char c;
       const char t = 'a';
       const char f = 'b';
 
-      WHEN("Static true")
+      FOR("A static or dynamic configuration")
 	{
-	  char * end = boolean<config::static_, action::prepare, f, t>(&c, true);
+	  WHEN("True")
+	    {
+	      char * end = boolean<config::static_, action::prepare, f, t>(&c, true);
 
-	  REQUIRE(end == &c + 1);
-	  REQUIRE(c == t);
-	}
+	      REQUIRE(end == &c + 1);
+	      REQUIRE(c == t);
+	    }
 
-      WHEN("Static false")
-	{
-	  char * end = boolean<config::static_, action::prepare, f, t>(&c, false);
+	  WHEN("False")
+	    {
+	      char * end = boolean<config::static_, action::prepare, f, t>(&c, false);
 
-	  REQUIRE(end == &c + 1);
-	  REQUIRE(c == f);
+	      REQUIRE(end == &c + 1);
+	      REQUIRE(c == f);
+	    }
 	}
     }
 }
@@ -222,42 +155,38 @@ SCENARIO("Character", "[character]")
   char * begin = &c;
   char * end = &c;
 
-  WHEN("Static")
+  GIVEN("A character")
     {
-      REQUIRE((std::size_t)character<config::static_, action::size>(nullptr, 0) == 1);
-
-      end = character<config::static_, action::prepare>(begin, 'c');
-
-      REQUIRE(end - begin == 1);
-      REQUIRE(c == 'c');
-    }
-
-  WHEN("Dynamic")
-    {
-      REQUIRE((std::size_t)character<config::static_, action::size>(nullptr, 0) == 1);
-
-      WHEN("Prepare")
+      FOR("A static configuration")
 	{
-	  end = character<config::dynamic, action::prepare>(begin, 'c');
+	  FIRST("Get the size")
+	    {
+	      REQUIRE((std::size_t)character<config::static_, action::size>(nullptr, 0) == 1);
 
-	  REQUIRE(end - begin == 1);
-	  REQUIRE(c == 'c');
+	      THEN("Prepare")
+		{
+		  end = character<config::static_, action::prepare>(begin, 'c');
+
+		  REQUIRE(end - begin == 1);
+		  REQUIRE(c == 'c');
+		}
+	    }
 	}
 
-      WHEN("Write")
+      FOR("A dynamic configuration")
 	{
-	  end = character<config::dynamic, action::write>(begin, 'c');
+	  FIRST("Get the size")
+	    {
+	      REQUIRE((std::size_t)character<config::static_, action::size>(nullptr, 0) == 1);
 
-	  REQUIRE(end - begin == 1);
-	  REQUIRE(c == 'c');
-	}
+	      THEN("Prepare, write or reset")
+		{
+		  end = character<config::dynamic, action::prepare>(begin, 'c');
 
-      WHEN("Reset")
-	{
-	  end = character<config::dynamic, action::reset>(begin, 'c');
-
-	  REQUIRE(end - begin == 1);
-	  REQUIRE(c == 'c');
+		  REQUIRE(end - begin == 1);
+		  REQUIRE(c == 'c');
+		}
+	    }
 	}
     }
 }
@@ -321,7 +250,7 @@ SCENARIO("Container", "[container]")
 	    {
 	      GIVEN_A_BUFFER(64)
 		{
-		  WHEN("Static")
+		  FOR("A static configuration")
 		    {
 		      WHEN("Left-aligned")
 			{
@@ -358,7 +287,7 @@ SCENARIO("Container", "[container]")
 			    }
 			}
 
-		      WHEN("Dynamic")
+		      FOR("A dynamic configuration")
 			{
 			  WHEN("Left-aligned")
 			    {
@@ -400,7 +329,7 @@ SCENARIO("Container", "[container]")
 	    {
 	      const char pad = ' ';
 
-	      WHEN("Static")
+	      FOR("A static configuration")
 		{
 		  const std::size_t max_length = 0;
 
@@ -443,7 +372,7 @@ SCENARIO("Container", "[container]")
 		    }
 		}
 
-	      WHEN("Dynamic")
+	      FOR("A dynamic configuration")
 		{
 		  const std::size_t max_length = 64;
 
@@ -801,7 +730,7 @@ SCENARIO("Date", "[date]")
     {
       typedef universal_timezone_t<config::static_, align::left, ' '> timezone_t;
 
-      WHEN("Static")
+      FOR("A static configuration")
 	{
 	  WHEN("Handle weekday and seconds")
 	    {
@@ -920,7 +849,7 @@ SCENARIO("Date", "[date]")
 	    }
 	}
 
-      WHEN("Dynamic")
+      FOR("A dynamic configuration")
 	{
 	  WHEN("Handle weekday and seconds")
 	    {
@@ -1084,7 +1013,7 @@ SCENARIO("Date", "[date]")
     {
       typedef universal_timezone_t<config::static_, align::left, ' '> timezone_t;
 
-      WHEN("Static")
+      FOR("A static configuration")
 	{
 	  const std::size_t size = (std::size_t)rfc850::date<config::static_, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
@@ -1103,7 +1032,7 @@ SCENARIO("Date", "[date]")
 	    }
 	}
 
-      WHEN("Dynamic")
+      FOR("A dynamic configuration")
 	{
 	  const std::size_t size = (std::size_t)rfc850::date<config::dynamic, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
@@ -1147,7 +1076,7 @@ SCENARIO("Date", "[date]")
     {
       typedef universal_timezone_t<config::static_, align::left, ' '> timezone_t;
 
-      WHEN("Static")
+      FOR("A static configuration")
 	{
 	  const std::size_t size = (std::size_t)rfc1123::date<config::static_, true, true, timezone_t, action::size>(nullptr, date_time, timezone_t());
 
@@ -1263,12 +1192,12 @@ SCENARIO("Itoa adapter", "[itoa, adapter]")
 
 	  WHEN("Forward")
 	    {
-#define TEST(I, L)					\
-	      THEN(#I)					\
-		{					\
-		  char * end = to_string.fwd(begin, I);	\
-							\
-		  REQUIRE(end - begin == L);		\
+#define TEST(I, L)						\
+	      THEN(#I)						\
+		{						\
+		  char * end = to_string.fwd(begin, I);		\
+								\
+		  REQUIRE(end - begin == L);			\
 		  REQUIRE(std::string(begin, end) == #I);	\
 		}
 
@@ -1283,12 +1212,12 @@ SCENARIO("Itoa adapter", "[itoa, adapter]")
 
 	  WHEN("Backward")
 	    {
-#define TEST(I, L)					\
-	      THEN(#I)					\
-		{					\
-		  char * begin = to_string.bwd(end, I);	\
-							\
-		  REQUIRE(end - begin == L);		\
+#define TEST(I, L)						\
+	      THEN(#I)						\
+		{						\
+		  char * begin = to_string.bwd(end, I);		\
+								\
+		  REQUIRE(end - begin == L);			\
 		  REQUIRE(std::string(begin, end) == #I);	\
 		}
 
@@ -1408,7 +1337,7 @@ SCENARIO("Number", "[Number]")
 
   WHEN("Four digits number")
     {
-      WHEN("Static of dynamic")
+      WHEN("Static or dynamic")
 	{
 	  REQUIRE(((std::size_t)four_digits_number<config::static_, action::size, uint16_t>(nullptr, 0) == 4));
 
@@ -1467,7 +1396,7 @@ SCENARIO("Number", "[Number]")
 
       adapter::itoa::to_string_t itoa;
 
-      WHEN("Static")
+      FOR("A static configuration")
 	{
 	  WHEN("Left or right aligned, any padding")
 	    {
@@ -1490,7 +1419,7 @@ SCENARIO("Number", "[Number]")
 	    }
 	}
 
-      WHEN("Dynamic")
+      FOR("A dynamic configuration")
 	{
 	  uint8_t previous_digits = 0;
 	  const uint8_t max_digits_ = 8;
@@ -1654,7 +1583,7 @@ struct set_t
       case value_type::Charlie: return "Charlie";
       case value_type::David: return "David";
       default: return "";
-      //LCOV_EXCL_STOP
+	//LCOV_EXCL_STOP
       }
   }
 };
@@ -1670,7 +1599,7 @@ SCENARIO("Bitset", "[bitset]")
 {
   character_separator_t<','> separator;
 
-  WHEN("Static")
+  FOR("A static configuration")
     {
       const std::size_t size = (std::size_t)bitset<set_t, action::size>(nullptr, set_t::value_type::Alice | set_t::value_type::Bob, separator);
 
@@ -1686,7 +1615,7 @@ SCENARIO("Bitset", "[bitset]")
       }
     }
 
-  WHEN("Dynamic")
+  FOR("A dynamic configuration")
     {
       std::size_t max_length;
 
@@ -1843,7 +1772,7 @@ SCENARIO("Timezone", "[timezone]")
     {
       const char pad = ' ';
 
-      WHEN("Static")
+      FOR("A static configuration")
 	{
 	  WHEN("Left or right aligned")
 	    {
@@ -1875,7 +1804,7 @@ SCENARIO("Timezone", "[timezone]")
 	    }
 	}
 
-      WHEN("Dynamic")
+      FOR("A dynamic configuration")
 	{
 	  const std::size_t size = (std::size_t)universal_timezone<config::dynamic, align::left, pad, action::size>(nullptr, universal_timezone::UT);
 
@@ -1989,15 +1918,15 @@ SCENARIO("Timezone", "[timezone]")
     }
 
   WHEN("military_timezone_t")
-  {
-    typedef military_timezone_t<config::dynamic> military_timezone_type;
+    {
+      typedef military_timezone_t<config::dynamic> military_timezone_type;
 
-    military_timezone_type timezone;
+      military_timezone_type timezone;
 
-    const std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
+      const std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
 
-    REQUIRE(size == 1);
-  }
+      REQUIRE(size == 1);
+    }
 
   WHEN("differential")
     {
@@ -2047,205 +1976,275 @@ SCENARIO("String", "[string]")
 {
   const char * data = "Hello world!";
   const std::size_t length = std::strlen(data);
-  const char pad = ' ';
 
-  GIVEN("A string and a padding character")
+  GIVEN("A string")
     {
-      const std::size_t max_length_ = 32;
-
-      WHEN("Static")
+      FOR("A string without padding and alignment")//i.e. the buffer has the size of its content
 	{
-	  std::size_t max_length = length;
-
-	  WHEN("Left or right aligned")
-	    {
-	      const std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, nullptr, 0, max_length);
-
-	      REQUIRE(size == length);
-
-	      GIVEN("Size")
-		{
-		  GIVEN_A_BUFFER(size)
+	  GIVEN_A_BUFFER(length)
+	  {
+	    FOR("A static configuration")
+	      {
+		FIRST("Get the size")
 		  {
+		    REQUIRE((std::size_t)string<config::static_, action::size>(nullptr, nullptr, length) == length);
+
 		    THEN("Prepare")
 		      {
-			end = string<config::static_, align::left, pad, action::prepare>(begin, data, length, max_length);
+			end = string<config::static_, action::prepare>(begin, data, length);
+
+			REQUIRE(end - begin == length);
+			REQUIRE(std::string(begin,end) == data);
+		      }
+		  }
+	      }
+
+	    FOR("A dynamic configuration")
+	      {
+		FIRST("Get the size")
+		  {
+		    REQUIRE((std::size_t)string<config::dynamic, action::size>(nullptr, nullptr, length) == length);
+		    REQUIRE((std::size_t)string<config::dynamic, action::size>(nullptr, data) == length);
+
+		    THEN("Prepare, write or reset")
+		      {
+			end = string<config::dynamic, action::prepare>(begin, data, length);
 
 			REQUIRE(end - begin == length);
 			REQUIRE(std::string(begin, end) == data);
 		      }
 		  }
-		}
-	    }
-	}
+	      }
 
-      WHEN("Dynamic")
-	{
-	  const std::size_t max_length = max_length_;
-	  std::size_t previous_length = 0;
+	    FOR("Manual filling")
+	      {
+		char * location;
 
-	  WHEN("Left-aligned")
-	    {
-	      const std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, length, max_length, previous_length);
-
-	      REQUIRE(size == max_length);
-	      REQUIRE(max_length == max_length_);
-	      REQUIRE(previous_length == 0);
-
-	      GIVEN("Size")
-		{
-		  GIVEN_A_BUFFER(size)
+		GIVEN("A location")
 		  {
-		    THEN("Prepare")
+		    FOR("A static or dynamic configuration")
 		      {
-			end = string<config::dynamic, align::left, pad, action::prepare>(begin, "world!", 6, max_length, previous_length);
-
-			REQUIRE(end - begin == max_length);
-			REQUIRE(max_length == max_length_);
-			REQUIRE(previous_length == 0);
-			REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-
-			THEN("Write")
+			FIRST("Get the size")
 			  {
-			    end = string<config::dynamic, align::left, pad, action::write>(begin, data, length, max_length, previous_length);
+			    REQUIRE((std::size_t)string<config::static_, action::size>(nullptr, &location, length) == length);
 
-			    REQUIRE(end - begin == max_length);
-			    REQUIRE(max_length == max_length_);
-			    REQUIRE(previous_length == length);
-			    REQUIRE(std::string(begin, end) == data + std::string(max_length - length, pad));
-
-			    THEN("Reset")
+			    THEN("Prepare")
 			      {
-				end = string<config::dynamic, align::left, pad, action::reset>(begin, nullptr, 0, max_length, previous_length);
+				end = string<config::static_, action::prepare>(begin, &location, length);
 
-				REQUIRE(end - begin == max_length);
-				REQUIRE(max_length == max_length_);
-				REQUIRE(previous_length == 0);
-				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+				REQUIRE(location == begin);
+				REQUIRE(end == location + length);
 			      }
 			  }
 		      }
 		  }
-		}
-	    }
-
-	  WHEN("Right-aligned")
-	    {
-	      const std::size_t size = (std::size_t)string<config::dynamic, align::right, pad, action::size>(nullptr, nullptr, 0, max_length, previous_length);
-
-	      REQUIRE(size == max_length);
-	      REQUIRE(max_length == max_length_);
-	      REQUIRE(previous_length == 0);
-
-	      GIVEN("Size")
-		{
-		  GIVEN_A_BUFFER(size)
-		  {
-		    THEN("Prepare")
-		      {
-			end = string<config::dynamic, align::right, pad, action::prepare>(begin, "world!", 6, max_length, previous_length);
-
-			REQUIRE(end - begin == max_length);
-			REQUIRE(max_length == max_length_);
-			REQUIRE(previous_length == 0);
-			REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-
-			THEN("Write")
-			  {
-			    end = string<config::dynamic, align::right, pad, action::write>(begin, data, length, max_length, previous_length);
-
-			    REQUIRE(end - begin == max_length);
-			    REQUIRE(max_length == max_length_);
-			    REQUIRE(previous_length == length);
-			    REQUIRE(std::string(begin, end) == std::string(max_length - length, pad) + data);
-
-			    THEN("Reset")
-			      {
-				end = string<config::dynamic, align::right, pad, action::reset>(begin, nullptr, 0, max_length, previous_length);
-
-				REQUIRE(end - begin == max_length);
-				REQUIRE(max_length == max_length_);
-				REQUIRE(previous_length == 0);
-				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
-			      }
-			  }
-		      }
-		  }
-		}
-	    }
+	      }
+	  }
 	}
 
-      WHEN("Manual fill")
+      WHEN("Handle a string with padding and alignment")
 	{
-	  WHEN("Static")
-	    {
-	      const std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, nullptr, 0, length);
+	  const char pad = ' ';
 
-	      GIVEN_A_BUFFER(size)
+	  GIVEN("A padding character")
+	    {
+	      const std::size_t max_length_ = 32;
+
+	      FOR("A static configuration")
 		{
-		  THEN("Prepare")
+		  std::size_t max_length = length;
+
+		  WHEN("Left or right aligned")
 		    {
-		      char * value = nullptr;
-		      end = string<config::static_, align::left, pad, action::prepare>(buffer, &value, length, length);
+		      const std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, nullptr, 0, max_length);
 
-		      (void)length;
-		      REQUIRE(value != nullptr);
-		      REQUIRE(end - begin == size);
-		      std::memcpy(value, data, length);
-		      REQUIRE(std::string(begin, end) == data);
+		      REQUIRE(size == length);
+
+		      GIVEN("Size")
+			{
+			  GIVEN_A_BUFFER(size)
+			  {
+			    THEN("Prepare")
+			      {
+				end = string<config::static_, align::left, pad, action::prepare>(begin, data, length, max_length);
+
+				REQUIRE(end - begin == length);
+				REQUIRE(std::string(begin, end) == data);
+			      }
+			  }
+			}
+		    }
+		}
+
+	      FOR("A dynamic configuration")
+		{
+		  const std::size_t max_length = max_length_;
+		  std::size_t previous_length = 0;
+
+		  WHEN("Left-aligned")
+		    {
+		      const std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, length, max_length, previous_length);
+
+		      REQUIRE(size == max_length);
+		      REQUIRE(max_length == max_length_);
+		      REQUIRE(previous_length == 0);
+
+		      GIVEN("Size")
+			{
+			  GIVEN_A_BUFFER(size)
+			  {
+			    THEN("Prepare")
+			      {
+				end = string<config::dynamic, align::left, pad, action::prepare>(begin, "world!", 6, max_length, previous_length);
+
+				REQUIRE(end - begin == max_length);
+				REQUIRE(max_length == max_length_);
+				REQUIRE(previous_length == 0);
+				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+
+				THEN("Write")
+				  {
+				    end = string<config::dynamic, align::left, pad, action::write>(begin, data, length, max_length, previous_length);
+
+				    REQUIRE(end - begin == max_length);
+				    REQUIRE(max_length == max_length_);
+				    REQUIRE(previous_length == length);
+				    REQUIRE(std::string(begin, end) == data + std::string(max_length - length, pad));
+
+				    THEN("Reset")
+				      {
+					end = string<config::dynamic, align::left, pad, action::reset>(begin, nullptr, 0, max_length, previous_length);
+
+					REQUIRE(end - begin == max_length);
+					REQUIRE(max_length == max_length_);
+					REQUIRE(previous_length == 0);
+					REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+				      }
+				  }
+			      }
+			  }
+			}
+		    }
+
+		  WHEN("Right-aligned")
+		    {
+		      const std::size_t size = (std::size_t)string<config::dynamic, align::right, pad, action::size>(nullptr, nullptr, 0, max_length, previous_length);
+
+		      REQUIRE(size == max_length);
+		      REQUIRE(max_length == max_length_);
+		      REQUIRE(previous_length == 0);
+
+		      GIVEN("Size")
+			{
+			  GIVEN_A_BUFFER(size)
+			  {
+			    THEN("Prepare")
+			      {
+				end = string<config::dynamic, align::right, pad, action::prepare>(begin, "world!", 6, max_length, previous_length);
+
+				REQUIRE(end - begin == max_length);
+				REQUIRE(max_length == max_length_);
+				REQUIRE(previous_length == 0);
+				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+
+				THEN("Write")
+				  {
+				    end = string<config::dynamic, align::right, pad, action::write>(begin, data, length, max_length, previous_length);
+
+				    REQUIRE(end - begin == max_length);
+				    REQUIRE(max_length == max_length_);
+				    REQUIRE(previous_length == length);
+				    REQUIRE(std::string(begin, end) == std::string(max_length - length, pad) + data);
+
+				    THEN("Reset")
+				      {
+					end = string<config::dynamic, align::right, pad, action::reset>(begin, nullptr, 0, max_length, previous_length);
+
+					REQUIRE(end - begin == max_length);
+					REQUIRE(max_length == max_length_);
+					REQUIRE(previous_length == 0);
+					REQUIRE(std::string(begin, end) == std::string(max_length, pad));
+				      }
+				  }
+			      }
+			  }
+			}
+		    }
+		}
+
+	      WHEN("Manual fill")
+		{
+		  FOR("A static configuration")
+		    {
+		      const std::size_t size = (std::size_t)string<config::static_, align::left, pad, action::size>(nullptr, nullptr, 0, length);
+
+		      GIVEN_A_BUFFER(size)
+		      {
+			THEN("Prepare")
+			  {
+			    char * value = nullptr;
+			    end = string<config::static_, align::left, pad, action::prepare>(buffer, &value, length, length);
+
+			    (void)length;
+			    REQUIRE(value != nullptr);
+			    REQUIRE(end - begin == size);
+			    std::memcpy(value, data, length);
+			    REQUIRE(std::string(begin, end) == data);
+			  }
+		      }
+		    }
+
+		  FOR("A dynamic configuration")
+		    {
+		      const std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, 0, length);
+
+		      GIVEN_A_BUFFER(size)
+		      {
+			THEN("Prepare")
+			  {
+			    char * value = nullptr;
+			    end = string<config::dynamic, align::left, pad, action::prepare>(buffer, &value, length, length);
+			    REQUIRE(value != nullptr);
+			    REQUIRE(end - begin == size);
+			    std::memcpy(value, data, length);
+			    REQUIRE(std::string(begin, end) == data);
+			  }
+		      }
 		    }
 		}
 	    }
 
-	  WHEN("Dynamic")
+	  WHEN("string_t<config::static_>")
 	    {
-	      const std::size_t size = (std::size_t)string<config::dynamic, align::left, pad, action::size>(nullptr, nullptr, 0, length);
+	      typedef string_t<config::static_, align::left, ' '> string_type;
 
-	      GIVEN_A_BUFFER(size)
-	      {
-		THEN("Prepare")
-		  {
-		    char * value = nullptr;
-		    end = string<config::dynamic, align::left, pad, action::prepare>(buffer, &value, length, length);
-		    REQUIRE(value != nullptr);
-		    REQUIRE(end - begin == size);
-		    std::memcpy(value, data, length);
-		    REQUIRE(std::string(begin, end) == data);
-		  }
-	      }
+	      string_type string = string_type();
+	      const std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
+
+	      REQUIRE(size == 32);
 	    }
-	}
 
-      WHEN("string_t<config::static_>")
-	{
-	  typedef string_t<config::static_, align::left, ' '> string_type;
+	  WHEN("string_t<config::dynamic>")
+	    {
+	      typedef string_t<config::dynamic, align::left, ' '> string_type;
 
-	  string_type string = string_type();
-	  const std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
+	      string_type string = string_type();
 
-	  REQUIRE(size == 32);
-	}
+	      const std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
 
-      WHEN("string_t<config::dynamic>")
-	{
-	  typedef string_t<config::dynamic, align::left, ' '> string_type;
+	      REQUIRE(size == 32);
+	    }
 
-	  string_type string = string_type();
+	  WHEN("string_t<config::dynamic, ..., true>")
+	    {
+	      typedef string_t<config::dynamic, align::left, ' ', true> string_type;
 
-	  const std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
+	      string_type string = string_type();
 
-	  REQUIRE(size == 32);
-	}
+	      const std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
 
-      WHEN("string_t<config::dynamic, ..., true>")
-	{
-	  typedef string_t<config::dynamic, align::left, ' ', true> string_type;
-
-	  string_type string = string_type();
-
-	  const std::size_t size = (std::size_t)string.handle<action::size>(nullptr, nullptr, 32);
-
-	  REQUIRE(size == 32);
+	      REQUIRE(size == 32);
+	    }
 	}
     }
 }

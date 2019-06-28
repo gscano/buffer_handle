@@ -9,4 +9,7 @@
 
 #define GIVEN_A_BUFFER(size) GIVEN_A_BUFFER_(size, #size)
 
+#define FOR( desc )      INTERNAL_CATCH_DYNAMIC_SECTION( "      For: " << desc )
+#define FIRST( desc )    INTERNAL_CATCH_DYNAMIC_SECTION( "    First: " << desc )
+
 #endif/*BUFFER_HANDLE_TEST_HPP*/
