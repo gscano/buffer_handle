@@ -9,15 +9,15 @@ namespace buffer_handle
   template<config Config, char InsteadOfALeadingZero, action Action, typename I> inline
   char * two_digits_number(char * buffer, I i)
   {
-    static_assert(std::is_integral<I>::value, "Template parameter I must be an integral type.");
-    assert(0 <= i);
+    static_assert(std::is_integral<I>::value, "Template parameter I must be of integral type.");
+    assert(0 <= i && i <= 99);
 
     if(must_write(Config, Action))
       {
 	buffer[0] = '0' + i / 10;
 	buffer[1] = '0' + i - 10 * (buffer[0] - '0');
 
-	if(InsteadOfALeadingZero != 0 && buffer[0] == '0')
+	if(InsteadOfALeadingZero != '\0' && buffer[0] == '0')
 	  {
 	    buffer[0] = InsteadOfALeadingZero;
 	  }
@@ -29,8 +29,8 @@ namespace buffer_handle
   template<config Config, action Action, typename I> inline
   char * four_digits_number(char * buffer, I i)
   {
-    static_assert(std::is_integral<I>::value, "Template parameter I must be an integral type.");
-    assert(0 <= i);
+    static_assert(std::is_integral<I>::value, "Template parameter I must be of integral type.");
+    assert(0 <= i && i < 9999);
 
     if(must_write(Config, Action))
       {

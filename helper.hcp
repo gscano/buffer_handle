@@ -60,7 +60,8 @@ namespace buffer_handle
       }
     else
       {
-	std::memset(begin, Pad, end - begin);// == max_length - current_length
+	assert((size_t)(end - begin) == (size_t)(max_length - current_length));
+	std::memset(begin, Pad, end - begin);
       }
   }
 

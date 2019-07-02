@@ -211,7 +211,15 @@ All code is scoped in `namespace buffer_handle`.
 |---------------------------|----------------------------|
 | [Character](#character)   | [test.cpp](test.cpp#L152)  |
 | [Boolean](#boolean)       | [test.cpp](test.cpp#L25)   |
-| [String](#string)         | [test.cpp](test.cpp#L1975) |
+| [String](#string)         | [test.cpp](test.cpp#L1984) |
+| [Time](#time)             | [test.cpp](test.cpp#L1681) |
+| [Timezone](#timezone)     | [test.cpp](test.cpp#L1778) |
+| [Date](#date)             | [test.cpp](test.cpp#L611)  |
+| [Container](#container)   | [test.cpp](test.cpp#L223)  |
+| [Bitset](#bitset)         | [test.cpp](test.cpp#1607)  |
+|---------------------------|----------------------------|
+| [Adapters](#adapters)     | |
+| [Helpers](#helpers)       | |
 
 ### Types
 
@@ -227,6 +235,18 @@ enum class case_ { lower, first_upper, upper };
 
 //Declared in buffer_handle/config.hpp
 enum class config { static_, dynamic };
+```
+
+### Conditions
+
+The function `must_write` can be used to test whether the given *configuration* and *action* template parameters imply to write something to the buffer. It is true
+* for a **dynamic** configuration unless **size** is the action; or
+* for a **static** configuration only if the action is to **prepare** the buffer.
+
+```cpp
+//Defined in buffer_handle/helper.hpp
+
+constexpr bool must_write(config Config, action Action);
 ```
 
 ### Character
@@ -283,7 +303,7 @@ char * string(char * buffer, const char * value, std::size_t length = std::strle
 ```
 
 Handles a string in the most basic way by copying it to the buffer when [must-write](#must-write) is `true`.
-The `length` argument conveniently defaults to the length of the string pointed to by `value`. However, a verification against a `nullptr` is only performed, as an `ASSERT`, for a **static** *configuration*. In a **dynamic** *configuration*, `nullptr` can be passed during a **size** or **prepare** (for instance if the actual string is not known yet) as long as the same length is supplied for every *action*. Also note that the **reset** *action* uses the value passed at that time. To **reset** a buffer to a specific value can be achieved with the function below.
+The `length` argument conveniently defaults to the length of the string pointed to by `value`. However, a verification against a `nullptr` is only performed, as an `ASSERT`, for a **static** *configuration*. In a **dynamic** *configuration*, `nullptr` can be passed during a **size** or **prepare** (for instance if the actual string is not known yet) as long as the same length is supplied for every *action*. Also note that the **reset** *action* uses the value passed at that time. To **reset** a buffer to a specific value use the function below.
 
 ```cpp
 template<config Config, align Align, char Pad, action Action>
@@ -307,11 +327,7 @@ char * string(char * buffer, char ** value, std::size_t length);
 
 template<config Config, align Align, char Pad, action Action>
 char * string(char * buffer, char ** value, std::size_t length, std::size_t max_length);
-```
 
-###### Functor
-
-```cpp
 template<config Config, align Align, char Pad, bool IsLong = false>
 struct string_t
 {
@@ -320,17 +336,25 @@ struct string_t
 };
 ```
 
-###### Number
+### Number
 
 ```cpp
 //Defined in buffer_handle/number.hpp
+```
 
+```cpp
 template<config Config, char InsteadOfALeadingZero, action Action, typename I>
 char * two_digits_number(char * buffer, I i);
 
 template<config Config, action Action, typename I>
 char * four_digits_number(char * buffer, I i);
+```
 
+Those two functions handle a specific and fixed number of digits of a positive integral number `i`. There are no verifications that the decimal representation of `i` is bounded to those digits nor that it is positive (except for an ̀`assert`). They are mainly used to handle [times](#time) and [dates](#date).
+The template parameter `InsteadOfALeadingZero` can be used to set the first digit to a specific character in case of a single digit number. Use `'\0'` in order to have a leading zero.
+
+
+```cpp
 template<config Action, class Itoa, typename I>
 char * integral_number(char * buffer, I i, const Itoa & itoa = Itoa());
 
@@ -338,16 +362,22 @@ template<config Config, align Align, char Pad, action Action, class Itoa,
 	 typename I, typename Digits = uint8_t>
 char * integral_number(char * buffer, I i, Digits & max_digits, /* Digits & previous_digits, */
 		       const Itoa & itoa = Itoa());
+
+template<config Config, align Align, char Pad, class Itoa, typename I, typename Digits,
+	 bool IsLong = false>
+struct integral_number_t
+{
+  template<action Action>
+  char * handle(char * buffer, I value, const Itoa & itoa = Itoa());
+};
 ```
 
-* The template parameter `InsteadOfALeadingZero` can be `'\0'` in order to have a leading zero.
-* Type `I` must be integral and `i`must be positive.
-* The `max_digits` argument is a reference because the function will assign it when **prepare** is called based on the value passed in `i`. It must not be modified.
-* `uint8_t` should be enough to encode the number of digits for most applications.
-* The `Itoa` functor must conform to the provided [adapter](#itoa) contract.
-* The function `integral_number` without the `max_digits` argument is equivalent to calling its counterpart as **static**.
+The first function above writes a positive integral number to the buffer when **prepare**d.
+The second one handles a positive integral number whose decimal representation is limited to `max_digits`. This argument would usually be assigned by the function when a buffer is **prepare**d based on the maximum possible value supplied in `i`, in which case it must not be modified afterwards. It is also possible to provide a constant value throughout calls if this value is already known.
+A `uint8_t` should be enough to encode the number of digits for most applications but this type could modified for bigger values.
+The `Itoa` functor must conform to the [adapter](#itoa) contract and the function without the `max_digits` argument is equivalent to calling its counterpart as **static**.
 
-###### Time
+### Time
 
 ```cpp
 //Defined in buffer_handle/time.hpp
@@ -365,9 +395,11 @@ template<config Config, action Action>
 char * time_(char * buffer, std::tm time);
 ```
 
-* The `Itoa` functor must conform to the provided [adapter](#itoa) contract.
+The `Itoa` functor must conform to the [adapter](#itoa) contract.
 
-###### Timezone
+### Timezone
+
+Those functions and functors handle *universal*, *North American*, *military* and *differential* timezones.
 
 ```cpp
 //Defined in buffer_handle/timezone.hpp
@@ -390,20 +422,67 @@ char * military_timezone(char * buffer, T offset);
 
 template<config Config, action Action, typename Hours, typename Minutes>
 char * differential_timezone(char * buffer, bool sign, Hours hours, Minutes minutes);
+
+template<config Config, align Align, char Pad>
+struct universal_timezone_t
+{
+  universal_timezone_t(enum universal_timezone value = universal_timezone::GMT);
+
+  enum universal_timezone value;
+
+  template<action Action>
+  char * handle(char * buffer) const;
+};
+
+template<config Config>
+struct north_american_timezone_t
+{
+  north_american_timezone_t(enum north_american_timezone value = north_american_timezone::EST);
+
+  enum north_american_timezone value;
+
+  template<action Action>
+  char * handle(char * buffer) const;
+};
+
+template<config Config>
+struct military_timezone_t
+{
+  military_timezone_t(char letter = 'Z');
+
+  template<typename T>
+  military_timezone_t(T offset);
+
+  template<typename T>
+  void set(T offset);
+
+  char letter;
+
+  template<action Action>
+  char * handle(char * buffer) const;
+};
+
+template<config Config>
+struct differential_timezone_t
+{
+  differential_timezone_t(bool positive = true, uint8_t hours = 0, uint8_t minutes = 0);
+
+  bool positive;
+  uint8_t hours;
+  uint8_t minutes;
+
+  template<action Action>
+  char * handle(char * buffer) const;
+};
 ```
 
-###### Date
+### Date
+
+The following functions handle *asc*, *rfc822*, *rfc850* and *rfc1123* dates.
+
+Note that for functions accepting  directly a month or a year, 1 is for January and years start at 0 not 1900.
 
 ```cpp
-//Defined in buffer_handle/date.hpp
-
-template<config Config, char InsteadOfALeadingZeroForDay, char Separator, bool YearOn4Digits,
-	 action Action, typename Day, typename Month, typename Year>
-char * day_month_year(char * buffer, Day day, Month month, Year year);//dd Mon YYYY
-
-template<config Config, action Action, typename Month, typename Day>
-char * month_day(char * buffer, Month month, Day day);//Mon dd
-
 namespace asc
 {
   template<config Config, action Action,
@@ -460,14 +539,27 @@ namespace rfc1123//§5.2.14
 };
 ```
 
-* The template parameters
-  * `InsteadOfALeadingZeroForDay` can be `'\0'` in order to have a leading zero
-  * `YearOn4Digits` toggles the year format to 'YYYY' instead of 'YY'
-* For functions accepting  directly a month or a year
-  * 1 is for January;
-  * years start at 0 not 1900.
+The two functions below are mainly used by above functions but can also can be used independtly.
+They respectively write the date in format 'dd Mon YY' and 'Mon dd'.
 
-###### Container
+The template parameter `InsteadOfALeadingZeroForDay` can be `'\0'` in order to have a leading zero while `YearOn4Digits` toggles the year format to 'YYYY' instead of 'YY'
+
+```cpp
+//Defined in buffer_handle/date.hpp
+
+template<config Config, char InsteadOfALeadingZeroForDay, char Separator, bool YearOn4Digits,
+	 action Action, typename Day, typename Month, typename Year>
+char * day_month_year(char * buffer, Day day, Month month, Year year);//dd Mon YY
+
+template<config Config, action Action, typename Month, typename Day>
+char * month_day(char * buffer, Month month, Day day);//Mon dd
+```
+
+### Container
+
+Containes can be handled in two ways.
+The first function writes every element contained between `begin` and `end` in a buffer of size `max_length` but does not check out of bound data.
+The second one writes the most possible elements between `current` and `end` and updates `current` if it is not possible to write every element.
 
 ```cpp
 //Defined in buffer_handle/container.hpp
@@ -481,10 +573,20 @@ template<align Align, char Pad, action Action,
 	   class Handler, class Separator, typename Iterator>
 char * container(char * buffer, const Iterator & begin, Iterator & current, const Iterator & end,
 		 std::size_t max_length, Handler & handler, Separator & separator);
+
+template<config Config, align Align, char Pad, bool IsLong = false>
+struct container_t
+{
+  void set_max_length(std::size_t length);
+
+  template<action Action, class Iterator, class Handler, class Separator>
+  char * handle(char * buffer, Iterator & begin, Iterator & end,
+		Handler & handler, Separator & separator);
+};
 ```
 
-* The maximum length is determined by the container content when **static**.
-* When **dynamic**, the `max_length` is not used unless the function with the `current` argument is used and which stops iterating before the `end`.
+The maximum length is determined by the container content when **static**.
+
 * The `Handler` contract is
   ```cpp
   template<typename Element>
@@ -510,6 +612,13 @@ char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & ma
 
 template<config Config, align Align, char Pad, class Bitset, action Action, class Separator>
 char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator, std::size_t & previous_length);
+
+template<config Config, align Align, char Pad, class Bitset, bool IsLong = false>
+struct bitset_t
+{
+  template<action Action, class Separator>
+  char * handle(char * buffer, typename Bitset::value_type value, Separator & separator);
+};
 ```
 
 * The `Bitset` contract is
@@ -524,9 +633,7 @@ char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & ma
   char * handle(char * buffer) /* const */;
   ```
 
-### Special functors
-
-###### Nothing
+### Special functor 'nothing'
 
 ```cpp
 //Defined in buffer_handle/nothing.hpp
@@ -538,112 +645,9 @@ struct nothing_t
 };
 ```
 
-###### Number
-
-```cpp
-//Defined in buffer_handle/number.hpp
-
-template<config Config, align Align, char Pad, class Itoa, typename I, typename Digits,
-	 bool IsLong = false>
-struct integral_number_t
-{
-  template<action Action>
-  char * handle(char * buffer, I value, const Itoa & itoa = Itoa());
-};
-```
-
-* The `Itoa` functor must conform to the provided [adapter](#itoa) contract.
-
-###### Timezone
-
-```cpp
-//Defined in buffer_handle/timezone.hpp
-
-template<config Config, align Align, char Pad>
-struct universal_timezone_t
-{
-  universal_timezone_t(enum universal_timezone value = universal_timezone::GMT);
-
-  enum universal_timezone value;
-
-  template<action Action>
-  char * handle(char * buffer) const;
-};
-
-template<config Config>
-struct north_american_timezone_t
-{
-  north_american_timezone_t(enum north_american_timezone value = north_american_timezone::EST);
-
-  enum north_american_timezone value;
-
-  template<action Action>
-  char * handle(char * buffer) const;
-};
-
-template<config Config>
-struct military_timezone_t
-{
-  military_timezone_t(char letter = 'Z');
-
-  template<typename T>
-  military_timezone_t(T offset);
-
-  template<typename T>
-  void set(T offset);
-
-  char letter;
-
-  template<action Action>
-  char * handle(char * buffer) const;
-};
-
-template<config Config>
-struct differential_timezone_t
-{
-  differential_timezone_t(bool positive = true, uint8_t hours = 0, uint8_t minutes = 0);
-
-  bool positive;
-  uint8_t hours;
-  uint8_t minutes;
-
-  template<action Action>
-  char * handle(char * buffer) const;
-};
-```
-
-###### Container
-
-```cpp
-//Defined in buffer_handle/container.hpp
-
-template<config Config, align Align, char Pad, bool IsLong = false>
-struct container_t
-{
-  void set_max_length(std::size_t length);
-
-  template<action Action, class Iterator, class Handler, class Separator>
-  char * handle(char * buffer, Iterator & begin, Iterator & end,
-		Handler & handler, Separator & separator);
-};
-```
-
-###### Bitset
-
-```cpp
-//Defined in buffer_handle/bitset.hpp
-
-template<config Config, align Align, char Pad, class Bitset, bool IsLong = false>
-struct bitset_t
-{
-  template<action Action, class Separator>
-  char * handle(char * buffer, typename Bitset::value_type value, Separator & separator);
-};
-```
-
 ### Adapters
 
-##### Itoa
+###### Itoa
 
 ```cpp
 namespace adapter
@@ -669,21 +673,10 @@ Available implementations are:
 
 ### Helpers
 
-###### Must write
+###### Action modifiers
 
-The function `must_write` can be used to test whether the given configuration and action template parameters imply to write something to the buffer. It is true
-* for a **dynamic** configuration unless **size** is the action; or
-* for a **static** configuration only if the action is to **prepare** the buffer.
-
-```cpp
-//Defined in buffer_handle/helper.hpp
-
-constexpr bool must_write(config Config, action Action);
-```
-
-###### Write when reset
-
-The function `write_when_reset` can be used to force a **write** to happen when **reset** is given as an argument (see [date.hcp](date.hcp#L254) for an example).
+It is sometimes necessary to modify the behavior of a given *action* to adjust a function to a specific external behavior.
+The function `write_when_reset` can be used to bypass a **reset** with a **write** (see [date.hcp](date.hcp#L254) for an example).
 
 ```cpp
 //Defined in buffer_handle/helper.hpp
