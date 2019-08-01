@@ -25,8 +25,7 @@ When the *configuration* is **dynamic**, the **prepare** *action* must be execut
 
 The *action* is also a template parameter so that a specific set of functions would be generated depending on the combination of *actions* and *configurations*.
 
-For some functions, more specific *configurations* can be toggled regarding [alignment](#alignment), [padding](#padding) and [case](#case).
-Even more *configurations* can be used to cope with the specificities of a function.
+For some functions, more *configurations* can be selected regarding [alignment](#alignment), [padding](#padding) and [case](#case) or for anything specific to a function.
 
 ###### Alignment
 
@@ -38,7 +37,7 @@ When **reset**ting a buffer or when alignment leaves some portions untouched, a 
 
 ###### Case
 
-When localization does not apply, constant strings could be written with either a **lower**, **upper** or **lower with a first upper letter** case.
+When internationalization does not apply, constant strings could be written with either a **lower**, **upper** or **lower with a first upper letter** case.
 
 ##### Coding style
 
@@ -207,19 +206,18 @@ where dummy arguments are passed.
 
 All code is scoped in `namespace buffer_handle`.
 
-| Documentation             | Example                    |
-|---------------------------|----------------------------|
-| [Character](#character)   | [test.cpp](test.cpp#L152)  |
-| [Boolean](#boolean)       | [test.cpp](test.cpp#L25)   |
-| [String](#string)         | [test.cpp](test.cpp#L1984) |
-| [Time](#time)             | [test.cpp](test.cpp#L1681) |
-| [Timezone](#timezone)     | [test.cpp](test.cpp#L1778) |
-| [Date](#date)             | [test.cpp](test.cpp#L611)  |
-| [Container](#container)   | [test.cpp](test.cpp#L223)  |
-| [Bitset](#bitset)         | [test.cpp](test.cpp#1607)  |
-|---------------------------|----------------------------|
-| [Adapters](#adapters)     | |
-| [Helpers](#helpers)       | |
+| Main                    | Extra                                         |
+|-------------------------|-----------------------------------------------|
+| [Character](#character) | [Types](#types)                               |
+| [Boolean](#boolean)     | [Conditions](#conditions)                     |
+| [String](#string)       | [Nothing](#nothing)                           |
+| [Number](#number)       | [Itoa adapter](#itoa)                         |
+| [Time](#time)           | **Helpers**                                   |
+| [Timezone](#timezone)   | [Actions modififers](#actions-modifiers)      |
+| [Date](#date)           | [Reseting](#reseting)                         |
+| [Container](#container) | [Padding](#padding)                           |
+| [Bitset](#bitset)       | [Container separators](#container-separators) |
+
 
 ### Types
 
@@ -239,7 +237,9 @@ enum class config { static_, dynamic };
 
 ### Conditions
 
-The function `must_write` can be used to test whether the given *configuration* and *action* template parameters imply to write something to the buffer. It is true
+###### Must write
+
+The function `must_write` can be used to test whether the given *configuration* and *action* template parameters imply to write something to the buffer. It is `true`
 * for a **dynamic** configuration unless **size** is the action; or
 * for a **static** configuration only if the action is to **prepare** the buffer.
 
@@ -249,7 +249,7 @@ The function `must_write` can be used to test whether the given *configuration* 
 constexpr bool must_write(config Config, action Action);
 ```
 
-### Character
+### [Character](test.cpp#L152)
 
 Handle a single character or a given token.
 The content is written whenever [`must_write`](#must-write) is `true`.
@@ -276,7 +276,7 @@ char * TOKEN(char * buffer);
 //        backslash, closing_bracket, underscore, backquote, opening_brace, pipe, closing_brace
 ```
 
-### Boolean
+### [Boolean](test.cpp#L25)
 
 Handle a boolean as a string or as a single character.
 The content is written whenever [`must_write`](#must-write) is `true`.
@@ -291,7 +291,7 @@ template<config Config, action Action, char False = '0', char True = '1'>
 char * boolean(char * buffer, bool value);
 ```
 
-### String
+### [String](test.cpp#L1984)
 
 ```cpp
 //Defined in buffer_handle/string.hpp
@@ -336,7 +336,7 @@ struct string_t
 };
 ```
 
-### Number
+### [Number](test.cpp#L1257)
 
 ```cpp
 //Defined in buffer_handle/number.hpp
@@ -377,7 +377,7 @@ The second one handles a positive integral number whose decimal representation i
 A `uint8_t` should be enough to encode the number of digits for most applications but this type could modified for bigger values.
 The `Itoa` functor must conform to the [adapter](#itoa) contract and the function without the `max_digits` argument is equivalent to calling its counterpart as **static**.
 
-### Time
+### [Time](test.cpp#L1681)
 
 ```cpp
 //Defined in buffer_handle/time.hpp
@@ -397,7 +397,7 @@ char * time_(char * buffer, std::tm time);
 
 The `Itoa` functor must conform to the [adapter](#itoa) contract.
 
-### Timezone
+### [Timezone](test.cpp#L1778)
 
 Those functions and functors handle *universal*, *North American*, *military* and *differential* timezones.
 
@@ -476,7 +476,7 @@ struct differential_timezone_t
 };
 ```
 
-### Date
+### [Date](test.cpp#L611)
 
 The following functions handle *asc*, *rfc822*, *rfc850* and *rfc1123* dates.
 
@@ -555,7 +555,7 @@ template<config Config, action Action, typename Month, typename Day>
 char * month_day(char * buffer, Month month, Day day);//Mon dd
 ```
 
-### Container
+### [Container](test.cpp#L223)
 
 Containes can be handled in two ways.
 The first function writes every element contained between `begin` and `end` in a buffer of size `max_length` but does not check out of bound data.
@@ -593,13 +593,13 @@ The maximum length is determined by the container content when **static**.
   template<config Config, action Action>
   char * handle(char * buffer, Element element) /* const */;
   ```
-* The `Separator` contract is
+* The `[Separator](#container-separators)` contract is
   ```cpp
   template<config Config, action Action>
   char * handle(char * buffer) /* const */;
   ```
 
-###### Bitset
+### [Bitset](test.cpp#1607)
 
 ```cpp
 //Defined in buffer_handle/bitset.hpp
@@ -627,13 +627,13 @@ struct bitset_t
   static const char * get(value_type value);
   ```
 
-* The `Separator` contract is
+* The `[Separator](#container-separators)` contract is
   ```cpp
   template<config Config, action Action>
   char * handle(char * buffer) /* const */;
   ```
 
-### Special functor 'nothing'
+### Nothing
 
 ```cpp
 //Defined in buffer_handle/nothing.hpp
@@ -676,15 +676,19 @@ Available implementations are:
 ###### Action modifiers
 
 It is sometimes necessary to modify the behavior of a given *action* to adjust a function to a specific external behavior.
+
 The function `write_when_reset` can be used to bypass a **reset** with a **write** (see [date.hcp](date.hcp#L254) for an example).
+
+The function `always_write` can be used in a **static** context to force a **write** into a **reset** actually rewriting the content everytime.
 
 ```cpp
 //Defined in buffer_handle/helper.hpp
 
 constexpr action write_when_reset(action value);
+constexpr action always_write(action value);
 ```
 
-###### Reset
+###### Reseting
 
 The `reset` function is used to **reset** a buffer depending on alignment and usage of the previous length.
 
@@ -693,9 +697,9 @@ template<align Align, bool UsePreviousLength, char Pad, typename Size>
 void reset(char * buffer, Size max_length, Size & previous_length);
 ```
 
-###### Pad
+###### Padding
 
-The `pad_left` and `pad_right` functions could be used to fill the left, respectively right, side of a buffer. For `pad_left`, the content to pad is between `begin` and `end` while for `pad_right` it is between `end` and `begin + max_length`. If `UsePreviousLength` is false then the `memset` will happen on these regions. However, if it is true, the `previous_length` argument will be compared to the current length. Then, if the previous length is smaller than the current length, no `memset` is required since the new content entirely overwrites the previous content. On the other hand, if the previous length is strictly bigger than the current length, the differential region between the previous and the actual content is reset by `memset`.
+The `pad_left` and `pad_right` functions could be used to fill the left, respectively right, side of a buffer. For `pad_left`, the content to pad is between `begin` and `end` while for `pad_right` it is between `end` and `begin + max_length`. If `UsePreviousLength` is `false` then the `memset` will happen on these regions. However, if it is `true`, the `previous_length` argument will be compared to the current length. Then, if the previous length is smaller than the current length, no `memset` is required since the new content entirely overwrites the previous content. On the other hand, if the previous length is strictly bigger than the current length, the differential region between the previous and the actual content is reset by `memset`.
 
 ```cpp
 //Defined in buffer_handle/helper.hpp
@@ -707,7 +711,7 @@ template<bool UsePreviousLength, char Pad, typename Size>
 void pad_right(char * begin, char * end, Size max_length, Size & previous_length);
 ```
 
-###### Container
+###### Container separators
 
 Functors `character_separator_t` and `character_and_space_separator_t` can be used as the `Separator` template parameter for containers.
 

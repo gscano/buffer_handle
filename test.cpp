@@ -2,13 +2,13 @@
 
 #include <catch2/catch.hpp>
 
+#include <buffer_handle/bitset.hpp>
 #include <buffer_handle/boolean.hpp>
 #include <buffer_handle/character.hpp>
 #include <buffer_handle/container.hpp>
 #include <buffer_handle/date.hpp>
 #include <buffer_handle/nothing.hpp>
 #include <buffer_handle/number.hpp>
-#include <buffer_handle/bitset.hpp>
 #include <buffer_handle/string.hpp>
 #include <buffer_handle/time.hpp>
 #include <buffer_handle/timezone.hpp>

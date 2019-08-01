@@ -18,6 +18,12 @@ namespace buffer_handle
     return (value == action::reset) ? action::write : value;
   }
 
+  inline
+  constexpr action always_write(action value)
+  {
+    return (value == action::write) ? action::prepare : value;
+  }
+
   template<align Align, bool UsePreviousLength, char Pad, typename Size> inline
   void reset(char * buffer, Size max_length, Size & previous_length)
   {
