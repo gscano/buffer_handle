@@ -4,6 +4,7 @@
 #include <cstddef> // size_t
 
 #include <buffer_handle/action.hpp> // action
+#include <buffer_handle/align.hpp> // align
 #include <buffer_handle/config.hpp> // config
 
 namespace buffer_handle

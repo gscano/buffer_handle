@@ -29,6 +29,7 @@ namespace buffer_handle
 	  case action::prepare:
 	    {
 	      colon<config::static_, action::prepare>(buffer + 2);
+	      [[fallthrough]];
 	    }
 	  case action::write:
 	  case action::reset:
@@ -63,6 +64,7 @@ namespace buffer_handle
 	  case action::prepare:
 	    {
 	      colon<config::static_, action::prepare>(buffer);
+	      [[fallthrough]];
 	    }
 	  case action::write:
 	  case action::reset:

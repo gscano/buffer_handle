@@ -79,10 +79,13 @@ namespace buffer_handle
 		  {
 		    previous_length = max_length;
 		  }
+
+		[[fallthrough]];
 	      }
 	    case action::reset:
 	      {
 		value = nullptr;
+		[[fallthrough]];
 	      }
 	    case action::write:
 	      {

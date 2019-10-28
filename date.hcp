@@ -39,6 +39,7 @@ namespace buffer_handle
 	    {
 	      character<config::static_, action::prepare>(buffer + 2, Separator);
 	      character<config::static_, action::prepare>(buffer + 6, Separator);
+	      [[fallthrough]];
 	    }
 	  case action::write:
 	  case action::reset:
@@ -83,6 +84,7 @@ namespace buffer_handle
 	  case action::prepare:
 	    {
 	      space<config::static_, action::prepare>(buffer + 3);
+	      [[fallthrough]];
 	    }
 	  case action::write:
 	  case action::reset:
@@ -116,6 +118,7 @@ namespace buffer_handle
 	case action::prepare:
 	  {
 	    space<config::static_, action::prepare>(buffer + 3);
+	    [[fallthrough]];
 	  }
 	case action::write:
 	case action::reset:
@@ -170,6 +173,7 @@ namespace buffer_handle
 		{
 		  comma<config::static_, action::prepare>(buffer + 3);
 		  space<config::static_, action::prepare>(buffer + 4);
+		  [[fallthrough]];
 		}
 	      case action::write:
 	      case action::reset:

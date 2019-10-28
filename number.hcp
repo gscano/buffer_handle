@@ -98,6 +98,8 @@ namespace buffer_handle
 		  {
 		    previous_digits = max_digits;
 		  }
+
+		[[fallthrough]];
 	      }
 	    case action::reset:
 	      {
