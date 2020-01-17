@@ -167,7 +167,7 @@ Note that `nullptr` is passed so that a cast to `std::size_t` of the return valu
 ```cpp
 handle<config::static_, 10, action::prepare>(buffer, 9, 23, 0, "sunny", 30, 'C');
 handle<config::static_, 10, action::prepare>(buffer, 23, 58, -1, "cloudy", 68, 'F');
-handle<config::static_, 10, action::prepare>(buffer, 23, 58, 1, "freezing", 9, 'K');
+handle<config::static_, 10, action::prepare>(buffer, 23, 58, 1, "freezing", 99, 'K');
 ```
 
 the output would be:
@@ -184,7 +184,7 @@ so this configuration mimics `snprintf` but the same code can also by used with 
 handle<config::dynamic, 10, action::prepare>(buffer, 0, 0, 0, "", 0, 'C');
 handle<config::dynamic, 10, action::write>(buffer, 9, 23, 0, "sunny", 30, 'C');
 handle<config::dynamic, 10, action::write>(buffer, 23, 58, -1, "cloudy", 68, 'F');
-handle<config::dynamic, 10, action::write>(buffer, 23, 58, 1, "freezing", 9, 'K');
+handle<config::dynamic, 10, action::write>(buffer, 23, 58, 1, "freezing", 99, 'K');
 ```
 
 for which the buffer would be successively overwritten as such:
