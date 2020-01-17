@@ -1110,8 +1110,8 @@ SCENARIO("Date", "[date]")
 
 SCENARIO("Helper", "[helper]")
 {
-  static_assert(must_write(config::static_, action::prepare));
-  static_assert(write_when_reset(action::reset) == action::write);
+  static_assert(must_write(config::static_, action::prepare), "");
+  static_assert(write_when_reset(action::reset) == action::write, "");
 
   const char pad = ' ';
 
@@ -1195,18 +1195,19 @@ SCENARIO("Helper", "[helper]")
 
 SCENARIO("Itoa adapter", "[itoa, adapter]")
 {
-  GIVEN_A_BUFFER(64)
+  WHEN("To string")
     {
-      WHEN("To string")
-	{
-	  adapter::itoa::to_string_t to_string;
+      adapter::itoa::to_string_t to_string;
 
+      GIVEN_A_BUFFER(64)
+	{
 	  WHEN("Forward")
 	    {
+
 #define TEST(I, L)						\
 	      THEN(#I)						\
 		{						\
-		  char * end = to_string.fwd(begin, I);		\
+		  end = to_string.fwd(begin, I);		\
 								\
 		  REQUIRE(end - begin == L);			\
 		  REQUIRE(std::string(begin, end) == #I);	\
@@ -1226,7 +1227,7 @@ SCENARIO("Itoa adapter", "[itoa, adapter]")
 #define TEST(I, L)						\
 	      THEN(#I)						\
 		{						\
-		  char * begin = to_string.bwd(end, I);		\
+		  begin = to_string.bwd(end, I);		\
 								\
 		  REQUIRE(end - begin == L);			\
 		  REQUIRE(std::string(begin, end) == #I);	\
@@ -1254,7 +1255,7 @@ SCENARIO("Nothing", "[nothing]")
   REQUIRE(nothing_t().handle<action::reset>(&c) == &c);
 }
 
-SCENARIO("Number", "[Number]")
+SCENARIO("Number", "[number]")
 {
   {
     REQUIRE(details::digits<uint8_t>(0) == 1);

@@ -1,10 +1,13 @@
 #ifndef BUFFER_HANDLE_TEST_HPP
 #define BUFFER_HANDLE_TEST_HPP
 
-#define GIVEN_A_BUFFER_(size, tsize)		\
-  char buffer[size] = {0};			\
-  char * begin = buffer;			\
-  char * end = buffer;				\
+#include <alloca.h>
+
+#define GIVEN_A_BUFFER_(size, tsize)			\
+  char * buffer = (char *)alloca(size);			\
+  std::memset(buffer, 0, size);				\
+  char * begin = buffer;				\
+  char * end = buffer + size - 1;			\
   GIVEN("A " tsize " bytes buffer")
 
 #define GIVEN_A_BUFFER(size) GIVEN_A_BUFFER_(size, #size)
