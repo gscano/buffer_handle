@@ -76,11 +76,11 @@ void dynamic()
   handle<config::dynamic, 10, action::write>(buffer, 9, 23, 0, "sunny", 30, 'C');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 
-  handle<config::dynamic, 10, action::reset>(buffer, 2, 0, -1, "", 68, 'F');
-  handle<config::dynamic, 10, action::write>(buffer, 23, 58, -1, "cloudy", 9, 'K');
+  handle<config::dynamic, 10, action::reset>(buffer, 2, 0, -1, "", 0, 'F');
+  handle<config::dynamic, 10, action::write>(buffer, 23, 58, -1, "cloudy", 68, 'F');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 
-  handle<config::dynamic, 10, action::reset>(buffer, 2, 0, -1, "", 68, 'F');
+  handle<config::dynamic, 10, action::reset>(buffer, 2, 0, -1, "", 0, 'F');
   handle<config::dynamic, 10, action::write>(buffer, 23, 58, 1, "freezing", 9, 'K');
   std::cerr << "\t" << std::string(buffer, size) << std::endl;
 }

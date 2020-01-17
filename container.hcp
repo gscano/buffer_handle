@@ -11,7 +11,7 @@ namespace buffer_handle
     char * container_process(char * buffer, const Iterator & begin, const Iterator & end,
 			     Handler & handler, Separator & separator)
     {
-      for(Iterator current = begin; current != end; ++current)
+      for(Iterator current = begin; current != end; std::advance(current, 1))
 	{
 	  if(Align == align::left)
 	    {

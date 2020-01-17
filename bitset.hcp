@@ -18,22 +18,22 @@ namespace buffer_handle
       typedef typename std::underlying_type<T>::type value_type;
     };
 
-    template<align Align, class Bitset, action Action, class Separator> inline
-    char * bitset(char * buffer, typename Bitset::value_type value_, Separator & separator)
+    template<align Align, class Set, action Action, class Separator> inline
+    char * bitset(char * buffer, typename Set::value_type value_, Separator & separator)
     {
-      static_assert(std::is_integral<typename Bitset::value_type>::value || std::is_enum<typename Bitset::value_type>::value, "");
+      static_assert(std::is_integral<typename Set::value_type>::value || std::is_enum<typename Set::value_type>::value, "");
 
-      typedef typename underlying_t<typename Bitset::value_type>::value_type value_type;
+      typedef typename underlying_t<typename Set::value_type>::value_type value_type;
 
       const value_type value = (value_type)value_;
       value_type mask = (value_type)1;
 
       if(Align == align::right)
 	{
-	  mask <<= Bitset::count - 1;
+	  mask <<= Set::count - 1;
 	}
 
-      std::size_t count = Bitset::count;
+      std::size_t count = Set::count;
       bool is_first = true;
 
       while(0 < count)
@@ -67,13 +67,13 @@ namespace buffer_handle
 		}
 	    }
 
-	  std::size_t size = std::strlen(Bitset::get((typename Bitset::value_type)mask));
+	  std::size_t size = std::strlen(Set::get((typename Set::value_type)mask));
 
 	  if(Align == align::left)
 	    {
 	      if(Action == action::prepare)
 		{
-		  std::memcpy(buffer, Bitset::get((typename Bitset::value_type)mask), size);
+		  std::memcpy(buffer, Set::get((typename Set::value_type)mask), size);
 		}
 
 	      buffer += size;
@@ -84,7 +84,7 @@ namespace buffer_handle
 
 	      if(Action == action::prepare)
 		{
-		  std::memcpy(buffer, Bitset::get((typename Bitset::value_type)mask), size);
+		  std::memcpy(buffer, Set::get((typename Set::value_type)mask), size);
 		}
 	    }
 
@@ -105,18 +105,18 @@ namespace buffer_handle
     }
   };
 
-  template<class Bitset, action Action, class Separator> inline
-  char * bitset(char * buffer, typename Bitset::value_type value, Separator & separator)
+  template<class Set, action Action, class Separator> inline
+  char * bitset(char * buffer, typename Set::value_type value, Separator & separator)
   {
-    return details::bitset<align::left, Bitset, Action, Separator>(buffer, value, separator);
+    return details::bitset<align::left, Set, Action, Separator>(buffer, value, separator);
   }
 
-  template<config Config, align Align, char Pad, class Bitset, action Action, class Separator, bool UsePreviousLength> inline
-  char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator, std::size_t & previous_length)
+  template<config Config, align Align, char Pad, class Set, action Action, class Separator, bool UsePreviousLength> inline
+  char * bitset(char * buffer, typename Set::value_type value, std::size_t & max_length, Separator & separator, std::size_t & previous_length)
   {
     if(Config == config::static_)
       {
-	buffer = bitset<Bitset, Action, Separator>(buffer, value, separator);
+	buffer = bitset<Set, Action, Separator>(buffer, value, separator);
       }
     else if(Config == config::dynamic)
       {
@@ -124,11 +124,11 @@ namespace buffer_handle
 	  {
 	  case action::size:
 	    {
-	      return buffer + (std::size_t)bitset<Bitset, action::size, Separator>(nullptr, value, separator);
+	      return buffer + (std::size_t)bitset<Set, action::size, Separator>(nullptr, value, separator);
 	    }
 	  case action::prepare:
 	    {
-	      max_length = (std::size_t)bitset<Bitset, action::size, Separator>(nullptr, value, separator);
+	      max_length = (std::size_t)bitset<Set, action::size, Separator>(nullptr, value, separator);
 	      if(UsePreviousLength)
 		{
 		  previous_length = max_length;
@@ -146,13 +146,13 @@ namespace buffer_handle
 	    {
 	      if(Align == align::left)
 		{
-		  char * local = details::bitset<Align, Bitset, action::prepare, Separator>(buffer, value, separator);
+		  char * local = details::bitset<Align, Set, action::prepare, Separator>(buffer, value, separator);
 
 		  pad_right<UsePreviousLength, Pad>(buffer, local, max_length, previous_length);
 		}
 	      else if(Align == align::right)
 		{
-		  char * local = details::bitset<Align, Bitset, action::prepare, Separator>(buffer + max_length, value, separator);
+		  char * local = details::bitset<Align, Set, action::prepare, Separator>(buffer + max_length, value, separator);
 
 		  pad_left<UsePreviousLength, Pad>(buffer, local, max_length, previous_length);
 		}
@@ -165,29 +165,29 @@ namespace buffer_handle
     return buffer;
   }
 
-  template<config Config, align Align, char Pad, class Bitset, action Action, class Separator> inline
-  char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator)
+  template<config Config, align Align, char Pad, class Set, action Action, class Separator> inline
+  char * bitset(char * buffer, typename Set::value_type value, std::size_t & max_length, Separator & separator)
   {
     std::size_t previous_length;
-    return bitset<Config, Align, Pad, Bitset, Action, Separator, false>(buffer, value, max_length, separator, previous_length);
+    return bitset<Config, Align, Pad, Set, Action, Separator, false>(buffer, value, max_length, separator, previous_length);
   }
 
-  template<config Config, align Align, char Pad, class Bitset>
-  struct bitset_t<Config, Align, Pad, Bitset, false>
+  template<config Config, align Align, char Pad, class Set>
+  struct bitset_t<Config, Align, Pad, Set, false>
   {
   protected:
     std::size_t max_length;
 
   public:
     template<action Action, class Separator>
-    char * handle(char * buffer, typename Bitset::value_type value, Separator & separator)
+    char * handle(char * buffer, typename Set::value_type value, Separator & separator)
     {
-      return bitset<Config, Align, Pad, Bitset, Action, Separator>(buffer, value, this->max_length, separator);
+      return bitset<Config, Align, Pad, Set, Action, Separator>(buffer, value, this->max_length, separator);
     }
   };
 
-  template<config Config, align Align, char Pad, class Bitset>
-  struct bitset_t<Config, Align, Pad, Bitset, true>
+  template<config Config, align Align, char Pad, class Set>
+  struct bitset_t<Config, Align, Pad, Set, true>
   {
   protected:
     std::size_t max_length;
@@ -195,9 +195,9 @@ namespace buffer_handle
 
   public:
     template<action Action, class Separator>
-    char * handle(char * buffer, typename Bitset::value_type value, Separator & separator)
+    char * handle(char * buffer, typename Set::value_type value, Separator & separator)
     {
-      return bitset<Config, Align, Pad, Bitset, Action, Separator>(buffer, value, this->max_length, separator, previous_length);
+      return bitset<Config, Align, Pad, Set, Action, Separator>(buffer, value, this->max_length, separator, previous_length);
     }
   };
 };

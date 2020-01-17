@@ -7,6 +7,8 @@ When buffers are extensively used to send textual output, their management requi
 * [Reference](#reference)
 * [Tests](#tests)
 
+Repositories are available on [GitHub](https://github.com/gscano/buffer_handle.git) and on [malloc.fr](https://www.malloc.fr/buffer_handle.git) [website](https://www.malloc.fr/buffer_handle).
+
 ## Concept
 
 The purpose of this library is to provide a single [function](#function-signature) to perform 4 basic *actions* on a buffer,
@@ -105,7 +107,7 @@ Moving to the implementation, the first thing is to write constant strings:
   buffer = dot<config::static_, Action>(buffer);
 ```
 
-Note that `<config::static_, Action>` is used and not `<config::static_, action::prepare>` because in the second case the content would be rewritten every time the function is called may it be with **write** or **reset** (see [`must_write`](#must-write) and [`write_on_reset`](#write-on-reset) to modify this behavior).
+Note that `<config::static_, Action>` is used and not `<config::static_, action::prepare>` because in the second case the content would be rewritten every time the function is called may it be with **write** or **reset** (see [`must_write`](#must-write) and [`action modifiers`](#action-modifiers) to change this behavior).
 
 Then the varying strings could be introduced:
 
@@ -164,7 +166,7 @@ Note that `nullptr` is passed so that a cast to `std::size_t` of the return valu
 
 ```cpp
 handle<config::static_, 10, action::prepare>(buffer, 9, 23, 0, "sunny", 30, 'C');
-handle<config::static_, 10, action::prepare>(buffer, 23, 58, -1, "cloudy", 9, 'K');
+handle<config::static_, 10, action::prepare>(buffer, 23, 58, -1, "cloudy", 68, 'F');
 handle<config::static_, 10, action::prepare>(buffer, 23, 58, 1, "freezing", 9, 'K');
 ```
 
@@ -181,7 +183,7 @@ so this configuration mimics `snprintf` but the same code can also by used with 
 ```cpp
 handle<config::dynamic, 10, action::prepare>(buffer, 0, 0, 0, "", 0, 'C');
 handle<config::dynamic, 10, action::write>(buffer, 9, 23, 0, "sunny", 30, 'C');
-handle<config::dynamic, 10, action::write>(buffer, 23, 58, -1, "cloudy", 9, 'K');
+handle<config::dynamic, 10, action::write>(buffer, 23, 58, -1, "cloudy", 68, 'F');
 handle<config::dynamic, 10, action::write>(buffer, 23, 58, 1, "freezing", 9, 'K');
 ```
 
@@ -213,7 +215,7 @@ All code is scoped in `namespace buffer_handle`.
 | [String](#string)       | [Nothing](#nothing)                           |
 | [Number](#number)       | [Itoa adapter](#itoa)                         |
 | [Time](#time)           | **Helpers**                                   |
-| [Timezone](#timezone)   | [Actions modififers](#actions-modifiers)      |
+| [Timezone](#timezone)   | [Actions modifiers](#actions-modifiers)       |
 | [Date](#date)           | [Reseting](#reseting)                         |
 | [Container](#container) | [Padding](#padding)                           |
 | [Bitset](#bitset)       | [Container separators](#container-separators) |
@@ -302,7 +304,7 @@ template<config Config, action Action>
 char * string(char * buffer, const char * value, std::size_t length = std::strlen(value));
 ```
 
-Handles a string in the most basic way by copying it to the buffer when [must-write](#must-write) is `true`.
+Handles a string in the most basic way by copying it to the buffer when [`must_write`](#must-write) is `true`.
 The `length` argument conveniently defaults to the length of the string pointed to by `value`. However, a verification against a `nullptr` is only performed, as an `ASSERT`, for a **static** *configuration*. In a **dynamic** *configuration*, `nullptr` can be passed during a **size** or **prepare** (for instance if the actual string is not known yet) as long as the same length is supplied for every *action*. Also note that the **reset** *action* uses the value passed at that time. To **reset** a buffer to a specific value use the function below.
 
 ```cpp
@@ -313,7 +315,7 @@ char * string(char * buffer, const char * value, std::size_t length, std::size_t
 
 In this overload, the `max_length` argument sets the maximum size of the buffer. It must remain the same for every *action*.
 For simplification, passing a `nullptr` for a **write** is equivalent to a **reset**.
-When **reset**, the string is filled with `Pad` characters.
+When **reset**ing, the string is filled with `Pad` characters.
 For an explanation on the optional `previous_length` argument, refer to the [large buffer](#large-buffers) section.
 
 ###### Manual management
@@ -350,7 +352,7 @@ template<config Config, action Action, typename I>
 char * four_digits_number(char * buffer, I i);
 ```
 
-Those two functions handle a specific and fixed number of digits of a positive integral number `i`. There are no verifications that the decimal representation of `i` is bounded to those digits nor that it is positive (except for an ̀`assert`). They are mainly used to handle [times](#time) and [dates](#date).
+Those two functions handle a specific and fixed number of digits of a positive integral number `i`. There are no verifications that the decimal representation of `i` is bounded to those digits nor that it is positive (except for an `assert`). They are mainly used to handle [times](#time) and [dates](#date).
 The template parameter `InsteadOfALeadingZero` can be used to set the first digit to a specific character in case of a single digit number. Use `'\0'` in order to have a leading zero.
 
 
@@ -378,6 +380,8 @@ A `uint8_t` should be enough to encode the number of digits for most application
 The `Itoa` functor must conform to the [adapter](#itoa) contract and the function without the `max_digits` argument is equivalent to calling its counterpart as **static**.
 
 ### [Time](test.cpp#L1681)
+
+These functions handle the three classical time formats: epoch, 'HH:mm' and 'HH:mm:ss'.
 
 ```cpp
 //Defined in buffer_handle/time.hpp
@@ -478,7 +482,7 @@ struct differential_timezone_t
 
 ### [Date](test.cpp#L611)
 
-The following functions handle *asc*, *rfc822*, *rfc850* and *rfc1123* dates.
+The following functions handle *asc*, [*rfc822*](https://tools.ietf.org/html/rfc822#section-5), [*rfc850* (§2.1.4)](https://tools.ietf.org/html/rfc850#section-2) and [*rfc1123* (§5.2.14)](https://tools.ietf.org/html/rfc1123#page-55) dates.
 
 Note that for functions accepting  directly a month or a year, 1 is for January and years start at 0 not 1900.
 
@@ -542,7 +546,7 @@ namespace rfc1123//§5.2.14
 The two functions below are mainly used by above functions but can also can be used independtly.
 They respectively write the date in format 'dd Mon YY' and 'Mon dd'.
 
-The template parameter `InsteadOfALeadingZeroForDay` can be `'\0'` in order to have a leading zero while `YearOn4Digits` toggles the year format to 'YYYY' instead of 'YY'
+The template parameter `InsteadOfALeadingZeroForDay` can be `'\0'` in order to have a leading zero while `YearOn4Digits` toggles the year format to 'YYYY' instead of 'YY'.
 
 ```cpp
 //Defined in buffer_handle/date.hpp
@@ -557,9 +561,12 @@ char * month_day(char * buffer, Month month, Day day);//Mon dd
 
 ### [Container](test.cpp#L223)
 
-Containes can be handled in two ways.
-The first function writes every element contained between `begin` and `end` in a buffer of size `max_length` but does not check out of bound data.
-The second one writes the most possible elements between `current` and `end` and updates `current` if it is not possible to write every element.
+Handle a container following the `std::advance` order.
+They require a `handler` and a `separator` contract object respectively responsible for writing elements of the container to the buffer and to eventually separate them with a specific pattern.
+
+Containers can be handled in two ways.
+The first function writes every element contained between `begin` and `end` in a buffer of size `max_length` but does not check out of bound data. The size must be known to not exceed the buffer size prior to calling the function.
+The second one writes the most possible elements between `current` and `end` and updates `current` if it is not possible to write every element. It checks the size of every element before printing it to the buffer and is thus slower.
 
 ```cpp
 //Defined in buffer_handle/container.hpp
@@ -585,15 +592,15 @@ struct container_t
 };
 ```
 
-The maximum length is determined by the container content when **static**.
+The maximum length is determined by the function, based on the content of the container, when **static**.
 
-* The `Handler` contract is
+* The `Handler` contract is:
   ```cpp
   template<typename Element>
   template<config Config, action Action>
   char * handle(char * buffer, Element element) /* const */;
   ```
-* The `[Separator](#container-separators)` contract is
+* The [`Separator`](#container-separators) contract is:
   ```cpp
   template<config Config, action Action>
   char * handle(char * buffer) /* const */;
@@ -601,33 +608,36 @@ The maximum length is determined by the container content when **static**.
 
 ### [Bitset](test.cpp#1607)
 
+Handle a set of values represented by a value in the power of 2.
+It requires a `set` and a `separator` contract object respectively to known the number of elements and their conversion to string, and to eventually separate them with a specific pattern.
+
 ```cpp
 //Defined in buffer_handle/bitset.hpp
 
-template<class Bitset, action Action, class Separator>
-char * bitset(char * buffer, typename Bitset::value_type value, Separator & separator);
+template<class Set, action Action, class Separator>
+char * bitset(char * buffer, typename Set::value_type value, Separator & separator);
 
-template<config Config, align Align, char Pad, class Bitset, action Action, class Separator>
-char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator);
+template<config Config, align Align, char Pad, class Set, action Action, class Separator>
+char * bitset(char * buffer, typename Set::value_type value, std::size_t & max_length, Separator & separator);
 
-template<config Config, align Align, char Pad, class Bitset, action Action, class Separator>
-char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator, std::size_t & previous_length);
+template<config Config, align Align, char Pad, class Set, action Action, class Separator>
+char * bitset(char * buffer, typename Set::value_type value, std::size_t & max_length, Separator & separator, std::size_t & previous_length);
 
-template<config Config, align Align, char Pad, class Bitset, bool IsLong = false>
+template<config Config, align Align, char Pad, class Set, bool IsLong = false>
 struct bitset_t
 {
   template<action Action, class Separator>
-  char * handle(char * buffer, typename Bitset::value_type value, Separator & separator);
+  char * handle(char * buffer, typename Set::value_type value, Separator & separator);
 };
 ```
 
-* The `Bitset` contract is
+* The `Set` contract is
   ```cpp
   static const std::size_t count;//Number of different elements
   static const char * get(value_type value);
   ```
 
-* The `[Separator](#container-separators)` contract is
+* The [`Separator`](#container-separators) contract is
   ```cpp
   template<config Config, action Action>
   char * handle(char * buffer) /* const */;
@@ -677,9 +687,9 @@ Available implementations are:
 
 It is sometimes necessary to modify the behavior of a given *action* to adjust a function to a specific external behavior.
 
-The function `write_when_reset` can be used to bypass a **reset** with a **write** (see [date.hcp](date.hcp#L254) for an example).
+The function `write_when_reset` can be used to bypass a **reset** with a **write** (see [date.hcp](date.hcp#L258) for an example).
 
-The function `always_write` can be used in a **static** context to force a **write** into a **reset** actually rewriting the content everytime.
+The function `always_write` can be used in a **dynamic** context to force a **write** into a **reset** actually rewriting the content everytime as if it were **static**. It can be used when in a **dynamic** configuration to write a recurring value to a position that may change depending on the situation.
 
 ```cpp
 //Defined in buffer_handle/helper.hpp
@@ -739,6 +749,6 @@ Run `make test` to compile and `make run-test` to execute.
 
 ### Dependencies
 
-* [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.9.1](https://github.com/catchorg/Catch2/releases/tag/v2.9.1))
+* [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.11.1](https://github.com/catchorg/Catch2/releases/tag/v2.11.1))
 
 To change the path of this dependency, create a `config.mk` file and then assign the `CATCH` variable with the appropriate location (`.` is used by default).

@@ -9,20 +9,20 @@
 
 namespace buffer_handle
 {
-  template<class Bitset, action Action, class Separator>
-  char * bitset(char * buffer, typename Bitset::value_type value, Separator & separator);
+  template<class Set, action Action, class Separator>
+  char * bitset(char * buffer, typename Set::value_type value, Separator & separator);
 
-  template<config Config, align Align, char Pad, class Bitset, action Action, class Separator>
-  char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator);
+  template<config Config, align Align, char Pad, class Set, action Action, class Separator>
+  char * bitset(char * buffer, typename Set::value_type value, std::size_t & max_length, Separator & separator);
 
-  template<config Config, align Align, char Pad, class Bitset, action Action, class Separator>
-  char * bitset(char * buffer, typename Bitset::value_type value, std::size_t & max_length, Separator & separator, std::size_t & previous_length);
+  template<config Config, align Align, char Pad, class Set, action Action, class Separator>
+  char * bitset(char * buffer, typename Set::value_type value, std::size_t & max_length, Separator & separator, std::size_t & previous_length);
 
-  template<config Config, align Align, char Pad, class Bitset, bool IsLong = false>
+  template<config Config, align Align, char Pad, class Set, bool IsLong = false>
   struct bitset_t
   {
     template<action Action, class Separator>
-    char * handle(char * buffer, typename Bitset::value_type value, Separator & separator);
+    char * handle(char * buffer, typename Set::value_type value, Separator & separator);
   };
 };
 
