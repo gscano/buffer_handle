@@ -1,0 +1,28 @@
+language: cpp
+
+dist:
+  - trusty
+
+os:
+  - linux
+  - osx
+
+compiler:
+  - gcc
+  - clang
+
+env:
+  - CXXSTD=c++11
+
+jobs:
+  exclude:
+    - os: osx
+      compiler: gcc
+
+install:
+  - mkdir catch2
+  - wget -O catch2/catch.hpp https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
+
+script:
+  - make ci-test
+  - make run-test
