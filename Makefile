@@ -3,7 +3,9 @@
 CXX ?= g++
 CXXSTD ?= c++11
 CXXFLAGS ?= -Wall -Wextra -Werror -MD -O0 -g --coverage -fno-inline
+
 CATCH ?= .
+BOOST ?= .
 
 all: test run-test example Makefile
 
@@ -11,15 +13,12 @@ run-test: test
 	./$<
 
 test: test.cpp Makefile
-	$(CXX) $< -std=$(CXXSTD) $(CXXFLAGS) -I $(CATCH) -I ../ -o $@
-
-ci-test:  test.cpp Makefile
-	$(CXX) $< -std=$(CXXSTD) -Wall -Wextra -Werror -I $(CATCH) -I ../ -o $@
+	$(CXX) $< -std=$(CXXSTD) $(CXXFLAGS) -I $(CATCH) -I $(BOOST) -I ../ -o $@
 
 -include test.d
 
 example: example.cpp Makefile
-	g++ $< -g -std=$(CXXSTD) -O0 -I ../ -o $@
+	g++ $< -g -std=$(CXXSTD) -I $(BOOST) -O0 -I ../ -o $@
 
 coverage: run-test
 	lcov --capture --directory . --output-file coverage.data

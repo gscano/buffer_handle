@@ -2,6 +2,7 @@
 #include <cstring> // memcpy() strlen()
 
 #include <buffer_handle/helper.hpp> // must_write()
+#include <buffer_handle/misc.hpp> // BUFFER_HANDLE_FALLTHROUGH
 #include <buffer_handle/number.hpp> // four_digits_number() two_digits_number()
 #include <buffer_handle/string.hpp> // string()
 #include <buffer_handle/time.hpp> // time_()
@@ -39,7 +40,7 @@ namespace buffer_handle
 	    {
 	      character<config::static_, action::prepare>(buffer + 2, Separator);
 	      character<config::static_, action::prepare>(buffer + 6, Separator);
-	      [[fallthrough]];
+	      BUFFER_HANDLE_FALLTHROUGH;
 	    }
 	  case action::write:
 	  case action::reset:
@@ -84,7 +85,7 @@ namespace buffer_handle
 	  case action::prepare:
 	    {
 	      space<config::static_, action::prepare>(buffer + 3);
-	      [[fallthrough]];
+	      BUFFER_HANDLE_FALLTHROUGH;
 	    }
 	  case action::write:
 	  case action::reset:
@@ -118,7 +119,7 @@ namespace buffer_handle
 	case action::prepare:
 	  {
 	    space<config::static_, action::prepare>(buffer + 3);
-	    [[fallthrough]];
+	    BUFFER_HANDLE_FALLTHROUGH;
 	  }
 	case action::write:
 	case action::reset:
@@ -173,7 +174,7 @@ namespace buffer_handle
 		{
 		  comma<config::static_, action::prepare>(buffer + 3);
 		  space<config::static_, action::prepare>(buffer + 4);
-		  [[fallthrough]];
+		  BUFFER_HANDLE_FALLTHROUGH;
 		}
 	      case action::write:
 	      case action::reset:

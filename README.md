@@ -5,7 +5,8 @@ When buffers are extensively used to send textual output, their management requi
 * [Concept](#concept)
 * [Example](#example)
 * [Reference](#reference)
-* [Tests](#tests)
+* [Note](#note)
+* [Test](#test)
 
 Repositories are available on [GitHub](https://github.com/gscano/buffer_handle.git) and on [malloc.fr](https://www.malloc.fr/buffer_handle.git) [website](https://www.malloc.fr/buffer_handle).
 
@@ -206,7 +207,7 @@ where dummy arguments are passed.
 
 ## Reference
 
-All code is scoped in `namespace buffer_handle`.
+All code is scoped in the `buffer_handle` namespace.
 
 | Main                    | Extra                                         |
 |-------------------------|-----------------------------------------------|
@@ -215,7 +216,7 @@ All code is scoped in `namespace buffer_handle`.
 | [String](#string)       | [Nothing](#nothing)                           |
 | [Number](#number)       | [Itoa adapter](#itoa)                         |
 | [Time](#time)           | **Helpers**                                   |
-| [Timezone](#timezone)   | [Actions modifiers](#actions-modifiers)       |
+| [Timezone](#timezone)   | [Action modifiers](#action-modifiers)       |
 | [Date](#date)           | [Reseting](#reseting)                         |
 | [Container](#container) | [Padding](#padding)                           |
 | [Bitset](#bitset)       | [Container separators](#container-separators) |
@@ -743,12 +744,27 @@ struct character_and_space_separator_t
 };
 ```
 
-## Tests
+## Note
+
+#### `-Wimplicit-fallthrough`
+
+There are two possible workarounds to suppress `-Wimplicit-fallthrough` warnings:
+
+###### If a dependency to `boost/config.hpp` is not a problem,
+
+be sure that it is included before any `buffer_handle/*.hpp` file at the exception of [types](#types), [conditions](#conditions), [adapters](#adapters) and [helpers](#helpers) files.
+
+###### Otherwise,
+
+define the macro `BUFFER_HANDLE_FALLTHROUGH` to suit your specific needs. It defaults to the empty string for old compilers not enforcing the option but can be set, for instance, to `[[fallthrough]]` for newer compilers.
+
+## Test
 
 Run `make test` to compile and `make run-test` to execute.
 
 ### Dependencies
 
 * [Catch2](https://github.com/catchorg/Catch2) (tested with version [2.11.1](https://github.com/catchorg/Catch2/releases/tag/v2.11.1))
+* [Boost config](https://github.com/boostorg/config) (tested with version [1.72.0](https://github.com/boostorg/config/archive/boost-1.72.0.zip))
 
-To change the path of this dependency, create a `config.mk` file and then assign the `CATCH` variable with the appropriate location (`.` is used by default).
+To change the path of these dependencies, create a `config.mk` file and then assign the `CATCH` and the `BOOST` variables with the appropriate locations (`.` is used by default).

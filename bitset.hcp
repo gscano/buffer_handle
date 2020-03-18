@@ -1,6 +1,7 @@
 #include <cstring> // memcpy() strlen()
 
 #include <buffer_handle/helper.hpp> // pad_left() pad_right()
+#include <buffer_handle/misc.hpp> // BUFFER_HANDLE_FALLTHROUGH
 
 namespace buffer_handle
 {
@@ -134,7 +135,7 @@ namespace buffer_handle
 		  previous_length = max_length;
 		}
 
-	      [[fallthrough]];
+	      BUFFER_HANDLE_FALLTHROUGH;
 	    }
 	  case action::reset:
 	    {

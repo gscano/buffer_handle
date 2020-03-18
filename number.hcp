@@ -3,6 +3,7 @@
 #include <type_traits> // is_integral is_signed
 
 #include <buffer_handle/helper.hpp> // must_write()
+#include <buffer_handle/misc.hpp> // BUFFER_HANDLE_FALLTHROUGH
 
 namespace buffer_handle
 {
@@ -99,7 +100,7 @@ namespace buffer_handle
 		    previous_digits = max_digits;
 		  }
 
-		[[fallthrough]];
+		BUFFER_HANDLE_FALLTHROUGH;
 	      }
 	    case action::reset:
 	      {

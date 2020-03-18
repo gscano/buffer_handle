@@ -2,6 +2,8 @@
 
 #include <catch2/catch.hpp>
 
+#include <boost/config.hpp>
+
 #include <buffer_handle/bitset.hpp>
 #include <buffer_handle/boolean.hpp>
 #include <buffer_handle/character.hpp>

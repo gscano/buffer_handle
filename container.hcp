@@ -1,6 +1,7 @@
 #include <iterator> // advance() distance()
 
 #include <buffer_handle/helper.hpp> // pad_left() pad_right()
+#include <buffer_handle/misc.hpp> // BUFFER_HANDLE_FALLTHROUGH
 
 namespace buffer_handle
 {
@@ -79,7 +80,7 @@ namespace buffer_handle
 		    previous_length = max_length;
 		  }
 
-		[[fallthrough]];
+		BUFFER_HANDLE_FALLTHROUGH;
 	      }
 	    case action::reset:
 	      {
@@ -185,7 +186,7 @@ namespace buffer_handle
   template<align Align, char Pad, bool IsLong>
   struct container_t<config::static_, Align, Pad, IsLong>
   {
-    void set_max_length(std::size_t length)
+    void set_max_length(std::size_t)
     {
 
     }

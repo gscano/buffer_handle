@@ -3,6 +3,7 @@
 #include <cstring> // memcpy() memset() strlen()
 
 #include <buffer_handle/helper.hpp> // must_write() reset()
+#include <buffer_handle/misc.hpp> // BUFFER_HANDLE_FALLTHROUGH
 
 namespace buffer_handle
 {
@@ -80,12 +81,12 @@ namespace buffer_handle
 		    previous_length = max_length;
 		  }
 
-		[[fallthrough]];
+		BUFFER_HANDLE_FALLTHROUGH;
 	      }
 	    case action::reset:
 	      {
 		value = nullptr;
-		[[fallthrough]];
+		BUFFER_HANDLE_FALLTHROUGH;
 	      }
 	    case action::write:
 	      {
