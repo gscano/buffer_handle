@@ -1,9 +1,12 @@
+Concept
+~~~~~~~
+
 The purpose of this library is to provide a utility similar to
-`snprintf` but for which static portions of the output are only
+``snprintf`` but for which static portions of the output are only
 written once. It is primarily intended for high throughput
 applications needing intensive output capacities.
 Instead of having a central function, types are handled by
-specific `functions <#function-signature>`__ which can then be
+specific `functions <reference.rst>`__ which can then be
 combined and chained to produce a larger and more complex output.
 
 There are 4 *actions* which can be carried out on a buffer:
@@ -24,20 +27,15 @@ executed; whereas **write** or **reset** *actions* would have no effect.
 
 When the *configuration* is **dynamic**, the **prepare** *action* must
 be executed only once, followed by as many **write** or **reset**
-*actions* one would want. Those need not be intertwined as **reset**
-only clears the **dynamic** content of the buffer which is not always
-wanted. Indeed, a **reset** is equivalent to a **write** with default
-values.
+*actions*. Those need not be intertwined as **reset** only clears the
+**dynamic** content of the buffer which is not always wanted. Indeed, a
+**reset** is equivalent to a **write** with default values.
 
 The *action* is also a template parameter so that a specific set of
 functions would be generated depending on the combination of *actions*
 and *configurations*.
 
 The generated code is thus tailored to the use at the calling site.
-
-For some functions, more *configurations* can be selected regarding
-`alignment <#alignment>`__, `padding <#padding>`__ and `case <#case>`__
-or for anything specific to a function.
 
 Additional configuration
 ------------------------
@@ -113,8 +111,8 @@ extra argument is used to keep track of the length of the written data
 after a call. It will then be reused by the next invocation to limit the
 portion touched by a **reset**. This behavior can also be triggered by
 two consecutive **write**\ s depending on the size of each content (see
-`padding <#pad>`__ functions). Similarly, some functors have a template
-parameter ``bool IsLong`` which can be set to ``true`` to indicate that
-the buffer to handle will be large. The ``previous_length`` will then be
-a data member of the functor and its management will be transparent for
-the caller.
+`padding <reference.rst#padding>`__ functions). Similarly, some functors
+have a template parameter ``bool IsLong`` which can be set to ``true`` to
+indicate that the buffer to handle will be large. The ``previous_length``
+will then be a data member of the functor and its management will be
+transparent for the caller.

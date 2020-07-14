@@ -1,3 +1,6 @@
+Example
+~~~~~~~
+
 * `Mock example <#mock>`__
 
 ----------------
@@ -5,13 +8,14 @@
 Mock
 ====
 
-Let’s consider as an `example <../example.cpp>`__ a buffer which would hold
-``At 09:23, the weather is sunny with a temperature of 23°C.`` and where
-the ``09:23``, ``is``, ``sunny``, ``23`` and ``C`` parts would be
-subject to modifications.
+Let’s consider as an example an application ouputing
 
-First, the signature of the function handling such buffers would be as
-follow:
+   ``At 09:23, the weather is sunny with a temperature of 23°C.``
+   
+in a buffer and where the ``09:23``, ``is``, ``sunny``, ``23`` and ``C``
+parts would be subject to modifications.
+
+First, the function signature would be as follow:
 
 .. code:: cpp
 
@@ -49,8 +53,8 @@ strings:
 Note that ``<config::static_, Action>`` is used and not
 ``<config::static_, action::prepare>`` because in the second case the
 content would be rewritten every time the function is called may it be
-with **write** or **reset** (see ```must_write`` <#must-write>`__ and
-```action modifiers`` <#action-modifiers>`__ to change this behavior).
+with **write** or **reset** (see `must_write <#must-write>`__ and
+`action modifiers <#action-modifiers>`__ to change this behavior).
 
 Then the varying strings could be introduced:
 
@@ -121,11 +125,11 @@ For the following calls:
 
 the output would be:
 
-.. code:: console
-
-   At 09:23, the weather is sunny with a temperature of 30°C.
-   At 02:00, the weather was cloudy with a temperature of 68°F.
-   At 23:58, the weather will be freezing with a temperature of 99°K.
+   ``At 09:23, the weather is sunny with a temperature of 30°C.``
+   
+   ``At 02:00, the weather was cloudy with a temperature of 68°F.``
+   
+   ``At 23:58, the weather will be freezing with a temperature of 99°K.``
 
 so this configuration mimics ``snprintf`` but the same code can also by
 used with a **dynamic** configuration:
@@ -139,12 +143,13 @@ used with a **dynamic** configuration:
 
 for which the buffer would be successively overwritten as such:
 
-.. code:: console
-
-   At 00:00, the weather                    with a temperature of  0°C.
-   At 09:23, the weather is           sunny with a temperature of 30°C.
-   At 02:00, the weather was         cloudy with a temperature of 68°F.
-   At 23:58, the weather will be   freezing with a temperature of 99°K.
+   ``At 00:00, the weather                    with a temperature of  0°C.``
+   
+   ``At 09:23, the weather is           sunny with a temperature of 30°C.``
+   
+   ``At 02:00, the weather was         cloudy with a temperature of 68°F.``
+   
+   ``At 23:58, the weather will be   freezing with a temperature of 99°K.``
 
 after obtaining the maximal size with:
 
