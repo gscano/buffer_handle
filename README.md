@@ -31,9 +31,9 @@ Run `make test` to compile and `make run-test` to execute.
 ### Dependencies
 
 * [Catch2](https://github.com/catchorg/Catch2) (tested with version
-[2.11.1](https://github.com/catchorg/Catch2/releases/tag/v2.11.1))
+[2.12.4](https://github.com/catchorg/Catch2/releases/tag/v2.12.4))
 * [Boost config](https://github.com/boostorg/config) (tested with version
-[1.72.0](https://github.com/boostorg/config/archive/boost-1.72.0.zip))
+[1.73.0](https://github.com/boostorg/config/archive/boost-1.73.0.zip))
 
 To change the path to those dependencies, create a `config.mk` file and then
 assign the `CATCH` and the `BOOST` variables with the appropriate locations
