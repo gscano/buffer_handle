@@ -1,13 +1,14 @@
 config.mk
 
-test.d
-test.o
+*.d
+*.o
 test
 
 coverage*
 test.gcda
 test.gcno
 
-example
+text-example
+http-example
 
 *~
