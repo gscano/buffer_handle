@@ -305,6 +305,10 @@ format to ‘YYYY’ instead of ‘YY’.
    template<config Config, action Action, typename Month, typename Day>
    char * month_day(char * buffer, Month month, Day day);// Mon dd
 
+The fonctions below handle date components.
+
+.. code:: cpp
+   
    template<config Config, action Action, typename Weekday>
    char * wkday(char * buffer, Weekday weekday);// Sun-Sat
 

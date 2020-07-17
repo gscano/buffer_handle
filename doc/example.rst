@@ -1,16 +1,19 @@
 Example
 ~~~~~~~
 
-* `Mock example <#mock>`__
+* `Text example <#text>`__
+* `HTTP example <#http>`__
 
 ----------------
 
-Mock
+Text
 ====
 
 Let’s consider as an example an application ouputing
 
-   ``At 09:23, the weather is sunny with a temperature of 23°C.``
+.. code:: text
+	  
+   At 09:23, the weather is sunny with a temperature of 23°C.
    
 in a buffer and where the ``09:23``, ``is``, ``sunny``, ``23`` and ``C``
 parts would be subject to modifications.
@@ -125,11 +128,11 @@ For the following calls:
 
 the output would be:
 
-   ``At 09:23, the weather is sunny with a temperature of 30°C.``
-   
-   ``At 02:00, the weather was cloudy with a temperature of 68°F.``
-   
-   ``At 23:58, the weather will be freezing with a temperature of 99°K.``
+.. code:: text
+
+   At 09:23, the weather is sunny with a temperature of 30°C.
+   At 02:00, the weather was cloudy with a temperature of 68°F.
+   At 23:58, the weather will be freezing with a temperature of 99°K.
 
 so this configuration mimics ``snprintf`` but the same code can also by
 used with a **dynamic** configuration:
@@ -143,13 +146,12 @@ used with a **dynamic** configuration:
 
 for which the buffer would be successively overwritten as such:
 
-   ``At 00:00, the weather                    with a temperature of  0°C.``
-   
-   ``At 09:23, the weather is           sunny with a temperature of 30°C.``
-   
-   ``At 02:00, the weather was         cloudy with a temperature of 68°F.``
-   
-   ``At 23:58, the weather will be   freezing with a temperature of 99°K.``
+.. code:: text
+	  
+   At 00:00, the weather                    with a temperature of  0°C.
+   At 09:23, the weather is           sunny with a temperature of 30°C.
+   At 02:00, the weather was         cloudy with a temperature of 68°F.
+   At 23:58, the weather will be   freezing with a temperature of 99°K.
 
 after obtaining the maximal size with:
 
@@ -158,3 +160,114 @@ after obtaining the maximal size with:
    (std::size_t)handle<config::dynamic, 10, action::size>(nullptr, 0, 0, 0, nullptr, 0, 'K');
 
 where dummy arguments are passed.
+
+----------------
+
+HTTP
+====
+
+Because spaces are allowed in numerous places of the HTTP protocol,
+between the `:` of a header field and its content for instance,
+let's consider as an illustration how HTTP headers can be handled.
+
+Let's assume the output buffer contains a simple header such as:
+
+.. code:: text
+	  
+  HTTP/1.1 [code:3-digits-integral] [reason:text(max-length=10)]
+  Content-Length: [length:integral(max-digits=4)]
+  Content-Type: [type:text(max-length=10)]; charset=UTF-8
+  Content-Encoding: [encoding:text(max-length=10)]
+
+where `[]` elements are variable.
+
+First the function signature would go along the lines of:
+
+.. code:: cpp
+	  
+  template<config Config, action Action>
+  char * handle(char * buffer, unsigned short code, const char * reason,
+	        std::size_t length, const char * type, const char * encoding);
+
+Then generic variables holding maximum lengths can be declared at the top of the function:
+
+.. code:: cpp
+
+  unsigned char code_max_digits = 3;
+  std::size_t reason_max_length = 10;
+  std::size_t max_length_digits = 4;
+  std::size_t type_max_length = 10;
+  std::size_t max_encoding_length = 10;
+
+Because these values are not checked, supplying an argument exceeding them would
+cause the buffer to get corrupted or cause a fatal memory access. Although it would
+be safer from a caller perspective to have a more complex implementation that would
+check arguments against those boundaries, it would incur a cost the caller might
+not be willing to pay.
+  
+The body of the function would then be:
+  
+.. code:: cpp
+
+  buffer = string<config::static_, Action>(buffer, "HTTP/1.1 ");
+  buffer = integral_number<Config, align::right, ' ', Action, adapter::itoa::to_string_t>
+    (buffer, code, code_max_digits);
+  buffer = space<config::static_, Action>(buffer);
+  buffer = string<Config, align::left, ' ', Action>
+    (buffer, reason, std::strlen(reason), reason_max_length);
+
+  buffer = carriage_return<config::static_, Action>(buffer);
+  buffer = new_line<config::static_, Action>(buffer);
+
+  buffer = string<config::static_, Action>(buffer, "Content-Length: ");
+  buffer = integral_number<Config, align::right, ' ', Action, adapter::itoa::to_string_t>
+    (buffer, length, max_length_digits);
+
+  buffer = carriage_return<config::static_, Action>(buffer);
+  buffer = new_line<config::static_, Action>(buffer);
+
+  buffer = string<config::static_, Action>(buffer, "Content-Type: ");
+  buffer = string<Config, align::right, ' ', Action>
+    (buffer, type, std::strlen(type), type_max_length);
+  buffer = string<config::static_, Action>(buffer, "; charset=UTF-8");
+
+  buffer = carriage_return<config::static_, Action>(buffer);
+  buffer = new_line<config::static_, Action>(buffer);
+
+  buffer = string<config::static_, Action>(buffer, "Content-Encoding: ");
+  buffer = string<Config, align::right, ' ', Action>
+    (buffer, encoding, std::strlen(encoding), max_encoding_length);
+
+After retrieving the maximum size of the corresponding buffer with *maximum values*,
+
+.. code:: cpp
+
+  handle<config::dynamic, action::size>(nullptr, 999, not_found, 9999, plain, identity);
+
+it is possible to first prepare the buffer
+
+.. code:: cpp
+
+  handle<config::dynamic, action::write>(buffer, 200, ok, 2783, html, gzip);
+
+and then write some content to it
+
+.. code:: cpp
+
+  handle<config::dynamic, action::write>(buffer, 0, ok, 0, "", "");
+
+leading to the following successive outputs:
+
+.. code:: text
+
+  HTTP/1.1               
+  Content-Length:     
+  Content-Type:           ; charset=UTF-8
+  Content-Encoding:           
+
+.. code:: text
+
+  HTTP/1.1 200 OK
+  Content-Length: 2783
+  Content-Type:  text/html; charset=UTF-8
+  Content-Encoding:       gzip

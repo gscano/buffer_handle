@@ -9,21 +9,21 @@
 
 using namespace buffer_handle;
 
-template<config Config,
-	 action Action>
-char * handle(char * buffer, unsigned short code, const char * reason, std::size_t length, const char * type, const char * encoding)
+template<config Config, action Action>
+char * handle(char * buffer, unsigned short code, const char * reason,
+	      std::size_t length, const char * type, const char * encoding)
 { 
   unsigned char code_max_digits = 3;
   std::size_t reason_max_length = 10;
   std::size_t max_length_digits = 4;
   std::size_t type_max_length = 10;
   std::size_t max_encoding_length = 10;
-    
+  
   buffer = string<config::static_, Action>(buffer, "HTTP/1.1 ");
   buffer = integral_number<Config, align::right, ' ', Action, adapter::itoa::to_string_t>
     (buffer, code, code_max_digits);
   buffer = space<config::static_, Action>(buffer);
-  buffer = string<Config, align::right, ' ', Action>
+  buffer = string<Config, align::left, ' ', Action>
     (buffer, reason, std::strlen(reason), reason_max_length);
 
   buffer = carriage_return<config::static_, Action>(buffer);
