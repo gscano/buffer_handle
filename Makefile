@@ -12,6 +12,8 @@ all: test run-test example Makefile
 run-test: test
 	./$<
 
+-include test.d
+
 test: test.cpp Makefile
 	$(CXX) $< --coverage -std=$(CXXSTD) $(CXXFLAGS) -I $(CATCH) -I $(BOOST) -I ../ -o $@
 
