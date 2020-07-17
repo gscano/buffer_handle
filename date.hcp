@@ -176,15 +176,15 @@ namespace buffer_handle
 
       buffer += 3;
 
-      buffer = space<Config, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
 
       buffer = month_day<Config, Action, Month, Day>(buffer, month, day);
 
-      buffer = space<Config, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
 
       buffer = time_<Config, Action, Hours, Minutes, Seconds>(buffer, hours, minutes, seconds);
 
-      buffer = space<Config, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
 
       buffer = four_digits_number<Config, Action, Year>(buffer, year);
 
@@ -239,7 +239,7 @@ namespace buffer_handle
 	       typename Hours, typename Minutes, typename Seconds> inline
       char * end(char * buffer, Hours hours, Minutes minutes, Seconds seconds, const Timezone & timezone)
       {
-	buffer = space<Config, Action>(buffer);
+	buffer = space<config::static_, Action>(buffer);
 
 	if(HandleSeconds)
 	  {
@@ -250,7 +250,7 @@ namespace buffer_handle
 	    buffer = time_<Config, Action, Hours, Minutes>(buffer, hours, minutes);
 	  }
 
-	buffer = space<Config, Action>(buffer);
+	buffer = space<config::static_, Action>(buffer);
 
 	buffer = timezone.template handle<Action>(buffer);
 
@@ -313,17 +313,17 @@ namespace buffer_handle
 	  buffer += max_length;
 	}
 
-      buffer = comma<Config, Action>(buffer);
+      buffer = comma<config::static_, Action>(buffer);
 
-      buffer = space<Config, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
 
       buffer = day_month_year<Config, false, '-', false, Action, Day, Month, Year>(buffer, day, month, year);
 
-      buffer = space<Config, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
 
       buffer = time_<Config, Action, Hours, Minutes, Seconds>(buffer, hours, minutes, seconds);
 
-      buffer = space<Config, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
 
       buffer = timezone.template handle<Action>(buffer);
 
@@ -386,17 +386,17 @@ namespace buffer_handle
     {
       buffer = wkday<Config, Action, Weekday>(buffer, weekday);
 
-      buffer = comma<Config, Action>(buffer);
-      buffer = space<Config, Action>(buffer);
+      buffer = comma<config::static_, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
 
       buffer = day_month_year<Config, ' ', ' ', true, Action, Day, Month, Year>
 	(buffer, day, month, year);
 
-      buffer = space<Config, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
       
       buffer = time_<Config, Action, Hours, Minutes, Seconds>(buffer, hours, minutes, seconds);
 
-      buffer = space<Config, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
 
       buffer = differential_timezone<Config, Action, TimezoneHours, TimezoneMinutes>
 	(buffer, timezone_sign, timezone_hours, timezone_minutes);
@@ -427,17 +427,17 @@ namespace buffer_handle
     {
       buffer = wkday<Config, Action, Weekday>(buffer, weekday);
 
-      buffer = comma<Config, Action>(buffer);
-      buffer = space<Config, Action>(buffer);
+      buffer = comma<config::static_, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
 
       buffer = day_month_year<Config, ' ', ' ', true, Action, Day, Month, Year>
 	(buffer, day, month, year);
 
-      buffer = space<Config, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
       
       buffer = time_<Config, Action, Hours, Minutes, Seconds>(buffer, hours, minutes, seconds);
 
-      buffer = space<Config, Action>(buffer);
+      buffer = space<config::static_, Action>(buffer);
 
       buffer = string<config::static_, Action>(buffer, "GMT", 3);
       
