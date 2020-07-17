@@ -6,6 +6,7 @@
 #include <buffer_handle/number.hpp> // four_digits_number() two_digits_number()
 #include <buffer_handle/string.hpp> // string()
 #include <buffer_handle/time.hpp> // time_()
+#include <buffer_handle/timezone.hpp> // differential_timezone()
 #include <buffer_handle/token.hpp> // comma() hyphen() space()
 
 namespace buffer_handle
@@ -99,6 +100,51 @@ namespace buffer_handle
       }
 
     return buffer + 3 + 1 + 2;
+  }
+
+  template<config Config, action Action, typename Weekday>
+  char * wkday(char * buffer, Weekday weekday)
+  {
+    if(must_write(Config, Action))
+      {
+	std::memcpy(buffer, details::wkday<Weekday>(weekday), 3);
+      }
+    
+    return buffer + 3;
+  }
+  
+  template<config Config, action Action, typename Weekday>
+  char * weekday(char * buffer, Weekday weekday)
+  {
+    std::size_t max_length;
+    
+    if(Config == config::static_)
+      {
+	max_length = std::strlen(details::weekday<Weekday>(weekday));
+	
+	buffer = string<Config, align::right, ' ', write_when_reset(Action)>(buffer, details::weekday<Weekday>(weekday), max_length, max_length);
+      }
+    else if(Config == config::dynamic)
+      {
+	max_length = std::strlen(details::weekday<Weekday>(7));//Default is equal to longest
+	
+	string<Config, align::right, ' ', write_when_reset(Action)>(buffer, details::weekday<Weekday>(weekday), std::strlen(details::weekday<Weekday>(weekday)), max_length);
+	
+	buffer += max_length;
+      }
+    
+    return buffer;
+  }
+  
+  template<config Config, action Action, typename Month>
+  char * month(char * buffer, Month month)
+  {
+    if(must_write(Config, Action))
+      {
+	std::memcpy(buffer, details::month<Month>(month), 3);
+      }
+    
+    return buffer + 3;
   }
 
   namespace asc
@@ -327,6 +373,87 @@ namespace buffer_handle
     }
   };
 
+  namespace rfc5322
+  {
+    template<config Config, action Action,
+	     typename Weekday, typename Day, typename Month, typename Year,
+	     typename Hours, typename Minutes, typename Seconds,
+	     typename TimezoneHours, typename TimezoneMinutes>
+    char * date(char * buffer,
+		Weekday weekday, Day day, Month month, Year year,
+		Hours hours, Minutes minutes, Seconds seconds,
+		bool timezone_sign, TimezoneHours timezone_hours, TimezoneMinutes timezone_minutes)
+    {
+      buffer = wkday<Config, Action, Weekday>(buffer, weekday);
+
+      buffer = comma<Config, Action>(buffer);
+      buffer = space<Config, Action>(buffer);
+
+      buffer = day_month_year<Config, ' ', ' ', true, Action, Day, Month, Year>
+	(buffer, day, month, year);
+
+      buffer = space<Config, Action>(buffer);
+      
+      buffer = time_<Config, Action, Hours, Minutes, Seconds>(buffer, hours, minutes, seconds);
+
+      buffer = space<Config, Action>(buffer);
+
+      buffer = differential_timezone<Config, Action, TimezoneHours, TimezoneMinutes>
+	(buffer, timezone_sign, timezone_hours, timezone_minutes);
+      
+      return buffer;
+    }
+
+    template<config Config, action Action, typename TimezoneHours, typename TimezoneMinutes>
+    char * date(char * buffer, std::tm date_time,
+		bool timezone_sign, TimezoneHours timezone_hours, TimezoneMinutes timezone_minutes)
+    {
+      return date<Config, Action>
+	(buffer,
+	 date_time.tm_wday, date_time.tm_mday, date_time.tm_mon + 1, date_time.tm_year + 1900,
+	 date_time.tm_hour, date_time.tm_min, date_time.tm_sec,
+	 timezone_sign, timezone_hours, timezone_minutes);
+    }
+  };
+
+  namespace rfc7231
+  {
+    template<config Config, action Action,
+	     typename Weekday, typename Day, typename Month, typename Year,
+	     typename Hours, typename Minutes, typename Seconds>
+    char * date(char * buffer,
+		Weekday weekday, Day day, Month month, Year year,
+		Hours hours, Minutes minutes, Seconds seconds)
+    {
+      buffer = wkday<Config, Action, Weekday>(buffer, weekday);
+
+      buffer = comma<Config, Action>(buffer);
+      buffer = space<Config, Action>(buffer);
+
+      buffer = day_month_year<Config, ' ', ' ', true, Action, Day, Month, Year>
+	(buffer, day, month, year);
+
+      buffer = space<Config, Action>(buffer);
+      
+      buffer = time_<Config, Action, Hours, Minutes, Seconds>(buffer, hours, minutes, seconds);
+
+      buffer = space<Config, Action>(buffer);
+
+      buffer = string<config::static_, Action>(buffer, "GMT", 3);
+      
+      return buffer;
+    }
+
+    template<config Config, action Action>
+    char * date(char * buffer, std::tm date_time)
+    {
+      return date<Config, Action>
+	(buffer,
+	 date_time.tm_wday, date_time.tm_mday, date_time.tm_mon + 1, date_time.tm_year + 1900,
+	 date_time.tm_hour, date_time.tm_min, date_time.tm_sec);
+    }
+  };
+  
   namespace details
   {
     template<typename Day> inline

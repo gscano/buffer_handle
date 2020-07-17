@@ -190,9 +190,12 @@ Date
 ====
 
 The following functions handle *asc*,
-`rfc822 <https://tools.ietf.org/html/rfc822#section-5>`__, `rfc850
-(§2.1.4) <https://tools.ietf.org/html/rfc850#section-2>`__ and `rfc1123
-(§5.2.14) <https://tools.ietf.org/html/rfc1123#page-55>`__ dates.
+`rfc822 <https://tools.ietf.org/html/rfc822#section-5>`__,
+`rfc850 (§2.1.4) <https://tools.ietf.org/html/rfc850#section-2>`__,
+`rfc1123 (§5.2.14) <https://tools.ietf.org/html/rfc1123#page-55>`__,
+`rfc5322 (§3.3) <https://tools.ietf.org/html/rfc5322#section-3.3>`__ and
+`rfc7231 (§7.1.1.1) <https://tools.ietf.org/html/rfc7231#section-7.1.1.1>`__
+dates.
 
 Note that for functions accepting directly a month or a year, 1 is for
 January and years start at 0 not 1900.
@@ -254,6 +257,35 @@ January and years start at 0 not 1900.
      char * date(char * buffer, std::tm date_time, const Timezone & timezone);
    };
 
+   namespace rfc5322//§3.3
+   {
+     template<config Config, action Action,
+	      typename Weekday, typename Day, typename Month, typename Year,
+	      typename Hours, typename Minutes, typename Seconds,
+	      typename TimezoneHours, typename TimezoneMinutes>
+     char * date(char * buffer,
+		 Weekday weekday, Day day, Month month, Year year,
+		 Hours hours, Minutes minutes, Seconds seconds,
+		 bool timezone_sign, TimezoneHours timezone_hours, TimezoneMinutes timezone_minutes);
+
+     template<config Config, action Action, typename TimezoneHours, typename TimezoneMinutes>
+     char * date(char * buffer, std::tm date_time,
+		 bool timezone_sign, TimezoneHours timezone_hours, TimezoneMinutes timezone_minutes);
+   };
+
+   namespace rfc7231//§7.1.1.1
+   {
+     template<config Config, action Action,
+ 	      typename Weekday, typename Day, typename Month, typename Year,
+ 	      typename Hours, typename Minutes, typename Seconds>
+     char * date(char * buffer,
+		 Weekday weekday, Day day, Month month, Year year,
+		 Hours hours, Minutes minutes, Seconds seconds);
+
+     template<config Config, action Action>
+     char * date(char * buffer, std::tm date_time);
+   };
+
 The two functions below are mainly used by above functions but can also
 can be used independtly. They respectively write the date in format ‘dd
 Mon YY’ and ‘Mon dd’.
@@ -268,10 +300,19 @@ format to ‘YYYY’ instead of ‘YY’.
 
    template<config Config, char InsteadOfALeadingZeroForDay, char Separator, bool YearOn4Digits,
         action Action, typename Day, typename Month, typename Year>
-   char * day_month_year(char * buffer, Day day, Month month, Year year);//dd Mon YY
+   char * day_month_year(char * buffer, Day day, Month month, Year year);// dd Mon YY
 
    template<config Config, action Action, typename Month, typename Day>
-   char * month_day(char * buffer, Month month, Day day);//Mon dd
+   char * month_day(char * buffer, Month month, Day day);// Mon dd
+
+   template<config Config, action Action, typename Weekday>
+   char * wkday(char * buffer, Weekday weekday);// Sun-Sat
+
+   template<config Config, action Action, typename Weekday>
+   char * weekday(char * buffer, Weekday weekday);// Sunday-Saturday
+
+   template<config Config, action Action, typename Month>
+   char * month(char * buffer, Month month);// Jan-Dec
 
 Number
 ======

@@ -1108,6 +1108,156 @@ SCENARIO("Date", "[date]")
 	    }
 	}
     }
+
+  FOR("An rfc5322 date")
+    {
+      FOR("A static configuration")
+	{
+	  FIRST("Get the size")
+	    {
+	      const std::size_t size = (std::size_t)rfc5322::date<config::static_, action::size>(nullptr, date_time, true, 0, 0);
+
+	      GIVEN_A_BUFFER(size)
+		{
+		  THEN("Prepare")
+		    {
+		      end = rfc5322::date<config::static_, action::prepare>(begin, date_time, true, 0, 0);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2001 23:32:57 +0000");
+		    }
+
+		  THEN("Prepare")
+		    {
+		      date_time.tm_wday = 1;
+		      date_time.tm_hour = 11;
+
+		      end = rfc5322::date<config::static_, action::prepare>(begin, date_time, false, 2, 32);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Mon,  3 Jan 2001 11:32:57 -0232");
+		    }
+		}
+	    }
+	}
+
+      FOR("A dynamic configuration")
+	{
+	  FIRST("Get the size")
+	    {
+	      const std::size_t size = (std::size_t)rfc5322::date<config::dynamic, action::size>(nullptr, date_time, true, 0, 0);
+
+	      GIVEN_A_BUFFER(size)
+		{
+		  THEN("Prepare")
+		    {
+		      end = rfc5322::date<config::dynamic, action::prepare>(begin, date_time, true, 0, 0);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2001 23:32:57 +0000");
+		      
+		      THEN("Write")
+			{
+			  date_time.tm_year = 201;
+			  date_time.tm_hour = 2;
+			  date_time.tm_min = 12;
+			  date_time.tm_sec = 4;
+			  
+			  end = rfc5322::date<config::dynamic, action::prepare>(begin, date_time, true, 23, 45);
+
+			  REQUIRE(std::size_t(end - begin) == size);
+			  REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2101 02:12:04 +2345");
+			  
+			  THEN("Reset")
+			    {
+			      date_time = std::tm();
+			      
+			      end = rfc5322::date<config::dynamic, action::prepare>(begin, date_time, true, 0, 0);
+
+			      REQUIRE(std::size_t(end - begin) == size);
+			      REQUIRE(std::string(begin, end) == "Sun,  0 Jan 1900 00:00:00 +0000");
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+  FOR("An rfc7231 date")
+    {
+      FOR("A static configuration")
+	{
+	  FIRST("Get the size")
+	    {
+	      const std::size_t size = (std::size_t)rfc7231::date<config::static_, action::size>(nullptr, date_time);
+
+	      GIVEN_A_BUFFER(size)
+		{
+		  THEN("Prepare")
+		    {
+		      end = rfc7231::date<config::static_, action::prepare>(begin, date_time);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2001 23:32:57 GMT");
+		    }
+
+		  THEN("Prepare")
+		    {
+		      date_time.tm_wday = 1;
+		      date_time.tm_hour = 11;
+
+		      end = rfc7231::date<config::static_, action::prepare>(begin, date_time);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Mon,  3 Jan 2001 11:32:57 GMT");
+		    }
+		}
+	    }
+	}
+
+      FOR("A dynamic configuration")
+	{
+	  FIRST("Get the size")
+	    {
+	      	      const std::size_t size = (std::size_t)rfc7231::date<config::dynamic, action::size>(nullptr, date_time);
+
+	      GIVEN_A_BUFFER(size)
+		{
+		  THEN("Prepare")
+		    {
+		      end = rfc7231::date<config::dynamic, action::prepare>(begin, date_time);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2001 23:32:57 GMT");
+		      
+		      THEN("Write")
+			{
+			  date_time.tm_year = 201;
+			  date_time.tm_hour = 2;
+			  date_time.tm_min = 12;
+			  date_time.tm_sec = 4;
+			  
+			  end = rfc7231::date<config::dynamic, action::prepare>(begin, date_time);
+
+			  REQUIRE(std::size_t(end - begin) == size);
+			  REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2101 02:12:04 GMT");
+			  
+			  THEN("Reset")
+			    {
+			      date_time = std::tm();
+			      
+			      end = rfc7231::date<config::dynamic, action::prepare>(begin, date_time);
+
+			      REQUIRE(std::size_t(end - begin) == size);
+			      REQUIRE(std::string(begin, end) == "Sun,  0 Jan 1900 00:00:00 GMT");
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
 }
 
 SCENARIO("Helper", "[helper]")
