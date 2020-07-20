@@ -13,10 +13,12 @@ namespace buffer_handle
   char * bitset(char * buffer, typename Set::value_type value, Separator & separator);
 
   template<config Config, align Align, char Pad, class Set, action Action, class Separator>
-  char * bitset(char * buffer, typename Set::value_type value, std::size_t & max_length, Separator & separator);
+  char * bitset(char * buffer, typename Set::value_type value, std::size_t & max_length,
+		Separator & separator);
 
   template<config Config, align Align, char Pad, class Set, action Action, class Separator>
-  char * bitset(char * buffer, typename Set::value_type value, std::size_t & max_length, Separator & separator, std::size_t & previous_length);
+  char * bitset(char * buffer, typename Set::value_type value, std::size_t & max_length,
+		Separator & separator, std::size_t & previous_length);
 
   template<config Config, align Align, char Pad, class Set, bool IsLong = false>
   struct bitset_t

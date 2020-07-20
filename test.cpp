@@ -44,7 +44,7 @@ SCENARIO("Boolean", "[boolean]")
 			{
 			  end = boolean<config::static_, case_::lower, align::left, pad, action::prepare>(begin, true);
 
-			  REQUIRE(end - begin == 4);
+			  REQUIRE(std::size_t(end - begin) == 4);
 			  REQUIRE(std::string(begin, end) == "true");
 			}
 
@@ -52,7 +52,7 @@ SCENARIO("Boolean", "[boolean]")
 			{
 			  end = boolean<config::static_, case_::lower, align::left, pad, action::prepare>(begin, false);
 
-			  REQUIRE(end - begin == 5);
+			  REQUIRE(std::size_t(end - begin) == 5);
 			  REQUIRE(std::string(begin, end) == "false");
 			}
 		    }
@@ -65,7 +65,7 @@ SCENARIO("Boolean", "[boolean]")
 		{
 		  FIRST("Get the size")
 		    {
-		      REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::left, pad, action::size>(nullptr, true) == 5));
+		      REQUIRE(((std::size_t)boolean<config::dynamic, case_::first_upper, align::left, pad, action::size>(nullptr, true) == 5));
 
 		      GIVEN_A_BUFFER(5)
 			{
@@ -73,18 +73,18 @@ SCENARIO("Boolean", "[boolean]")
 			    {
 			      WHEN("True")
 				{
-				  end = boolean<config::dynamic, case_::lower, align::left, pad, action::prepare>(begin, true);
+				  end = boolean<config::dynamic, case_::first_upper, align::left, pad, action::prepare>(begin, true);
 
-				  REQUIRE(end - begin == 5);
-				  REQUIRE(std::string(begin, end) == "true ");
+				  REQUIRE(std::size_t(end - begin) == 5);
+				  REQUIRE(std::string(begin, end) == "True ");
 				}
 
 			      WHEN("False")
 				{
-				  end = boolean<config::dynamic, case_::lower, align::left, pad, action::prepare>(begin, false);
+				  end = boolean<config::dynamic, case_::first_upper, align::left, pad, action::prepare>(begin, false);
 
-				  REQUIRE(end - begin == 5);
-				  REQUIRE(std::string(begin, end) == "false");
+				  REQUIRE(std::size_t(end - begin) == 5);
+				  REQUIRE(std::string(begin, end) == "False");
 				}
 			    }
 			}
@@ -95,7 +95,7 @@ SCENARIO("Boolean", "[boolean]")
 		{
 		  FIRST("Get the size")
 		    {
-		      REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::right, pad, action::size>(nullptr, true) == 5));
+		      REQUIRE(((std::size_t)boolean<config::dynamic, case_::upper, align::right, pad, action::size>(nullptr, true) == 5));
 
 		      GIVEN_A_BUFFER(5)
 			{
@@ -103,18 +103,18 @@ SCENARIO("Boolean", "[boolean]")
 			    {
 			      WHEN("True")
 				{
-				  end = boolean<config::dynamic, case_::lower, align::right, pad, action::prepare>(begin, true);
+				  end = boolean<config::dynamic, case_::upper, align::right, pad, action::prepare>(begin, true);
 
-				  REQUIRE(end - begin == 5);
-				  REQUIRE(std::string(begin, end) == " true");
+				  REQUIRE(std::size_t(end - begin) == 5);
+				  REQUIRE(std::string(begin, end) == " TRUE");
 				}
 
 			      WHEN("False")
 				{
-				  end = boolean<config::dynamic, case_::lower, align::right, pad, action::prepare>(begin, false);
+				  end = boolean<config::dynamic, case_::upper, align::right, pad, action::prepare>(begin, false);
 
-				  REQUIRE(end - begin == 5);
-				  REQUIRE(std::string(begin, end) == "false");
+				  REQUIRE(std::size_t(end - begin) == 5);
+				  REQUIRE(std::string(begin, end) == "FALSE");
 				}
 			    }
 			}
@@ -130,7 +130,7 @@ SCENARIO("Boolean", "[boolean]")
       const char t = 'a';
       const char f = 'b';
 
-      FOR("A static or dynamic configuration")
+      FOR("A static configuration")
 	{
 	  WHEN("True")
 	    {
@@ -146,6 +146,38 @@ SCENARIO("Boolean", "[boolean]")
 
 	      REQUIRE(end == &c + 1);
 	      REQUIRE(c == f);
+	    }
+	}
+
+      FOR("A dynamic configuraton")
+	{
+	  FIRST("Get the size")
+	    {
+	      REQUIRE((std::size_t)boolean<config::dynamic, action::size, f, t>(nullptr, true) == 1);
+
+	      THEN("Prepare")
+		{
+		  char * end = boolean<config::dynamic, action::prepare, f, t>(&c, false);
+
+		  REQUIRE(end == &c + 1);
+		  REQUIRE(c == f);
+
+		  THEN("Write")
+		    {
+		      end = boolean<config::dynamic, action::write, f, t>(&c, true);
+
+		      REQUIRE(end == &c+1);
+		      REQUIRE(c == t);
+
+		      THEN("Reset")
+			{
+			  end = boolean<config::dynamic, action::write, f, t>(&c, false);
+
+			  REQUIRE(end == &c+1);
+			  REQUIRE(c == f);
+			}
+		    }
+		}
 	    }
 	}
     }
@@ -169,7 +201,7 @@ SCENARIO("Character", "[character]")
 		{
 		  end = character<config::static_, action::prepare>(begin, 'c');
 
-		  REQUIRE(end - begin == 1);
+		  REQUIRE(std::size_t(end - begin) == 1);
 		  REQUIRE(c == 'c');
 		}
 	    }
@@ -185,7 +217,7 @@ SCENARIO("Character", "[character]")
 		{
 		  end = character<config::dynamic, action::prepare>(begin, 'c');
 
-		  REQUIRE(end - begin == 1);
+		  REQUIRE(std::size_t(end - begin) == 1);
 		  REQUIRE(c == 'c');
 		}
 	    }
@@ -266,7 +298,7 @@ SCENARIO("Container", "[container]")
 				{
 				  end = details::container_process<config::static_, align::left, action::prepare>(begin, cbegin, cend, element_handler, separator);
 
-				  REQUIRE(end - begin == std::strlen(data));
+				  REQUIRE(std::size_t(end - begin) == std::strlen(data));
 				  REQUIRE(std::string(begin, end) == data);
 				}
 			    }
@@ -303,7 +335,7 @@ SCENARIO("Container", "[container]")
 				    {
 				      end = details::container_process<config::dynamic, align::left, action::write>(begin, cbegin, cend, element_handler, separator);
 
-				      REQUIRE(end - begin == std::strlen(data));
+				      REQUIRE(std::size_t(end - begin) == std::strlen(data));
 				      REQUIRE(std::string(begin, end) == data);
 				    }
 				}
@@ -350,7 +382,7 @@ SCENARIO("Container", "[container]")
 			      {
 				end = container<config::static_, align::left, pad, action::prepare>(begin, cbegin, cend, max_length, element_handler, separator);
 
-				REQUIRE(end - begin == length);
+				REQUIRE(std::size_t(end - begin) == length);
 				REQUIRE(std::string(begin, end) == data);
 			      }
 			  }
@@ -369,7 +401,7 @@ SCENARIO("Container", "[container]")
 			      {
 				end = container<config::static_, align::right, pad, action::prepare>(begin, crbegin, crend, max_length, element_handler, separator);
 
-				REQUIRE(end - begin == size);
+				REQUIRE(std::size_t(end - begin) == size);
 				REQUIRE(std::string(begin, end) == data);
 			      }
 			  }
@@ -395,7 +427,7 @@ SCENARIO("Container", "[container]")
 			      {
 				end = container<config::dynamic, align::left, pad, action::prepare>(begin, cbegin, cend, max_length, element_handler, separator);
 
-				REQUIRE(end - begin == size);
+				REQUIRE(std::size_t(end - begin) == size);
 				REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
 
 				THEN("Write")
@@ -413,14 +445,14 @@ SCENARIO("Container", "[container]")
 
 				    end = container<config::dynamic, align::left, pad, action::write>(begin, cbegin, cend, max_length, element_handler, separator);
 
-				    REQUIRE(end -  begin == size);
+				    REQUIRE(std::size_t(end - begin) == size);
 				    REQUIRE(std::string(begin, end) == data2 + std::string(max_length - std::strlen(data2), pad));
 
 				    THEN("Reset")
 				      {
 					end = container<config::dynamic, align::left, pad, action::reset>(begin, cend, cend, max_length, element_handler, separator);
 
-					REQUIRE(end - begin == size);
+					REQUIRE(std::size_t(end - begin) == size);
 					REQUIRE(std::string(begin, end) == std::string(max_length, pad));
 				      }
 				  }
@@ -443,7 +475,7 @@ SCENARIO("Container", "[container]")
 			      {
 				end = container<config::dynamic, align::right, pad, action::prepare>(begin, crbegin, crend, max_length, element_handler, separator);
 
-				REQUIRE(end - begin == size);
+				REQUIRE(std::size_t(end - begin) == size);
 				REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
 
 				THEN("Write")
@@ -461,14 +493,14 @@ SCENARIO("Container", "[container]")
 
 				    end = container<config::dynamic, align::right, pad, action::write>(begin, crbegin, crend, max_length, element_handler, separator);
 
-				    REQUIRE(end -  begin == size);
+				    REQUIRE(std::size_t(end - begin) == size);
 				    REQUIRE(std::string(begin, end) == std::string(max_length - std::strlen(data2), pad) + data2);
 
 				    THEN("Reset")
 				      {
 					end = container<config::dynamic, align::right, pad, action::reset>(begin, crend, crend, max_length, element_handler, separator);
 
-					REQUIRE(end - begin == size);
+					REQUIRE(std::size_t(end - begin) == size);
 					REQUIRE(std::string(begin, end) == std::string(max_length, pad));
 				      }
 				  }
@@ -497,14 +529,14 @@ SCENARIO("Container", "[container]")
 			  {
 			    end = container<align::left, ' ', action::prepare>(begin, cbegin, current, cend, max_length, element_handler, separator);
 
-			    REQUIRE(end - begin == max_length);
+			    REQUIRE(std::size_t(end - begin) == max_length);
 			    REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
 
 			    THEN("Write")
 			      {
 				end = container<align::left, ' ', action::write>(begin, cbegin, current, cend, max_length, element_handler, separator);
 
-				REQUIRE(end - begin == length);
+				REQUIRE(std::size_t(end - begin) == length);
 				REQUIRE(std::string(begin, begin + max_length) == data + std::string(max_length - length, ' '));
 			      }
 			  }
@@ -527,28 +559,28 @@ SCENARIO("Container", "[container]")
 		      {
 			end = container<align::left, ' ', action::prepare>(begin, cbegin, current, cend, max_length, element_handler, separator);
 
-			REQUIRE(end - begin == max_length);
+			REQUIRE(std::size_t(end - begin) == max_length);
 			REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
 
 			THEN("Write")
 			  {
 			    end = container<align::left, ' ', action::write>(begin, cbegin, current, cend, max_length, element_handler, separator);
 
-			    REQUIRE(end - begin == 5);
+			    REQUIRE(std::size_t(end - begin) == 5);
 			    REQUIRE(std::string(begin, end) == "Hello");
 
 			    THEN("Write")
 			      {
 				end = container<align::left, ' ', action::write>(begin, cbegin, current, cend, max_length, element_handler, separator);
 
-				REQUIRE(end - begin == 6);
+				REQUIRE(std::size_t(end - begin) == 6);
 				REQUIRE(std::string(begin, end) == " world");
 
 				THEN("Write")
 				  {
 				    end = container<align::left, ' ', action::write>(begin, cbegin, current, cend, max_length, element_handler, separator);
 
-				    REQUIRE(end - begin == 2);
+				    REQUIRE(std::size_t(end - begin) == 2);
 				    REQUIRE(std::string(begin, end) == " !");
 				  }
 			      }
@@ -567,14 +599,14 @@ SCENARIO("Container", "[container]")
 		      {
 			end = container<align::left, ' ', action::prepare>(begin, cbegin, current, cend, max_length, element_handler, separator);
 
-			REQUIRE(end - begin == max_length);
+			REQUIRE(std::size_t(end - begin) == max_length);
 			REQUIRE(std::string(begin, end) == std::string(max_length, ' '));
 
 			THEN("Write")
 			  {
 			    end = container<align::left, ' ', action::write>(begin, cbegin, current, cend, max_length, element_handler, separator);
 
-			    REQUIRE(end - begin == 0);
+			    REQUIRE(std::size_t(end - begin) == 0);
 			  }
 		      }
 		  }
@@ -630,14 +662,14 @@ SCENARIO("Date", "[date]")
 		      {
 			end = day_month_year<config::dynamic, '\0', ' ', true, action::prepare>(begin, 5, 4, 0);
 
-			REQUIRE(end - begin == 11);
+			REQUIRE(std::size_t(end - begin) == 11);
 			REQUIRE(std::string(begin, end) == "05 Apr 0000");
 
 			THEN("Write")
 			  {
 			    end = day_month_year<config::dynamic, '\0', ' ', true, action::write>(begin, 24, 12, 1901);
 
-			    REQUIRE(end - begin == 11);
+			    REQUIRE(std::size_t(end - begin) == 11);
 			    REQUIRE(std::string(begin, end) == "24 Dec 1901");
 			  }
 		      }
@@ -659,14 +691,14 @@ SCENARIO("Date", "[date]")
 		      {
 			end = day_month_year<config::dynamic, ' ', ' ', false, action::prepare>(begin, 5, 4, 0);
 
-			REQUIRE(end - begin == 9);
+			REQUIRE(std::size_t(end - begin) == 9);
 			REQUIRE(std::string(begin, end) == " 5 Apr 00");
 
 			THEN("Write or reset")
 			  {
 			    end = day_month_year<config::dynamic, ' ', ' ', false, action::write>(begin, 24, 12, 1901);
 
-			    REQUIRE(end - begin == 9);
+			    REQUIRE(std::size_t(end - begin) == 9);
 			    REQUIRE(std::string(begin, end) == "24 Dec 01");
 			  }
 		      }
@@ -692,14 +724,14 @@ SCENARIO("Date", "[date]")
 		  {
 		    end = month_day<config::dynamic, action::prepare>(begin, 1, 3);
 
-		    REQUIRE(end - begin == 6);
+		    REQUIRE(std::size_t(end - begin) == 6);
 		    REQUIRE(std::string(begin, end) == "Jan 03");
 
 		    THEN("Write or reset")
 		      {
 			end = month_day<config::dynamic, action::prepare>(begin, 12, 31);
 
-			REQUIRE(end - begin == 6);
+			REQUIRE(std::size_t(end - begin) == 6);
 			REQUIRE(std::string(begin, end) == "Dec 31");
 		      }
 		  }
@@ -732,7 +764,7 @@ SCENARIO("Date", "[date]")
 	      {
 		end = asc::date<config::static_, action::prepare>(begin, date_time);
 
-		REQUIRE(end - begin == 24);
+		REQUIRE(std::size_t(end - begin) == 24);
 		REQUIRE(std::string(begin, end) == "Thu Jan 03 23:32:57 2001");
 	      }
 	  }
@@ -757,7 +789,7 @@ SCENARIO("Date", "[date]")
 		      {
 			end = rfc822::date<config::static_, true, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "Thu, 03 Jan 01 23:32:57 GMT");
 		      }
 
@@ -767,7 +799,7 @@ SCENARIO("Date", "[date]")
 
 			end = rfc822::date<config::static_, true, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "Thu, 12 Jan 01 23:32:57 GMT");
 		      }
 		  }
@@ -786,7 +818,7 @@ SCENARIO("Date", "[date]")
 		      {
 			end = rfc822::date<config::static_, true, false, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "Thu, 03 Jan 01 23:32 GMT");
 		      }
 
@@ -796,7 +828,7 @@ SCENARIO("Date", "[date]")
 
 			end = rfc822::date<config::static_, true, false, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "Thu, 12 Jan 01 23:32 GMT");
 		      }
 		  }
@@ -815,7 +847,7 @@ SCENARIO("Date", "[date]")
 		      {
 			end = rfc822::date<config::static_, false, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "03 Jan 01 23:32:57 GMT");
 		      }
 
@@ -825,7 +857,7 @@ SCENARIO("Date", "[date]")
 
 			end = rfc822::date<config::static_, false, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "12 Jan 01 23:32:57 GMT");
 		      }
 		  }
@@ -844,7 +876,7 @@ SCENARIO("Date", "[date]")
 		      {
 			end = rfc822::date<config::static_, false, false, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "03 Jan 01 23:32 GMT");
 		      }
 
@@ -854,7 +886,7 @@ SCENARIO("Date", "[date]")
 
 			end = rfc822::date<config::static_, false, false, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "12 Jan 01 23:32 GMT");
 		      }
 		  }
@@ -876,7 +908,7 @@ SCENARIO("Date", "[date]")
 		      {
 			end = rfc822::date<config::dynamic, true, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "Thu, 03 Jan 01 23:32:57 GMT");
 
 			THEN("Write")
@@ -885,7 +917,7 @@ SCENARIO("Date", "[date]")
 
 			    end = rfc822::date<config::dynamic, true, true, timezone_t, action::write>(begin, date_time, timezone_t());
 
-			    REQUIRE(end - begin == size);
+			    REQUIRE(std::size_t(end - begin) == size);
 			    REQUIRE(std::string(begin, end) == "Thu, 03 Jan 01 02:32:57 GMT");
 
 			    THEN("Reset")
@@ -894,7 +926,7 @@ SCENARIO("Date", "[date]")
 
 				end = rfc822::date<config::dynamic, true, true, timezone_t, action::reset>(begin, date_time, timezone_t());
 
-				REQUIRE(end - begin == size);
+				REQUIRE(std::size_t(end - begin) == size);
 				REQUIRE(std::string(begin, end) == "Thu, 11 Jan 01 02:32:57 GMT");
 			      }
 			  }
@@ -915,7 +947,7 @@ SCENARIO("Date", "[date]")
 		      {
 			end = rfc822::date<config::dynamic, true, false, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "Thu, 03 Jan 01 23:32 GMT");
 
 			THEN("Write")
@@ -924,7 +956,7 @@ SCENARIO("Date", "[date]")
 
 			    end = rfc822::date<config::dynamic, true, false, timezone_t, action::write>(begin, date_time, timezone_t());
 
-			    REQUIRE(end - begin == size);
+			    REQUIRE(std::size_t(end - begin) == size);
 			    REQUIRE(std::string(begin, end) == "Thu, 03 Jan 01 02:32 GMT");
 
 			    THEN("Reset")
@@ -933,7 +965,7 @@ SCENARIO("Date", "[date]")
 
 				end = rfc822::date<config::dynamic, true, false, timezone_t, action::reset>(begin, date_time, timezone_t());
 
-				REQUIRE(end - begin == size);
+				REQUIRE(std::size_t(end - begin) == size);
 				REQUIRE(std::string(begin, end) == "Thu, 11 Jan 01 02:32 GMT");
 			      }
 			  }
@@ -954,7 +986,7 @@ SCENARIO("Date", "[date]")
 		      {
 			end = rfc822::date<config::dynamic, false, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "03 Jan 01 23:32:57 GMT");
 
 			THEN("Write")
@@ -963,7 +995,7 @@ SCENARIO("Date", "[date]")
 
 			    end = rfc822::date<config::dynamic, false, true, timezone_t, action::write>(begin, date_time, timezone_t());
 
-			    REQUIRE(end - begin == size);
+			    REQUIRE(std::size_t(end - begin) == size);
 			    REQUIRE(std::string(begin, end) == "03 Jan 01 02:32:57 GMT");
 
 			    THEN("Reset")
@@ -972,7 +1004,7 @@ SCENARIO("Date", "[date]")
 
 				end = rfc822::date<config::dynamic, false, true, timezone_t, action::reset>(begin, date_time, timezone_t());
 
-				REQUIRE(end - begin == size);
+				REQUIRE(std::size_t(end - begin) == size);
 				REQUIRE(std::string(begin, end) == "11 Jan 01 02:32:57 GMT");
 			      }
 			  }
@@ -993,7 +1025,7 @@ SCENARIO("Date", "[date]")
 		      {
 			end = rfc822::date<config::dynamic, false, false, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "03 Jan 01 23:32 GMT");
 
 			THEN("Write")
@@ -1002,7 +1034,7 @@ SCENARIO("Date", "[date]")
 
 			    end = rfc822::date<config::dynamic, false, false, timezone_t, action::write>(begin, date_time, timezone_t());
 
-			    REQUIRE(end - begin == size);
+			    REQUIRE(std::size_t(end - begin) == size);
 			    REQUIRE(std::string(begin, end) == "03 Jan 01 02:32 GMT");
 
 			    THEN("Reset")
@@ -1011,7 +1043,7 @@ SCENARIO("Date", "[date]")
 
 				end = rfc822::date<config::dynamic, false, false, timezone_t, action::reset>(begin, date_time, timezone_t());
 
-				REQUIRE(end - begin == size);
+				REQUIRE(std::size_t(end - begin) == size);
 				REQUIRE(std::string(begin, end) == "11 Jan 01 02:32 GMT");
 			      }
 			  }
@@ -1038,7 +1070,7 @@ SCENARIO("Date", "[date]")
 		  {
 		    end = rfc850::date<config::static_, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-		    REQUIRE(end - begin == size);
+		    REQUIRE(std::size_t(end - begin) == size);
 		    REQUIRE(std::string(begin, end) == "Thursday, 03-Jan-01 23:32:57 GMT");
 		  }
 	      }
@@ -1057,7 +1089,7 @@ SCENARIO("Date", "[date]")
 		  {
 		    end = rfc850::date<config::dynamic, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-		    REQUIRE(end - begin == size);
+		    REQUIRE(std::size_t(end - begin) == size);
 		    REQUIRE(std::string(begin, end) == "         , 03-Jan-01 23:32:57 GMT");
 
 		    THEN("Write")
@@ -1066,7 +1098,7 @@ SCENARIO("Date", "[date]")
 
 			end = rfc850::date<config::dynamic, timezone_t, action::reset>(begin, date_time, timezone_t());
 
-			REQUIRE(end - begin == size);
+			REQUIRE(std::size_t(end - begin) == size);
 			REQUIRE(std::string(begin, end) == "   Sunday, 03-Jan-01 23:32:57 GMT");
 
 			THEN("Reset")
@@ -1075,7 +1107,7 @@ SCENARIO("Date", "[date]")
 
 			    end = rfc850::date<config::dynamic, timezone_t, action::reset>(begin, date_time, timezone_t());
 
-			    REQUIRE(end - begin == size);
+			    REQUIRE(std::size_t(end - begin) == size);
 			    REQUIRE(std::string(begin, end) == "   Sunday, 00-Jan-00 00:00:00 GMT");
 			  }
 		      }
@@ -1101,10 +1133,160 @@ SCENARIO("Date", "[date]")
 		  {
 		    end = rfc1123::date<config::static_, true, true, timezone_t, action::prepare>(begin, date_time, timezone_t());
 
-		    REQUIRE(end - begin == size);
+		    REQUIRE(std::size_t(end - begin) == size);
 		    REQUIRE(std::string(begin, end) == "Thu, 03 Jan 2001 23:32:57 GMT");
 		  }
 	      }
+	    }
+	}
+    }
+
+  FOR("An rfc5322 date")
+    {
+      FOR("A static configuration")
+	{
+	  FIRST("Get the size")
+	    {
+	      const std::size_t size = (std::size_t)rfc5322::date<config::static_, action::size>(nullptr, date_time, true, 0, 0);
+
+	      GIVEN_A_BUFFER(size)
+		{
+		  THEN("Prepare")
+		    {
+		      end = rfc5322::date<config::static_, action::prepare>(begin, date_time, true, 0, 0);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2001 23:32:57 +0000");
+		    }
+
+		  THEN("Prepare")
+		    {
+		      date_time.tm_wday = 1;
+		      date_time.tm_hour = 11;
+
+		      end = rfc5322::date<config::static_, action::prepare>(begin, date_time, false, 2, 32);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Mon,  3 Jan 2001 11:32:57 -0232");
+		    }
+		}
+	    }
+	}
+
+      FOR("A dynamic configuration")
+	{
+	  FIRST("Get the size")
+	    {
+	      const std::size_t size = (std::size_t)rfc5322::date<config::dynamic, action::size>(nullptr, date_time, true, 0, 0);
+
+	      GIVEN_A_BUFFER(size)
+		{
+		  THEN("Prepare")
+		    {
+		      end = rfc5322::date<config::dynamic, action::prepare>(begin, date_time, true, 0, 0);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2001 23:32:57 +0000");
+		      
+		      THEN("Write")
+			{
+			  date_time.tm_year = 201;
+			  date_time.tm_hour = 2;
+			  date_time.tm_min = 12;
+			  date_time.tm_sec = 4;
+			  
+			  end = rfc5322::date<config::dynamic, action::prepare>(begin, date_time, true, 23, 45);
+
+			  REQUIRE(std::size_t(end - begin) == size);
+			  REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2101 02:12:04 +2345");
+			  
+			  THEN("Reset")
+			    {
+			      date_time = std::tm();
+			      
+			      end = rfc5322::date<config::dynamic, action::prepare>(begin, date_time, true, 0, 0);
+
+			      REQUIRE(std::size_t(end - begin) == size);
+			      REQUIRE(std::string(begin, end) == "Sun,  0 Jan 1900 00:00:00 +0000");
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+  FOR("An rfc7231 date")
+    {
+      FOR("A static configuration")
+	{
+	  FIRST("Get the size")
+	    {
+	      const std::size_t size = (std::size_t)rfc7231::date<config::static_, action::size>(nullptr, date_time);
+
+	      GIVEN_A_BUFFER(size)
+		{
+		  THEN("Prepare")
+		    {
+		      end = rfc7231::date<config::static_, action::prepare>(begin, date_time);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2001 23:32:57 GMT");
+		    }
+
+		  THEN("Prepare")
+		    {
+		      date_time.tm_wday = 1;
+		      date_time.tm_hour = 11;
+
+		      end = rfc7231::date<config::static_, action::prepare>(begin, date_time);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Mon,  3 Jan 2001 11:32:57 GMT");
+		    }
+		}
+	    }
+	}
+
+      FOR("A dynamic configuration")
+	{
+	  FIRST("Get the size")
+	    {
+	      	      const std::size_t size = (std::size_t)rfc7231::date<config::dynamic, action::size>(nullptr, date_time);
+
+	      GIVEN_A_BUFFER(size)
+		{
+		  THEN("Prepare")
+		    {
+		      end = rfc7231::date<config::dynamic, action::prepare>(begin, date_time);
+
+		      REQUIRE(std::size_t(end - begin) == size);
+		      REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2001 23:32:57 GMT");
+		      
+		      THEN("Write")
+			{
+			  date_time.tm_year = 201;
+			  date_time.tm_hour = 2;
+			  date_time.tm_min = 12;
+			  date_time.tm_sec = 4;
+			  
+			  end = rfc7231::date<config::dynamic, action::prepare>(begin, date_time);
+
+			  REQUIRE(std::size_t(end - begin) == size);
+			  REQUIRE(std::string(begin, end) == "Thu,  3 Jan 2101 02:12:04 GMT");
+			  
+			  THEN("Reset")
+			    {
+			      date_time = std::tm();
+			      
+			      end = rfc7231::date<config::dynamic, action::prepare>(begin, date_time);
+
+			      REQUIRE(std::size_t(end - begin) == size);
+			      REQUIRE(std::string(begin, end) == "Sun,  0 Jan 1900 00:00:00 GMT");
+			    }
+			}
+		    }
+		}
 	    }
 	}
     }
@@ -1211,7 +1393,7 @@ SCENARIO("Itoa adapter", "[itoa, adapter]")
 		{						\
 		  end = to_string.fwd(begin, I);		\
 								\
-		  REQUIRE(end - begin == L);			\
+		  REQUIRE(std::size_t(end - begin) == L);			\
 		  REQUIRE(std::string(begin, end) == #I);	\
 		}
 
@@ -1231,7 +1413,7 @@ SCENARIO("Itoa adapter", "[itoa, adapter]")
 		{						\
 		  begin = to_string.bwd(end, I);		\
 								\
-		  REQUIRE(end - begin == L);			\
+		  REQUIRE(std::size_t(end - begin) == L);			\
 		  REQUIRE(std::string(begin, end) == #I);	\
 		}
 
@@ -1289,7 +1471,7 @@ SCENARIO("Number", "[number]")
 			{
 			  end = two_digits_number<config::static_, '\0', action::prepare, uint8_t>(begin, 43);
 
-			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::size_t(end - begin) == 2);
 			  REQUIRE(std::string(begin, end) == "43");
 			}
 
@@ -1297,7 +1479,7 @@ SCENARIO("Number", "[number]")
 			{
 			  end = two_digits_number<config::static_, '\0', action::prepare, uint8_t>(begin, 7);
 
-			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::size_t(end - begin) == 2);
 			  REQUIRE(std::string(begin, end) == "07");
 			}
 
@@ -1305,7 +1487,7 @@ SCENARIO("Number", "[number]")
 			{
 			  end = two_digits_number<config::static_, '\0', action::prepare, uint8_t>(begin, 0);
 
-			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::size_t(end - begin) == 2);
 			  REQUIRE(std::string(begin, end) == "00");
 			}
 		    }
@@ -1323,7 +1505,7 @@ SCENARIO("Number", "[number]")
 			{
 			  end = two_digits_number<config::static_, pad, action::prepare, uint8_t>(begin, 99);
 
-			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::size_t(end - begin) == 2);
 			  REQUIRE(std::string(begin, end) == "99");
 			}
 
@@ -1331,7 +1513,7 @@ SCENARIO("Number", "[number]")
 			{
 			  end = two_digits_number<config::static_, pad, action::prepare, uint8_t>(begin, 7);
 
-			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::size_t(end - begin) == 2);
 			  REQUIRE(std::string(begin, end) == " 7");
 			}
 
@@ -1339,7 +1521,7 @@ SCENARIO("Number", "[number]")
 			{
 			  end = two_digits_number<config::static_, pad, action::prepare, uint8_t>(begin, 0);
 
-			  REQUIRE(end - begin == 2);
+			  REQUIRE(std::size_t(end - begin) == 2);
 			  REQUIRE(std::string(begin, end) == " 0");
 			}
 		    }
@@ -1361,7 +1543,7 @@ SCENARIO("Number", "[number]")
 		    {
 		      end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 0);
 
-		      REQUIRE(end - begin == 4);
+		      REQUIRE(std::size_t(end - begin) == 4);
 		      REQUIRE(std::string(begin, end) == "0000");
 		    }
 
@@ -1369,7 +1551,7 @@ SCENARIO("Number", "[number]")
 		    {
 		      end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 2);
 
-		      REQUIRE(end - begin == 4);
+		      REQUIRE(std::size_t(end - begin) == 4);
 		      REQUIRE(std::string(begin, end) == "0002");
 		    }
 
@@ -1377,7 +1559,7 @@ SCENARIO("Number", "[number]")
 		    {
 		      end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 56);
 
-		      REQUIRE(end - begin == 4);
+		      REQUIRE(std::size_t(end - begin) == 4);
 		      REQUIRE(std::string(begin, end) == "0056");
 		    }
 
@@ -1385,7 +1567,7 @@ SCENARIO("Number", "[number]")
 		    {
 		      end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 723);
 
-		      REQUIRE(end - begin == 4);
+		      REQUIRE(std::size_t(end - begin) == 4);
 		      REQUIRE(std::string(begin, end) == "0723");
 		    }
 
@@ -1393,7 +1575,7 @@ SCENARIO("Number", "[number]")
 		    {
 		      end = four_digits_number<config::static_, action::prepare, uint16_t>(begin, 2968);
 
-		      REQUIRE(end - begin == 4);
+		      REQUIRE(std::size_t(end - begin) == 4);
 		      REQUIRE(std::string(begin, end) == "2968");
 		    }
 		}
@@ -1451,7 +1633,7 @@ SCENARIO("Number", "[number]")
 		      {
 			end = integral_number<config::dynamic, align::left, pad, action::prepare>(begin, 19237840, max_digits, previous_digits, itoa);
 
-			REQUIRE(end - begin == max_digits_);
+			REQUIRE(std::size_t(end - begin) == max_digits_);
 			REQUIRE(max_digits == max_digits_);
 			REQUIRE(previous_digits == 0);
 			REQUIRE(std::string(begin, end) == "        ");
@@ -1460,7 +1642,7 @@ SCENARIO("Number", "[number]")
 			  {
 			    end = integral_number<config::dynamic, align::left, pad, action::write>(begin, 1923784, max_digits, previous_digits, itoa);
 
-			    REQUIRE(end - begin == max_digits_);
+			    REQUIRE(std::size_t(end - begin) == max_digits_);
 			    REQUIRE(max_digits == max_digits_);
 			    REQUIRE(previous_digits == 7);
 			    REQUIRE(std::string(begin, end) == "1923784 ");
@@ -1469,7 +1651,7 @@ SCENARIO("Number", "[number]")
 			      {
 				end = integral_number<config::dynamic, align::left, pad, action::reset>(begin, 19, max_digits, previous_digits, itoa);
 
-				REQUIRE(end - begin == max_digits_);
+				REQUIRE(std::size_t(end - begin) == max_digits_);
 				REQUIRE(max_digits == max_digits_);
 				REQUIRE(previous_digits == 0);
 				REQUIRE(std::string(begin, end) == std::string(max_digits_, pad));
@@ -1478,7 +1660,7 @@ SCENARIO("Number", "[number]")
 				  {
 				    end = integral_number<config::dynamic, align::left, pad, action::write>(begin, 7326, max_digits, previous_digits, itoa);
 
-				    REQUIRE(end - begin == max_digits_);
+				    REQUIRE(std::size_t(end - begin) == max_digits_);
 				    REQUIRE(max_digits == max_digits_);
 				    REQUIRE(previous_digits == 4);
 				    REQUIRE(std::string(begin, end) == "7326" + std::string(max_digits_ - 4, pad));
@@ -1505,7 +1687,7 @@ SCENARIO("Number", "[number]")
 		      {
 			end = integral_number<config::dynamic, align::right, pad, action::prepare>(begin, 19237840, max_digits, previous_digits, itoa);
 
-			REQUIRE(end - begin == max_digits_);
+			REQUIRE(std::size_t(end - begin) == max_digits_);
 			REQUIRE(max_digits == max_digits_);
 			REQUIRE(previous_digits == 0);
 			REQUIRE(std::string(begin, end) == "        ");
@@ -1514,7 +1696,7 @@ SCENARIO("Number", "[number]")
 			  {
 			    end = integral_number<config::dynamic, align::right, pad, action::write>(begin, 1923784, max_digits, previous_digits, itoa);
 
-			    REQUIRE(end - begin == max_digits_);
+			    REQUIRE(std::size_t(end - begin) == max_digits_);
 			    REQUIRE(max_digits == max_digits_);
 			    REQUIRE(previous_digits == 7);
 			    REQUIRE(std::string(begin, end) == " 1923784");
@@ -1523,7 +1705,7 @@ SCENARIO("Number", "[number]")
 			      {
 				end = integral_number<config::dynamic, align::right, pad, action::reset>(begin, 19, max_digits, previous_digits, itoa);
 
-				REQUIRE(end - begin == max_digits_);
+				REQUIRE(std::size_t(end - begin) == max_digits_);
 				REQUIRE(max_digits == max_digits_);
 				REQUIRE(previous_digits == 0);
 				REQUIRE(std::string(begin, end) == std::string(max_digits_, pad));
@@ -1532,7 +1714,7 @@ SCENARIO("Number", "[number]")
 				  {
 				    end = integral_number<config::dynamic, align::right, pad, action::write>(begin, 7236, max_digits, previous_digits, itoa);
 
-				    REQUIRE(end - begin == max_digits_);
+				    REQUIRE(std::size_t(end - begin) == max_digits_);
 				    REQUIRE(max_digits == max_digits_);
 				    REQUIRE(previous_digits == 4);
 				    REQUIRE(std::string(begin, end) == std::string(max_digits_ - 4, pad) + "7236");
@@ -1621,7 +1803,7 @@ SCENARIO("Bitset", "[bitset]")
 	  {
 	    end = bitset<set_t, action::prepare>(begin, set_t::value_type::Alice | set_t::value_type::Bob, separator);
 
-	    REQUIRE(end - begin == size);
+	    REQUIRE(std::size_t(end - begin) == size);
 	    REQUIRE(std::string(begin, end) == "Alice,Bob");
 	  }
       }
@@ -1641,14 +1823,14 @@ SCENARIO("Bitset", "[bitset]")
 	      {
 		end = bitset<config::dynamic, align::left, ' ', set_t, action::prepare>(begin, set_t::value_type::Alice | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
 
-		REQUIRE(end - begin == size);
+		REQUIRE(std::size_t(end - begin) == size);
 		REQUIRE(std::string(begin, end) == std::string(size, ' '));
 
 		THEN("Write")
 		  {
 		    end = bitset<config::dynamic, align::left, ' ', set_t, action::write>(begin, set_t::value_type::Charlie, max_length, separator);
 
-		    REQUIRE(end - begin == size);
+		    REQUIRE(std::size_t(end - begin) == size);
 		    REQUIRE(std::string(begin, end) == std::string("Charlie") + std::string(max_length - std::strlen("Charlie"), ' '));
 		  }
 	      }
@@ -1665,14 +1847,14 @@ SCENARIO("Bitset", "[bitset]")
 	      {
 		end = bitset<config::dynamic, align::right, ' ', set_t, action::prepare>(begin, set_t::value_type::Alice | set_t::value_type::Bob | set_t::value_type::Charlie | set_t::value_type::David, max_length, separator);
 
-		REQUIRE(end - begin == size);
+		REQUIRE(std::size_t(end - begin) == size);
 		REQUIRE(std::string(begin, end) == std::string(size, ' '));
 
 		THEN("Write")
 		  {
 		    end = bitset<config::dynamic, align::right, ' ', set_t, action::write>(begin, set_t::value_type::Bob | set_t::value_type::Charlie, max_length, separator);
 
-		    REQUIRE(end - begin == size);
+		    REQUIRE(std::size_t(end - begin) == size);
 		    REQUIRE(std::string(begin, end) == std::string(max_length - std::strlen("Bob") - 1 - std::strlen("Charlie"), ' ') + "Bob,Charlie");
 		  }
 	      }
@@ -1717,7 +1899,7 @@ SCENARIO("Time", "[time]")
 		  {
 		    end = time_<config::static_, action::prepare>(buffer, hours, minutes);
 
-		    REQUIRE(end - begin == size);
+		    REQUIRE(std::size_t(end - begin) == size);
 		    REQUIRE(std::string(begin, end) == "05:23");
 		  }
 	      }
@@ -1745,7 +1927,7 @@ SCENARIO("Time", "[time]")
 		  {
 		    end = time_<config::static_, action::prepare>(buffer, hours, minutes, seconds);
 
-		    REQUIRE(end - begin == size);
+		    REQUIRE(std::size_t(end - begin) == size);
 		    REQUIRE(std::string(begin, end) == "05:23:59");
 		  }
 	      }
@@ -1770,7 +1952,7 @@ SCENARIO("Time", "[time]")
 	      {
 		end = time_<config::static_, action::prepare>(buffer, time);
 
-		REQUIRE(end - begin == size);
+		REQUIRE(std::size_t(end - begin) == size);
 		REQUIRE(std::string(begin, end) == "04:34:00");
 	      }
 	  }
@@ -1800,7 +1982,7 @@ SCENARIO("Timezone", "[timezone]")
 		      {
 			end = universal_timezone<config::static_, align::left, pad, action::prepare>(begin, universal_timezone::GMT);
 
-			REQUIRE(end - begin == 3);
+			REQUIRE(std::size_t(end - begin) == 3);
 			REQUIRE(std::string(begin, end) == "GMT");
 		      }
 
@@ -1808,7 +1990,7 @@ SCENARIO("Timezone", "[timezone]")
 		      {
 			end = universal_timezone<config::static_, align::left, pad, action::prepare>(begin, universal_timezone::UT);
 
-			REQUIRE(end - begin == 2);
+			REQUIRE(std::size_t(end - begin) == 2);
 			REQUIRE(std::string(begin, end) == "UT");
 		      }
 		  }
@@ -1832,7 +2014,7 @@ SCENARIO("Timezone", "[timezone]")
 			{
 			  end = universal_timezone<config::dynamic, align::left, pad, action::prepare>(begin, universal_timezone::UT);
 
-			  REQUIRE(end - begin == 3);
+			  REQUIRE(std::size_t(end - begin) == 3);
 			  REQUIRE(std::string(begin, end) == "UT ");
 			}
 		    }
@@ -1843,7 +2025,7 @@ SCENARIO("Timezone", "[timezone]")
 			{
 			  end = universal_timezone<config::dynamic, align::right, pad, action::prepare>(begin, universal_timezone::UT);
 
-			  REQUIRE(end - begin == 3);
+			  REQUIRE(std::size_t(end - begin) == 3);
 			  REQUIRE(std::string(begin, end) == " UT");
 			}
 		    }
@@ -1852,7 +2034,7 @@ SCENARIO("Timezone", "[timezone]")
 		    {
 		      end = universal_timezone<config::dynamic, align::right, pad, action::prepare>(begin, universal_timezone::GMT);
 
-		      REQUIRE(end - begin == 3);
+		      REQUIRE(std::size_t(end - begin) == 3);
 		      REQUIRE(std::string(begin, end) == "GMT");
 		    }
 		}
@@ -1869,6 +2051,17 @@ SCENARIO("Timezone", "[timezone]")
       const std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
 
       REQUIRE(size == 3);
+
+      GIVEN_A_BUFFER(size)
+	{
+	  THEN("Prepare")
+	    {
+	      end = timezone.handle<action::prepare>(begin);
+
+	      REQUIRE(std::size_t(end - begin) == 3);
+	      REQUIRE(std::string(begin, end) == "GMT");
+	    }
+	}
     }
 
   FOR("A North American timezone")
@@ -1885,7 +2078,7 @@ SCENARIO("Timezone", "[timezone]")
 		{
 		  end = north_american_timezone<config::static_, action::prepare>(begin, north_american_timezone::CST);
 
-		  REQUIRE(end - begin == 3);
+		  REQUIRE(std::size_t(end - begin) == 3);
 		  REQUIRE(std::string(begin, end) == "CST");
 		}
 	    }
@@ -1956,7 +2149,7 @@ SCENARIO("Timezone", "[timezone]")
 		    {
 		      end = differential_timezone<config::static_, action::prepare>(begin, true, 14, 45);
 
-		      REQUIRE(end - begin == 5);
+		      REQUIRE(std::size_t(end - begin) == 5);
 		      REQUIRE(std::string(begin, end) == "+1445");
 		    }
 
@@ -1964,7 +2157,7 @@ SCENARIO("Timezone", "[timezone]")
 		    {
 		      end = differential_timezone<config::static_, action::prepare>(begin, false, 00, 05);
 
-		      REQUIRE(end - begin == 5);
+		      REQUIRE(std::size_t(end - begin) == 5);
 		      REQUIRE(std::string(begin, end) == "-0005");
 		    }
 		}
@@ -2005,7 +2198,7 @@ SCENARIO("String", "[string]")
 		      {
 			end = string<config::static_, action::prepare>(begin, data, length);
 
-			REQUIRE(end - begin == length);
+			REQUIRE(std::size_t(end - begin) == length);
 			REQUIRE(std::string(begin,end) == data);
 		      }
 		  }
@@ -2022,7 +2215,7 @@ SCENARIO("String", "[string]")
 		      {
 			end = string<config::dynamic, action::prepare>(begin, data, length);
 
-			REQUIRE(end - begin == length);
+			REQUIRE(std::size_t(end - begin) == length);
 			REQUIRE(std::string(begin, end) == data);
 		      }
 		  }
@@ -2080,7 +2273,7 @@ SCENARIO("String", "[string]")
 			      {
 				end = string<config::static_, align::left, pad, action::prepare>(begin, data, length, max_length);
 
-				REQUIRE(end - begin == length);
+				REQUIRE(std::size_t(end - begin) == length);
 				REQUIRE(std::string(begin, end) == data);
 			      }
 			  }
@@ -2109,7 +2302,7 @@ SCENARIO("String", "[string]")
 			      {
 				end = string<config::dynamic, align::left, pad, action::prepare>(begin, "world!", 6, max_length, previous_length);
 
-				REQUIRE(end - begin == max_length);
+				REQUIRE(std::size_t(end - begin) == max_length);
 				REQUIRE(max_length == max_length_);
 				REQUIRE(previous_length == 0);
 				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
@@ -2118,7 +2311,7 @@ SCENARIO("String", "[string]")
 				  {
 				    end = string<config::dynamic, align::left, pad, action::write>(begin, data, length, max_length, previous_length);
 
-				    REQUIRE(end - begin == max_length);
+				    REQUIRE(std::size_t(end - begin) == max_length);
 				    REQUIRE(max_length == max_length_);
 				    REQUIRE(previous_length == length);
 				    REQUIRE(std::string(begin, end) == data + std::string(max_length - length, pad));
@@ -2127,7 +2320,7 @@ SCENARIO("String", "[string]")
 				      {
 					end = string<config::dynamic, align::left, pad, action::reset>(begin, nullptr, 0, max_length, previous_length);
 
-					REQUIRE(end - begin == max_length);
+					REQUIRE(std::size_t(end - begin) == max_length);
 					REQUIRE(max_length == max_length_);
 					REQUIRE(previous_length == 0);
 					REQUIRE(std::string(begin, end) == std::string(max_length, pad));
@@ -2154,7 +2347,7 @@ SCENARIO("String", "[string]")
 			      {
 				end = string<config::dynamic, align::right, pad, action::prepare>(begin, "world!", 6, max_length, previous_length);
 
-				REQUIRE(end - begin == max_length);
+				REQUIRE(std::size_t(end - begin) == max_length);
 				REQUIRE(max_length == max_length_);
 				REQUIRE(previous_length == 0);
 				REQUIRE(std::string(begin, end) == std::string(max_length, pad));
@@ -2163,7 +2356,7 @@ SCENARIO("String", "[string]")
 				  {
 				    end = string<config::dynamic, align::right, pad, action::write>(begin, data, length, max_length, previous_length);
 
-				    REQUIRE(end - begin == max_length);
+				    REQUIRE(std::size_t(end - begin) == max_length);
 				    REQUIRE(max_length == max_length_);
 				    REQUIRE(previous_length == length);
 				    REQUIRE(std::string(begin, end) == std::string(max_length - length, pad) + data);
@@ -2172,7 +2365,7 @@ SCENARIO("String", "[string]")
 				      {
 					end = string<config::dynamic, align::right, pad, action::reset>(begin, nullptr, 0, max_length, previous_length);
 
-					REQUIRE(end - begin == max_length);
+					REQUIRE(std::size_t(end - begin) == max_length);
 					REQUIRE(max_length == max_length_);
 					REQUIRE(previous_length == 0);
 					REQUIRE(std::string(begin, end) == std::string(max_length, pad));
@@ -2199,7 +2392,7 @@ SCENARIO("String", "[string]")
 
 			    (void)length;
 			    REQUIRE(value != nullptr);
-			    REQUIRE(end - begin == size);
+			    REQUIRE(std::size_t(end - begin) == size);
 			    std::memcpy(value, data, length);
 			    REQUIRE(std::string(begin, end) == data);
 			  }
@@ -2217,7 +2410,7 @@ SCENARIO("String", "[string]")
 			    char * value = nullptr;
 			    end = string<config::dynamic, align::left, pad, action::prepare>(buffer, &value, length, length);
 			    REQUIRE(value != nullptr);
-			    REQUIRE(end - begin == size);
+			    REQUIRE(std::size_t(end - begin) == size);
 			    std::memcpy(value, data, length);
 			    REQUIRE(std::string(begin, end) == data);
 			  }

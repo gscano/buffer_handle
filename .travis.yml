@@ -12,7 +12,7 @@ compiler:
 
 env:
   global:
-    - BOOST=config-boost-1.72.0/include
+    - BOOST=config-boost-1.73.0/include
   jobs:
     - CXXSTD=c++11
 
@@ -23,9 +23,9 @@ jobs:
 
 install:
   - mkdir catch2
-  - wget -O catch2/catch.hpp https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
-  - wget https://github.com/boostorg/config/archive/boost-1.72.0.zip
-  - unzip boost-1.72.0.zip
+  - wget -O catch2/catch.hpp https://github.com/catchorg/Catch2/releases/download/v2.12.4/catch.hpp
+  - wget https://github.com/boostorg/config/archive/boost-1.73.0.zip
+  - unzip boost-1.73.0.zip
 
 script:
   - echo ${BOOST}
