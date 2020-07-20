@@ -14,7 +14,7 @@ run-test: test
 
 -include test.d
 
-test: test.cpp Makefile
+test: test.cpp
 	$(CXX) $< --coverage -std=$(CXXSTD) $(CXXFLAGS) -I $(CATCH) -I $(BOOST) -I ../ -o $@
 
 -include text-example.d
@@ -26,7 +26,7 @@ example: text-example http-example
 
 coverage: run-test
 	lcov --capture --directory . --output-file coverage.data
-	lcov --remove coverage.data "/usr/include/*" "6/*" "$(CATCH)*" -o coverage.info
+	lcov --remove coverage.data "/usr/include/*" "6/*" $(CATCH)"/*" -o coverage.info
 	genhtml coverage.info -o $@
 
 clean:

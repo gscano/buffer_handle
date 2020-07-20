@@ -65,7 +65,7 @@ SCENARIO("Boolean", "[boolean]")
 		{
 		  FIRST("Get the size")
 		    {
-		      REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::left, pad, action::size>(nullptr, true) == 5));
+		      REQUIRE(((std::size_t)boolean<config::dynamic, case_::first_upper, align::left, pad, action::size>(nullptr, true) == 5));
 
 		      GIVEN_A_BUFFER(5)
 			{
@@ -73,18 +73,18 @@ SCENARIO("Boolean", "[boolean]")
 			    {
 			      WHEN("True")
 				{
-				  end = boolean<config::dynamic, case_::lower, align::left, pad, action::prepare>(begin, true);
+				  end = boolean<config::dynamic, case_::first_upper, align::left, pad, action::prepare>(begin, true);
 
 				  REQUIRE(std::size_t(end - begin) == 5);
-				  REQUIRE(std::string(begin, end) == "true ");
+				  REQUIRE(std::string(begin, end) == "True ");
 				}
 
 			      WHEN("False")
 				{
-				  end = boolean<config::dynamic, case_::lower, align::left, pad, action::prepare>(begin, false);
+				  end = boolean<config::dynamic, case_::first_upper, align::left, pad, action::prepare>(begin, false);
 
 				  REQUIRE(std::size_t(end - begin) == 5);
-				  REQUIRE(std::string(begin, end) == "false");
+				  REQUIRE(std::string(begin, end) == "False");
 				}
 			    }
 			}
@@ -95,7 +95,7 @@ SCENARIO("Boolean", "[boolean]")
 		{
 		  FIRST("Get the size")
 		    {
-		      REQUIRE(((std::size_t)boolean<config::dynamic, case_::lower, align::right, pad, action::size>(nullptr, true) == 5));
+		      REQUIRE(((std::size_t)boolean<config::dynamic, case_::upper, align::right, pad, action::size>(nullptr, true) == 5));
 
 		      GIVEN_A_BUFFER(5)
 			{
@@ -103,18 +103,18 @@ SCENARIO("Boolean", "[boolean]")
 			    {
 			      WHEN("True")
 				{
-				  end = boolean<config::dynamic, case_::lower, align::right, pad, action::prepare>(begin, true);
+				  end = boolean<config::dynamic, case_::upper, align::right, pad, action::prepare>(begin, true);
 
 				  REQUIRE(std::size_t(end - begin) == 5);
-				  REQUIRE(std::string(begin, end) == " true");
+				  REQUIRE(std::string(begin, end) == " TRUE");
 				}
 
 			      WHEN("False")
 				{
-				  end = boolean<config::dynamic, case_::lower, align::right, pad, action::prepare>(begin, false);
+				  end = boolean<config::dynamic, case_::upper, align::right, pad, action::prepare>(begin, false);
 
 				  REQUIRE(std::size_t(end - begin) == 5);
-				  REQUIRE(std::string(begin, end) == "false");
+				  REQUIRE(std::string(begin, end) == "FALSE");
 				}
 			    }
 			}
@@ -130,7 +130,7 @@ SCENARIO("Boolean", "[boolean]")
       const char t = 'a';
       const char f = 'b';
 
-      FOR("A static or dynamic configuration")
+      FOR("A static configuration")
 	{
 	  WHEN("True")
 	    {
@@ -146,6 +146,38 @@ SCENARIO("Boolean", "[boolean]")
 
 	      REQUIRE(end == &c + 1);
 	      REQUIRE(c == f);
+	    }
+	}
+
+      FOR("A dynamic configuraton")
+	{
+	  FIRST("Get the size")
+	    {
+	      REQUIRE((std::size_t)boolean<config::dynamic, action::size, f, t>(nullptr, true) == 1);
+
+	      THEN("Prepare")
+		{
+		  char * end = boolean<config::dynamic, action::prepare, f, t>(&c, false);
+
+		  REQUIRE(end == &c + 1);
+		  REQUIRE(c == f);
+
+		  THEN("Write")
+		    {
+		      end = boolean<config::dynamic, action::write, f, t>(&c, true);
+
+		      REQUIRE(end == &c+1);
+		      REQUIRE(c == t);
+
+		      THEN("Reset")
+			{
+			  end = boolean<config::dynamic, action::write, f, t>(&c, false);
+
+			  REQUIRE(end == &c+1);
+			  REQUIRE(c == f);
+			}
+		    }
+		}
 	    }
 	}
     }
