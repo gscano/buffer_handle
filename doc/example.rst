@@ -255,6 +255,7 @@ and then write some content to it
 .. code:: cpp
 
   handle<config::dynamic, action::write>(buffer, 0, ok, 0, "", "");
+  handle<config::dynamic, action::write>(buffer, 404, not_found, 212, plain, identity);
 
 leading to the following successive outputs:
 
@@ -271,3 +272,10 @@ leading to the following successive outputs:
   Content-Length: 2783
   Content-Type:  text/html; charset=UTF-8
   Content-Encoding:       gzip
+
+.. code:: text
+
+  HTTP/1.1 404 Not Found
+  Content-Length:  212
+  Content-Type: text/plain; charset=UTF-8
+  Content-Encoding:   identity
