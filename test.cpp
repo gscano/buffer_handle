@@ -2051,6 +2051,17 @@ SCENARIO("Timezone", "[timezone]")
       const std::size_t size = (std::size_t)timezone.handle<action::size>(nullptr);
 
       REQUIRE(size == 3);
+
+      GIVEN_A_BUFFER(size)
+	{
+	  THEN("Prepare")
+	    {
+	      end = timezone.handle<action::prepare>(begin);
+
+	      REQUIRE(std::size_t(end - begin) == 3);
+	      REQUIRE(std::string(begin, end) == "GMT");
+	    }
+	}
     }
 
   FOR("A North American timezone")
