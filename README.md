@@ -2,7 +2,7 @@ When regularly writing textual output to buffers it may be more efficient for
 an application to only write non static parts between calls. Buffers can then
 be reused as often as necessary, saving the static text initialization cost.
 
-This **C++ 11** header-only library under [MIT license](LICENSE) attempts to
+This **C++ 11** header-only library under [MIT license](./LICENSE) attempts to
 provide such functionality.
 
 * [Concept](doc/concept.rst)
